@@ -7,8 +7,6 @@ import com.game.pb.BasePb.Base;
 import com.game.pb.InnerPb.VerifyRs;
 import com.game.pb.RolePb.UserLoginRs;
 import com.game.server.GameServer;
-import com.game.server.work.WWork;
-import com.game.service.AccountService;
 
 public class VerifyRsHandler extends ServerHandler {
 	@Override

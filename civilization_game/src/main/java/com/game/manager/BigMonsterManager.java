@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
- * @author cpz 巨型虫族活动管理器
+ *   巨型虫族活动管理器
  */
 @Component
 public class BigMonsterManager {

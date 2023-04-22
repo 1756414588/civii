@@ -4,8 +4,8 @@ import com.game.activity.ActivityEventManager;
 import com.game.activity.define.EventEnum;
 import com.game.constant.*;
 import com.game.dataMgr.*;
-import com.game.domain.Player;
 import com.game.domain.Award;
+import com.game.domain.Player;
 import com.game.domain.p.Friend;
 import com.game.domain.p.LevelAward;
 import com.game.domain.p.LogicException;
@@ -22,19 +22,17 @@ import com.game.log.domain.VipExpLog;
 import com.game.pb.CommonPb;
 import com.game.pb.DailyTaskPb;
 import com.game.pb.RolePb;
-import com.game.server.exec.LoginExecutor;
 import com.game.service.AchievementService;
 import com.game.service.ActivityService;
 import com.game.service.FriendService;
-import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
+import com.game.util.LogHelper;
 import com.game.util.SynHelper;
 import com.google.common.collect.Lists;
-
-import java.util.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 @Component
 public class LordManager {
@@ -112,13 +110,11 @@ public class LordManager {
             /**
              * 每日活跃开启推送
              **/
-            SpringUtil.getBean(LoginExecutor.class).add(() -> {
-                StaticOpen open = staticOpenManger.getOpen(OpenConsts.OPEN_69);
-                if (open != null && player.getLevel() == open.getCondition()) {
-                    DailyTaskPb.SynDailyTaskRq builder = DailyTaskPb.SynDailyTaskRq.newBuilder().setComplate(taskManager.getComplateTask(player)).build();
-                    SynHelper.synMsgToPlayer(player, DailyTaskPb.SynDailyTaskRq.EXT_FIELD_NUMBER, DailyTaskPb.SynDailyTaskRq.ext, builder);
-                }
-            });
+            StaticOpen open = staticOpenManger.getOpen(OpenConsts.OPEN_69);
+            if (open != null && player.getLevel() == open.getCondition()) {
+                DailyTaskPb.SynDailyTaskRq builder = DailyTaskPb.SynDailyTaskRq.newBuilder().setComplate(taskManager.getComplateTask(player)).build();
+                SynHelper.synMsgToPlayer(player, DailyTaskPb.SynDailyTaskRq.EXT_FIELD_NUMBER, DailyTaskPb.SynDailyTaskRq.ext, builder);
+            }
         }
 
         if (totalExp > 0) {

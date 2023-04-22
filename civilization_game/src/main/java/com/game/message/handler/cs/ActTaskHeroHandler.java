@@ -5,7 +5,7 @@ import com.game.pb.ActivityPb;
 import com.game.service.ActivityService;
 
 /**
- * @author cpz
+ *
  * @date 2021/3/4 16:19
  * @description
  */

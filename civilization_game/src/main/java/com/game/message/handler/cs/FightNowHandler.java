@@ -20,7 +20,7 @@ public class FightNowHandler extends ClientHandler {
 		BroodWarService service = getService(BroodWarService.class);
 		BroodWarPb.FightNowRq req = msg.getExtension(BroodWarPb.FightNowRq.ext);
 		FightNowAction action = new FightNowAction(service, req, this);
-		GameServer.getInstance().mainLogicServer.addCommand(action, DealType.MAIN);
+		 GameServer.getInstance().mainLogicServer.addCommand(action, DealType.MAIN);
 	}
 
 	public class FightNowAction implements ICommand {

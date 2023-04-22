@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * @author cpz
+ *
  * 英雄洗练
  */
 @Getter

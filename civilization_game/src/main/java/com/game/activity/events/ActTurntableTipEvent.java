@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 /**
  * 金币转盘
  *
- * @author cpz
+ *
  */
 @Component
 public class ActTurntableTipEvent extends BaseActivityEvent {

@@ -2943,11 +2943,9 @@ public class WorldService {
         WorldPb.SynMapCityRq.Builder builder1 = WorldPb.SynMapCityRq.newBuilder();
         builder1.setInfo(worldManager.createCityOwner(city));
         WorldPb.SynMapCityRq msg = builder1.build();
-        SpringUtil.getBean(LoginExecutor.class).add(() -> {
-            chatManager.sendCountryShare(player, sysChat);
-            playerManager.getOnlinePlayer().forEach(e -> {
-                playerManager.synMapCityRq(e, msg);
-            });
+        chatManager.sendCountryShare(player, sysChat);
+        playerManager.getOnlinePlayer().forEach(e -> {
+            playerManager.synMapCityRq(e, msg);
         });
     }
 
@@ -6218,56 +6216,53 @@ public class WorldService {
         Random random = new Random();
         for (int i = 0; i < count; i++) {
             try {
-                SpringUtil.getBean(LoginExecutor.class).add(() -> {
-                    // 出征武将
-                    List<Integer> heroIds = new ArrayList<>();
-                    player.getEmbattleList().forEach(e -> {
-                        heroIds.add(Integer.valueOf(e));
-                    });
-                    // 补兵
-                    Iterator<Integer> it = heroIds.iterator();
-                    while (it.hasNext()) {
-                        boolean hasSolider = addSolider(player, it.next());
-                        if (!hasSolider) {
-                            it.remove();
-                        }
-                    }
-                    if (heroIds.size() == 0) {
-                        return;
-                    }
-                    // 出兵消耗
-                    int totalSoldier = 0;
-                    for (Integer heroId : heroIds) {
-                        Hero hero = player.getHero(heroId);
-                        if (hero == null) {
-                            continue;
-                        }
-                        totalSoldier += hero.getCurrentSoliderNum();
-                    }
-                    int distance = random.nextInt(8);
-                    int oilCost = (int) Math.ceil(totalSoldier / 10) + distance * 30;
-                    if (player.getResource(ResourceType.OIL) < oilCost) {
-                        return;
-                    }
-                    SimpleData simpleData = player.getSimpleData();
-                    if (simpleData.getKillRebelTimes() >= staticLimitMgr.getNum(11)) {
-                        return;
-                    }
-                    simpleData.setKillRebelTimes(simpleData.getKillRebelTimes() + 1);
-
-                    playerManager.subAward(player, AwardType.RESOURCE, ResourceType.OIL, oilCost, Reason.KILL_WORLD_MONSTER);
-                    // 开打
-                    March march = worldManager.createMarch(player, heroIds, player.getPos());
-                    march.setFightTime(march.getEndTime() + 1000L, MarchReason.KillRebel);
-                    march.setMarchType(MarchType.AttackMonster);
-                    Optional<StaticWorldMonster> op = staticWorldMgr.getWorldMonsterMap().values().stream().filter(e -> e.getType() == 1 && e.getLevel() == lv).findFirst();
-                    if (op.isPresent()) {
-                        StaticWorldMonster staticMonster = op.get();
-                        Monster monster = worldManager.createMonster(staticMonster.getId(), staticMonster.getLevel(), new Pos(), AddMonsterReason.ADD_PLAYER_MONSTER);
-                        worldLogic.handleRebel(staticMonster, player, monster, march, new MapInfo());
-                        worldLogic.synRewards(march, new MapInfo());
-                    }
+                List<Integer> heroIds = new ArrayList<>();
+                player.getEmbattleList().forEach(e -> {
+                    heroIds.add(Integer.valueOf(e));
                 });
+                // 补兵
+                Iterator<Integer> it = heroIds.iterator();
+                while (it.hasNext()) {
+                    boolean hasSolider = addSolider(player, it.next());
+                    if (!hasSolider) {
+                        it.remove();
+                    }
+                }
+                if (heroIds.size() == 0) {
+                    return;
+                }
+                // 出兵消耗
+                int totalSoldier = 0;
+                for (Integer heroId : heroIds) {
+                    Hero hero = player.getHero(heroId);
+                    if (hero == null) {
+                        continue;
+                    }
+                    totalSoldier += hero.getCurrentSoliderNum();
+                }
+                int distance = random.nextInt(8);
+                int oilCost = (int) Math.ceil(totalSoldier / 10) + distance * 30;
+                if (player.getResource(ResourceType.OIL) < oilCost) {
+                    return;
+                }
+                SimpleData simpleData = player.getSimpleData();
+                if (simpleData.getKillRebelTimes() >= staticLimitMgr.getNum(11)) {
+                    return;
+                }
+                simpleData.setKillRebelTimes(simpleData.getKillRebelTimes() + 1);
+
+                playerManager.subAward(player, AwardType.RESOURCE, ResourceType.OIL, oilCost, Reason.KILL_WORLD_MONSTER);
+                // 开打
+                March march = worldManager.createMarch(player, heroIds, player.getPos());
+                march.setFightTime(march.getEndTime() + 1000L, MarchReason.KillRebel);
+                march.setMarchType(MarchType.AttackMonster);
+                Optional<StaticWorldMonster> op = staticWorldMgr.getWorldMonsterMap().values().stream().filter(e -> e.getType() == 1 && e.getLevel() == lv).findFirst();
+                if (op.isPresent()) {
+                    StaticWorldMonster staticMonster = op.get();
+                    Monster monster = worldManager.createMonster(staticMonster.getId(), staticMonster.getLevel(), new Pos(), AddMonsterReason.ADD_PLAYER_MONSTER);
+                    worldLogic.handleRebel(staticMonster, player, monster, march, new MapInfo());
+                    worldLogic.synRewards(march, new MapInfo());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -6279,94 +6274,92 @@ public class WorldService {
             return;
         }
         try {
-            SpringUtil.getBean(LoginExecutor.class).add(() -> {
-                // 出征武将
-                List<Integer> heroIds = gmKillBigMonster(player);
-                if (heroIds.isEmpty()) {
+            // 出征武将
+            List<Integer> heroIds = gmKillBigMonster(player);
+            if (heroIds.isEmpty()) {
+                return;
+            }
+
+            int mapId = worldManager.getMapId(player.getPos());
+            MapInfo mapInfo = worldManager.getMapInfo(mapId);
+
+            int posX = player.getPosX();
+            int posY = player.getPosY();
+
+            int minX = Math.max(0, posX - 5);
+            int maxX = Math.min(500, posX + 5);
+            int minY = Math.max(0, posY - 5);
+            int maxY = Math.min(500, posY + 5);
+            Pos checkPos = new Pos();
+            Pos targetPos = null;
+            for (int i = minX; i <= maxX; i++) {
+                for (int j = minY; j <= maxY; j++) {
+                    checkPos.setPos(i, j);
+                    if (mapInfo.isFreePos(checkPos)) {
+                        targetPos = new Pos(i, j);
+                        break;
+                    }
+                }
+            }
+            if (targetPos == null) {
+                return;
+            }
+
+            Optional<StaticGiantZerg> op = staticWorldMgr.getGiantZergMap().values().stream().filter(e -> e.getType() == 1 && e.getLevel() == lv).findAny();
+            if (op.isPresent()) {
+                StaticGiantZerg staticGiantZerg = op.get();
+
+                StaticWorldMonster staticWorldMonster = staticWorldMgr.getMonster(Long.valueOf(staticGiantZerg.getId()).intValue());
+                if (staticWorldMonster == null) {
+                    LogHelper.CONFIG_LOGGER.error("staticGiantZerg error->[{}]", staticGiantZerg.getId());
                     return;
                 }
 
-                int mapId = worldManager.getMapId(player.getPos());
-                MapInfo mapInfo = worldManager.getMapInfo(mapId);
-
-                int posX = player.getPosX();
-                int posY = player.getPosY();
-
-                int minX = Math.max(0, posX - 5);
-                int maxX = Math.min(500, posX + 5);
-                int minY = Math.max(0, posY - 5);
-                int maxY = Math.min(500, posY + 5);
-                Pos checkPos = new Pos();
-                Pos targetPos = null;
-                for (int i = minX; i <= maxX; i++) {
-                    for (int j = minY; j <= maxY; j++) {
-                        checkPos.setPos(i, j);
-                        if (mapInfo.isFreePos(checkPos)) {
-                            targetPos = new Pos(i, j);
-                            break;
-                        }
-                    }
-                }
-                if (targetPos == null) {
+                BigMonster bigMonster = worldManager.addBigMonster(targetPos, staticGiantZerg.getId(), staticGiantZerg.getLevel(), mapInfo, AddMonsterReason.ADD_BIG_MONSTER);
+                if (bigMonster == null) {
                     return;
                 }
 
-                Optional<StaticGiantZerg> op = staticWorldMgr.getGiantZergMap().values().stream().filter(e -> e.getType() == 1 && e.getLevel() == lv).findAny();
-                if (op.isPresent()) {
-                    StaticGiantZerg staticGiantZerg = op.get();
+                March march = worldManager.createMarch(player, heroIds, targetPos);
+                march.setPeriod(1000L);
+                march.setEndTime(System.currentTimeMillis() + 10000L);
+                march.setFightTime(march.getEndTime() + 10000L, MarchReason.KillRebel);
+                march.setMarchType(MarchType.BigWar);
+                mapInfo.addMarch(march);
+                worldManager.synMarch(mapId, march);
 
-                    StaticWorldMonster staticWorldMonster = staticWorldMgr.getMonster(Long.valueOf(staticGiantZerg.getId()).intValue());
-                    if (staticWorldMonster == null) {
-                        LogHelper.CONFIG_LOGGER.error("staticGiantZerg error->[{}]", staticGiantZerg.getId());
-                        return;
+                bigMonster.setMapId(mapInfo.getMapId());
+                bigMonster.setLeaveTime(march.getFightTime() + 120000);
+                bigMonster.setState(EntityState.SURVIVAL.get());
+                bigMonster.setSoldierType(staticGiantZerg.getSoldierType());
+
+                List<Entity> monsterList = new ArrayList<>();
+                Team monsterTeam = battleMgr.initMonsterTeam(staticWorldMonster.getMonsterIds(), BattleEntityType.BIG_MONSTER);
+                bigMonster.setTeam(monsterTeam);
+                bigMonster.setTotalHp(monsterTeam.getLessSoldier());
+                monsterList.add(bigMonster);
+
+                worldManager.synEntityAddRq(monsterList);
+                List<Player> others = playerManager.getPlayers().values().stream().filter(e -> e.getCountry() == player.getCountry() && e.getLevel() > 35).collect(Collectors.toList());
+                int addCount = 0;
+                for (Player e : others) {
+                    if (addCount >= 1) {
+                        break;
                     }
-
-                    BigMonster bigMonster = worldManager.addBigMonster(targetPos, staticGiantZerg.getId(), staticGiantZerg.getLevel(), mapInfo, AddMonsterReason.ADD_BIG_MONSTER);
-                    if (bigMonster == null) {
-                        return;
+                    List<Integer> list = gmKillBigMonster(e);
+                    if (list.isEmpty()) {
+                        continue;
                     }
-
-                    March march = worldManager.createMarch(player, heroIds, targetPos);
-                    march.setPeriod(1000L);
-                    march.setEndTime(System.currentTimeMillis() + 10000L);
-                    march.setFightTime(march.getEndTime() + 10000L, MarchReason.KillRebel);
-                    march.setMarchType(MarchType.BigWar);
-                    mapInfo.addMarch(march);
-                    worldManager.synMarch(mapId, march);
-
-                    bigMonster.setMapId(mapInfo.getMapId());
-                    bigMonster.setLeaveTime(march.getFightTime() + 120000);
-                    bigMonster.setState(EntityState.SURVIVAL.get());
-                    bigMonster.setSoldierType(staticGiantZerg.getSoldierType());
-
-                    List<Entity> monsterList = new ArrayList<>();
-                    Team monsterTeam = battleMgr.initMonsterTeam(staticWorldMonster.getMonsterIds(), BattleEntityType.BIG_MONSTER);
-                    bigMonster.setTeam(monsterTeam);
-                    bigMonster.setTotalHp(monsterTeam.getLessSoldier());
-                    monsterList.add(bigMonster);
-
-                    worldManager.synEntityAddRq(monsterList);
-                    List<Player> others = playerManager.getPlayers().values().stream().filter(e -> e.getCountry() == player.getCountry() && e.getLevel() > 35).collect(Collectors.toList());
-                    int addCount = 0;
-                    for (Player e : others) {
-                        if (addCount >= 1) {
-                            break;
-                        }
-                        List<Integer> list = gmKillBigMonster(e);
-                        if (list.isEmpty()) {
-                            continue;
-                        }
-                        addCount++;
-                        March marchother = worldManager.createMarch(e, list, targetPos);
-                        marchother.setPeriod(1000L);
-                        marchother.setEndTime(System.currentTimeMillis() + 1000L);
-                        marchother.setFightTime(marchother.getEndTime() + 10000L, MarchReason.KillRebel);
-                        marchother.setMarchType(MarchType.BigWar);
-                        mapInfo.addMarch(marchother);
-                        worldManager.synMarch(mapId, marchother);
-                    }
+                    addCount++;
+                    March marchother = worldManager.createMarch(e, list, targetPos);
+                    marchother.setPeriod(1000L);
+                    marchother.setEndTime(System.currentTimeMillis() + 1000L);
+                    marchother.setFightTime(marchother.getEndTime() + 10000L, MarchReason.KillRebel);
+                    marchother.setMarchType(MarchType.BigWar);
+                    mapInfo.addMarch(marchother);
+                    worldManager.synMarch(mapId, marchother);
                 }
-            });
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

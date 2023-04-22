@@ -1,5 +1,6 @@
 package com.game.service;
 
+import com.game.server.LogicServer;
 import com.game.util.PbHelper;
 import java.util.ArrayList;
 import java.util.Date;
@@ -99,10 +100,12 @@ public class GmToolService {
 
 	@Autowired
 	private HeroManager heroManager;
+	@Autowired
+	LogicServer logicServer;
 
 	// http://106.75.138.179:9400/redalert_account/account/gm.do?toolId=item&sid=1&type=101&id=7&count=30&name=zl011
 	public void addItem(final AddItemRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				addItemTo(req);
@@ -111,7 +114,7 @@ public class GmToolService {
 	}
 
 	public void getPersonRq(final GetPersonRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				String marking = req.getMarking();
@@ -125,7 +128,7 @@ public class GmToolService {
 	}
 
 	public void modVip(final ModVipRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				long lordId = req.getLordId();
@@ -138,7 +141,7 @@ public class GmToolService {
 	}
 
 	public void forbidden(final ForbiddenRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				int forbiddenId = req.getForbiddenId();
@@ -151,7 +154,7 @@ public class GmToolService {
 	}
 
 	public void sendMail(final GameMailRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				String making = req.getMarking();
@@ -169,7 +172,7 @@ public class GmToolService {
 	}
 
 	public void personMailRq(final PersonMailRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				String marking = req.getMarking();
@@ -183,7 +186,7 @@ public class GmToolService {
 	}
 
 	public void replyPersonMailRq(final ReplyPersonMailRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				String marking = req.getMarking();
@@ -203,7 +206,7 @@ public class GmToolService {
 	}
 
 	public void sendNotice(final NoticeRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				sendNoticeLogic(req.getContent());
@@ -212,7 +215,7 @@ public class GmToolService {
 	}
 
 	public void fakeRecharge(final FakeRechargeRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				long lordId = req.getLordId();
@@ -224,7 +227,7 @@ public class GmToolService {
 	}
 
 	public void getOnlinesRq(final GetOnlinesRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				String marking = req.getMarking();
@@ -312,7 +315,7 @@ public class GmToolService {
 	// http://120.92.133.216:9400/redalert_account/account/gm.do?toolId=task&srcert=pp12dss&sid=1&taskId=0&name=认真的奥利弗
 
 	public void jumpTask(final TaskJumpRq req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 				jumpTaskTo(req);

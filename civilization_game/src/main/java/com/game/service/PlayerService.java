@@ -8,21 +8,10 @@ import com.game.dataMgr.StaticIniDataMgr;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticLordDataMgr;
 import com.game.dataMgr.StaticVipMgr;
-import com.game.domain.Player;
-import com.game.domain.Role;
-import com.game.domain.p.Account;
 import com.game.domain.Award;
-import com.game.domain.p.Hero;
-import com.game.domain.p.LevelAward;
-import com.game.domain.p.Lord;
-import com.game.domain.p.SimpleData;
-import com.game.domain.p.Soldier;
-import com.game.domain.p.Wall;
-import com.game.domain.s.StaticEnergyPrice;
-import com.game.domain.s.StaticLordLv;
-import com.game.domain.s.StaticNewState;
-import com.game.domain.s.StaticPortrait;
-import com.game.domain.s.StaticVip;
+import com.game.domain.Player;
+import com.game.domain.p.*;
+import com.game.domain.s.*;
 import com.game.log.LogUser;
 import com.game.log.consumer.EventManager;
 import com.game.log.consumer.EventName;
@@ -40,35 +29,19 @@ import com.game.pb.ChatPb;
 import com.game.pb.CommonPb;
 import com.game.pb.InnerPb.UseGiftCodeRs;
 import com.game.pb.RolePb;
-import com.game.pb.RolePb.CreateRoleRq;
-import com.game.pb.RolePb.CreateRoleRs;
-import com.game.pb.RolePb.GetLevelAwardRs;
-import com.game.pb.RolePb.GiftCodeRs;
-import com.game.pb.RolePb.RefreshDataRq;
-import com.game.pb.RolePb.RefreshDataRs;
-import com.game.pb.RolePb.RoleReloginRq;
-import com.game.pb.RolePb.RoleReloginRs;
+import com.game.pb.RolePb.*;
 import com.game.server.GameServer;
 import com.game.server.ICommand;
-import com.game.server.exec.LoginExecutor;
-import com.game.util.HttpUtils;
-import com.game.util.LogExceptionUtil;
-import com.game.util.LogHelper;
-import com.game.util.PbHelper;
+import com.game.server.LogicServer;
 import com.game.spring.SpringUtil;
-import com.game.util.StringUtil;
-import com.game.util.TimeHelper;
+import com.game.util.*;
 import com.google.common.collect.Lists;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 public class PlayerService {
@@ -308,10 +281,8 @@ public class PlayerService {
 				 */
 
 				Player tmpPlayer = player;
-				SpringUtil.getBean(LoginExecutor.class).add(() -> {
-					playerManager.saveUcServerInfos(tmpPlayer);
-					sentPost(tmpPlayer, 0);
-				});
+				playerManager.saveUcServerInfos(tmpPlayer);
+				sentPost(tmpPlayer, 0);
 			} else {
 				// 创建失败:异常的号会进入这里, TODO
 				if (account != null) {
@@ -785,6 +756,8 @@ public class PlayerService {
 //		handler.sendMsgToPublic(baseBuilder);
 	}
 
+	@Autowired
+	LogicServer logicServer;
 	/**
 	 * Method: useGiftCodeRs
 	 *
@@ -795,7 +768,7 @@ public class PlayerService {
 	 * @Description: 使用兑换码
 	 */
 	public void useGiftCodeRs(final UseGiftCodeRs req, final ServerHandler handler) {
-		GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+		 logicServer.addCommand(new ICommand() {
 			@Override
 			public void action() {
 
@@ -1030,9 +1003,7 @@ public class PlayerService {
 				}
 			}
 			int next = num + 1;
-			SpringUtil.getBean(LoginExecutor.class).add(() -> {
-				sentPost(player, next);
-			});
+			sentPost(player, next);
 		} catch (Exception e) {
 			int next = num + 1;
 			sentPost(player, next);

@@ -3,7 +3,7 @@ package com.game.constant;
 import com.game.log.domain.JourneyLog;
 
 /**
- * @author cpz
+ *
  * @date 2020/11/20 11:12
  * @description
  */

@@ -48,6 +48,7 @@ import com.game.pb.DataPb;
 import com.game.pb.WorldPb;
 import com.game.server.GameServer;
 import com.game.server.ICommand;
+import com.game.server.LogicServer;
 import com.game.service.AchievementService;
 import com.game.service.WorldActPlanService;
 import com.game.service.WorldService;
@@ -124,6 +125,8 @@ public class BroodWarManager extends BaseManager {
 	private HeroManager heroManager;
 	@Autowired
 	private MarchManager marchManager;
+	@Autowired
+	LogicServer logicServer;
 
 	@Getter
 	private Map<BroodWarState, AbstractBroodWarState> stateMap = new ConcurrentHashMap<>();
@@ -235,7 +238,7 @@ public class BroodWarManager extends BaseManager {
 				}
 			};
 			entity.setEvent(event);
-			GameServer.getInstance().mainLogicServer.addTimer(event);
+			 logicServer.addTimer(event);
 		}
 	}
 
@@ -256,7 +259,7 @@ public class BroodWarManager extends BaseManager {
 				}
 			};
 			entity.setEvent(event);
-			GameServer.getInstance().mainLogicServer.addTimer(event);
+			 logicServer.addTimer(event);
 		}
 	}
 
@@ -656,7 +659,7 @@ public class BroodWarManager extends BaseManager {
 
 	public void stopTimer(BroodWar broodWar) {
 //        LogHelper.GAME_LOGGER.info("母巢之战结束 清理线程");
-		GameServer.getInstance().mainLogicServer.removeTimer(broodWar.getEvent());
+		 logicServer.removeTimer(broodWar.getEvent());
 	}
 
 
@@ -2056,7 +2059,7 @@ public class BroodWarManager extends BaseManager {
 			return;
 		}
 		CannelMarchAction action = new CannelMarchAction(march);
-		GameServer.getInstance().mainLogicServer.addCommand(action, DealType.MAIN);
+		 logicServer.addCommand(action, DealType.MAIN);
 	}
 
 	public class CannelMarchAction implements ICommand {

@@ -5,7 +5,7 @@ import com.game.pb.ActivityPb;
 import com.game.service.ActivityService;
 
 /**
- * @author cpz
+ *
  * @date 2020/10/11 16:46
  */
 public class ActLuxuryGiftHandler extends ClientHandler {

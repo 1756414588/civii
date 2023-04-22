@@ -14,6 +14,7 @@ import com.game.manager.*;
 import com.game.message.handler.DealType;
 import com.game.server.GameServer;
 import com.game.server.ICommand;
+import com.game.server.LogicServer;
 import com.game.service.ActivityService;
 import com.game.service.WorldTargetTaskService;
 import com.game.util.HttpUtil;
@@ -77,6 +78,9 @@ public class ServerStatisticsJob {
 
 	@Autowired
 	DailyTaskManager dailyTaskManager;
+
+	@Autowired
+    LogicServer logicServer;
 
     /**
      * 在线人数更新推送
@@ -180,7 +184,7 @@ public class ServerStatisticsJob {
     @Scheduled(cron = "1 0 0 * * ?")
     private void activityRewardLogic() {
         GameServer.getInstance().currentDay = TimeHelper.getCurrentDay();
-        GameServer.getInstance().mainLogicServer.addCommand(() -> {
+         logicServer.addCommand(() -> {
             resetBigMonster();
             resetPlayer();
             activityService.activityRewardLogic();
@@ -217,7 +221,7 @@ public class ServerStatisticsJob {
     // private void resetTopUpPerson(PlayerManager playerManager) {
     // DailyTaskManager dailyTaskManager = GameServer.ac.getBean(DailyTaskManager.class);
     // playerManager.getOnlinePlayer().forEach(e -> {
-    // GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+    //  logicServer.addCommand(new ICommand() {
     // @Override
     // public void action() {
     // playerManager.wrapRoleLoginRs(e);
@@ -264,7 +268,7 @@ public class ServerStatisticsJob {
     @Scheduled(cron = "59 59 23 * * FRI")
     private void updateEndlessTDRand() {
         activityService.sendBroodAct();
-        GameServer.getInstance().mainLogicServer.addCommand(new ICommand() {
+         logicServer.addCommand(new ICommand() {
             @Override
             public void action() {
                 tdManager.updateEndlessTDRank();

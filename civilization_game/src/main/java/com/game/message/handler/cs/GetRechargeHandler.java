@@ -7,7 +7,7 @@ import com.game.spring.SpringUtil;
 /**
  * 充值通知
  *
- * @author cpz
+ *
  */
 public class GetRechargeHandler extends ClientHandler {
     @Override

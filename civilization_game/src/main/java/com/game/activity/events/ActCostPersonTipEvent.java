@@ -17,7 +17,7 @@ import java.util.Optional;
 /**
  * 消费有礼
  *
- * @author cpz
+ *
  */
 @Component
 public class ActCostPersonTipEvent extends BaseActivityEvent {

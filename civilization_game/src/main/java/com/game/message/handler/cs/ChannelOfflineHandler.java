@@ -8,9 +8,9 @@ import com.game.log.domain.LoginLog;
 import com.game.manager.PlayerManager;
 import com.game.message.handler.ClientHandler;
 import com.game.pb.InnerPb.ChannelOfflineRq;
-import com.game.server.exec.HttpExecutor;
-import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
+import com.game.util.LogHelper;
+
 import java.util.Date;
 
 public class ChannelOfflineHandler extends ClientHandler {
@@ -56,10 +56,8 @@ public class ChannelOfflineHandler extends ClientHandler {
 		player.logOut();
 		// 更新账号服玩家信息
 		PlayerManager playerManager = SpringUtil.getBean(PlayerManager.class);
+		playerManager.saveUcServerInfos(player);
 
-		SpringUtil.getBean(HttpExecutor.class).add(() -> {
-			playerManager.saveUcServerInfos(player);
-		});
 
 		com.game.log.LogUser logUser = SpringUtil.getBean(com.game.log.LogUser.class);
 		logUser.loginLog(LoginLog.builder().lordId(player.roleId).nick(player.getNick()).lv(player.getLevel()).createDate(player.account.getCreateDate()).loginDate(player.account.getLoginDate()).logoutDate(new Date(System.currentTimeMillis())).build());

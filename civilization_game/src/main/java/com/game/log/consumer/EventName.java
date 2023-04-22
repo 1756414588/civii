@@ -1,7 +1,7 @@
 package com.game.log.consumer;
 
 /**
- * @author cpz
+ *
  * @date 2020/12/6 13:19
  * @description
  */

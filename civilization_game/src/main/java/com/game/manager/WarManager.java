@@ -10,7 +10,6 @@ import com.game.flame.FlameWarManager;
 import com.game.pb.DataPb;
 import com.game.pb.DataPb.MarchData;
 import com.game.pb.WorldPb;
-import com.game.server.exec.LoginExecutor;
 import com.game.service.RebelService;
 import com.game.spring.SpringUtil;
 import com.game.worldmap.*;
@@ -372,76 +371,66 @@ public class WarManager {
 	}
 
 	public void synWarInfo(IWar war) {
-		SpringUtil.getBean(LoginExecutor.class).add(() -> {
-			WorldPb.SynCountryWarRq joinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
-			WorldPb.SynCountryWarRq unjoinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
+		WorldPb.SynCountryWarRq joinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
+		WorldPb.SynCountryWarRq unjoinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
 
-			playerManager.getOnlinePlayer().forEach(target -> {
-				if (!target.isLogin) {
-					return;
-				}
-				boolean isJoin = war.isJoin(target);
-				playerManager.synWarInfoToPlayer(target, isJoin ? joinWarPB : unjoinWarPB);
-			});
+		playerManager.getOnlinePlayer().forEach(target -> {
+			if (!target.isLogin) {
+				return;
+			}
+			boolean isJoin = war.isJoin(target);
+			playerManager.synWarInfoToPlayer(target, isJoin ? joinWarPB : unjoinWarPB);
 		});
 	}
 
 	public void synRebelWarInfo(IWar war) {
-		SpringUtil.getBean(LoginExecutor.class).add(() -> {
-			WorldPb.SynRebelWarRq joinWarPB = WorldPb.SynRebelWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
-			WorldPb.SynRebelWarRq unjoinWarPB = WorldPb.SynRebelWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
-			playerManager.getOnlinePlayer().forEach(target -> {
-				if (!target.isLogin) {
-					return;
-				}
-				boolean isJoin = war.isJoin(target);
-				playerManager.synReWarInfoToPlayer(target, isJoin ? joinWarPB : unjoinWarPB);
-			});
+		WorldPb.SynRebelWarRq joinWarPB = WorldPb.SynRebelWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
+		WorldPb.SynRebelWarRq unjoinWarPB = WorldPb.SynRebelWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
+		playerManager.getOnlinePlayer().forEach(target -> {
+			if (!target.isLogin) {
+				return;
+			}
+			boolean isJoin = war.isJoin(target);
+			playerManager.synReWarInfoToPlayer(target, isJoin ? joinWarPB : unjoinWarPB);
 		});
 	}
 
 	public void synRebelWarInfoToWorld(IWar war) {
-		SpringUtil.getBean(LoginExecutor.class).add(() -> {
-			WorldPb.SynRebelWarRq joinWarPB = WorldPb.SynRebelWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
-			WorldPb.SynRebelWarRq unjoinWarPB = WorldPb.SynRebelWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
-			playerManager.getOnlinePlayer().forEach(player -> {
-				if (!player.isLogin) {
-					return;
-				}
-				boolean isJoin = war.isJoin(player);
-				playerManager.synReWarInfoToPlayer(player, isJoin ? joinWarPB : unjoinWarPB);
-			});
+		WorldPb.SynRebelWarRq joinWarPB = WorldPb.SynRebelWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
+		WorldPb.SynRebelWarRq unjoinWarPB = WorldPb.SynRebelWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
+		playerManager.getOnlinePlayer().forEach(player -> {
+			if (!player.isLogin) {
+				return;
+			}
+			boolean isJoin = war.isJoin(player);
+			playerManager.synReWarInfoToPlayer(player, isJoin ? joinWarPB : unjoinWarPB);
 		});
 	}
 
 	public void synWarInfoToWorld(IWar war) {
-		SpringUtil.getBean(LoginExecutor.class).add(() -> {
-			WorldPb.SynCountryWarRq joinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
-			WorldPb.SynCountryWarRq unjoinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
-			playerManager.getOnlinePlayer().forEach(player -> {
-				if (!player.isLogin) {
-					return;
-				}
-				boolean isJoin = war.isJoin(player);
-				playerManager.synWarInfoToPlayer(player, isJoin ? joinWarPB : unjoinWarPB);
-			});
+		WorldPb.SynCountryWarRq joinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
+		WorldPb.SynCountryWarRq unjoinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
+		playerManager.getOnlinePlayer().forEach(player -> {
+			if (!player.isLogin) {
+				return;
+			}
+			boolean isJoin = war.isJoin(player);
+			playerManager.synWarInfoToPlayer(player, isJoin ? joinWarPB : unjoinWarPB);
 		});
 	}
 
 
 	public void synWarInfo(IWar war, int attackerCountry, int defenceCountry) {
-		SpringUtil.getBean(LoginExecutor.class).add(() -> {
-			WorldPb.SynCountryWarRq joinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
-			WorldPb.SynCountryWarRq unjoinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
-			playerManager.getOnlinePlayer().forEach(player -> {
-				if (!player.isLogin) {
-					return;
-				}
-				if (player.getCountry() == attackerCountry || player.getCountry() == defenceCountry) {
-					boolean isJoin = war.isJoin(player);
-					playerManager.synWarInfoToPlayer(player, isJoin ? joinWarPB : unjoinWarPB);
-				}
-			});
+		WorldPb.SynCountryWarRq joinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(true).build()).build();
+		WorldPb.SynCountryWarRq unjoinWarPB = WorldPb.SynCountryWarRq.newBuilder().setWarInfo(war.wrapPb(false).build()).build();
+		playerManager.getOnlinePlayer().forEach(player -> {
+			if (!player.isLogin) {
+				return;
+			}
+			if (player.getCountry() == attackerCountry || player.getCountry() == defenceCountry) {
+				boolean isJoin = war.isJoin(player);
+				playerManager.synWarInfoToPlayer(player, isJoin ? joinWarPB : unjoinWarPB);
+			}
 		});
 	}
 

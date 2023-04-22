@@ -2,46 +2,19 @@ package com.game.service;
 
 import com.game.activity.ActivityEventManager;
 import com.game.activity.define.EventEnum;
-import com.game.constant.ActPassPortTaskType;
-import com.game.constant.ActSevenConst;
-import com.game.constant.ActivityConst;
-import com.game.constant.AwardType;
-import com.game.constant.ChatShowType;
-import com.game.constant.DailyTaskId;
-import com.game.constant.GameError;
-import com.game.constant.LordPropertyType;
-import com.game.constant.MailId;
-import com.game.constant.Reason;
-import com.game.constant.UcCodeEnum;
+import com.game.constant.*;
 import com.game.dataMgr.StaticActivityMgr;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticVipMgr;
 import com.game.domain.ActivityData;
+import com.game.domain.Award;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.p.ActivityRecord;
-import com.game.domain.Award;
 import com.game.domain.p.Lord;
-import com.game.domain.s.ActivityBase;
-import com.game.domain.s.StaticActEquipUpdate;
-import com.game.domain.s.StaticActPayCard;
-import com.game.domain.s.StaticActPayGift;
-import com.game.domain.s.StaticActPayMoney;
-import com.game.domain.s.StaticLimitGift;
-import com.game.domain.s.StaticPay;
-import com.game.domain.s.StaticPayCalculate;
-import com.game.domain.s.StaticPayPassPort;
-import com.game.domain.s.StaticPayPoint;
-import com.game.domain.s.StaticResourceGift;
+import com.game.domain.s.*;
 import com.game.log.consumer.EventManager;
-import com.game.manager.ActivityManager;
-import com.game.manager.ChatManager;
-import com.game.manager.DailyTaskManager;
-import com.game.manager.EquipManager;
-import com.game.manager.PayManager;
-import com.game.manager.PlayerManager;
-import com.game.manager.ServerManager;
-import com.game.manager.SurpriseGiftManager;
+import com.game.manager.*;
 import com.game.message.handler.ClientHandler;
 import com.game.pay.channel.ChannelConsts;
 import com.game.pb.ActivityPb.SynResourceGiftShow;
@@ -50,20 +23,20 @@ import com.game.pb.PayPb;
 import com.game.pb.PayPb.GetOrderNumRq;
 import com.game.pb.PayPb.GetOrderNumRs;
 import com.game.pb.RolePb;
-import com.game.server.exec.HttpExecutor;
+import com.game.spring.SpringUtil;
 import com.game.uc.Message;
 import com.game.uc.PayOrder;
 import com.game.uc.Server;
 import com.game.util.LogHelper;
 import com.game.util.PbHelper;
-import com.game.spring.SpringUtil;
 import com.game.util.SynHelper;
 import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class PayService {
@@ -882,45 +855,42 @@ public class PayService {
 		int PAY_AMOUNT = payAmount;
 		String PLAT_ID = platId;
 		int REAL_PRODUCT_TYPE = realProductType;
-		SpringUtil.getBean(HttpExecutor.class).add(() -> {
-			PayOrder payOrder = payManager.createOrderNum(new PayOrder(channelId, platNo, player.roleId, serverId, productType, productId, PAY_AMOUNT * 100, PLAT_ID, accountKey, player.getLevel()));
-			if (null == payOrder.getCpOrderId()) {
-				// 创建失败
-				handler.sendErrorMsgToPlayer(GameError.PAY_CREATE_ORDERNUM_ERROR);
-				return;
-			}
+		PayOrder payOrder = payManager.createOrderNum(new PayOrder(channelId, platNo, player.roleId, serverId, productType, productId, PAY_AMOUNT * 100, PLAT_ID, accountKey, player.getLevel()));
+		if (null == payOrder.getCpOrderId()) {
+			// 创建失败
+			handler.sendErrorMsgToPlayer(GameError.PAY_CREATE_ORDERNUM_ERROR);
+			return;
+		}
 
-			payOrder.setRealServer(server.getServerId());
-			payOrder.setNick(player.getNick());
-			Message msg = httpService.sendOrderNum(payOrder);
-			if (msg == null || msg.getCode() != UcCodeEnum.SUCCESS.getCode()) {
-				// 创建失败
-				handler.sendErrorMsgToPlayer(GameError.PAY_CREATE_ORDERNUM_ERROR);
-				return;
-			}
+		payOrder.setRealServer(server.getServerId());
+		payOrder.setNick(player.getNick());
+		Message msg = httpService.sendOrderNum(payOrder);
+		if (msg == null || msg.getCode() != UcCodeEnum.SUCCESS.getCode()) {
+			// 创建失败
+			handler.sendErrorMsgToPlayer(GameError.PAY_CREATE_ORDERNUM_ERROR);
+			return;
+		}
 
-			PayPb.GetOrderNumRs.Builder builder = GetOrderNumRs.newBuilder();
-			builder.setOrderNum(payOrder.getCpOrderId());
+		PayPb.GetOrderNumRs.Builder builder = GetOrderNumRs.newBuilder();
+		builder.setOrderNum(payOrder.getCpOrderId());
 
-			StaticPayPoint staticPayPoint = staticVipDataMgr.getStaticPayPoint(REAL_PRODUCT_TYPE, PAY_AMOUNT);// 设置计费点
-			if (staticPayPoint == null) {
-				// 创建失败
-				handler.sendErrorMsgToPlayer(GameError.PAY_CREATE_ORDERNUM_ERROR);
-				return;
-			}
+		StaticPayPoint staticPayPoint = staticVipDataMgr.getStaticPayPoint(REAL_PRODUCT_TYPE, PAY_AMOUNT);// 设置计费点
+		if (staticPayPoint == null) {
+			// 创建失败
+			handler.sendErrorMsgToPlayer(GameError.PAY_CREATE_ORDERNUM_ERROR);
+			return;
+		}
 
-			builder.setPayPoint(staticPayPoint.getSdk_point());
-			handler.sendMsgToPlayer(GetOrderNumRs.ext, builder.build());
+		builder.setPayPoint(staticPayPoint.getSdk_point());
+		handler.sendMsgToPlayer(GetOrderNumRs.ext, builder.build());
 
-			// 充值回调
-			if (channelId == ChannelConsts.DEFAULT_CHANNEL) {
-				Message defaultPayBack = httpService.defaultPayBack(payOrder);
-			}
+		// 充值回调
+		if (channelId == ChannelConsts.DEFAULT_CHANNEL) {
+			Message defaultPayBack = httpService.defaultPayBack(payOrder);
+		}
 
-			List<Object> param = Lists.newArrayList(payOrder.getCpOrderId(), PAY_AMOUNT, "test", "test", productId, "test", payOrder.getCpOrderId(), "", false, player.getLord().getTopup() == 0, getPayGiftName(payOrder),payOrder.getProductType(),payOrder.getProductId());
-			SpringUtil.getBean(EventManager.class).order_event(player, param);
-
-		});
+		List<Object> param = Lists.newArrayList(payOrder.getCpOrderId(), PAY_AMOUNT, "test", "test", productId, "test", payOrder.getCpOrderId(), "", false, player.getLord().getTopup() == 0, getPayGiftName(payOrder),payOrder.getProductType(),payOrder.getProductId());
+		SpringUtil.getBean(EventManager.class).order_event(player, param);
 	}
 
 	/**

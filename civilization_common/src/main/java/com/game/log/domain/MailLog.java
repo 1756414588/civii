@@ -3,7 +3,7 @@ package com.game.log.domain;
 import lombok.Builder;
 
 /**
- * @author cpz
+ *
  * @date 2021/2/2 14:12
  * @description
  */

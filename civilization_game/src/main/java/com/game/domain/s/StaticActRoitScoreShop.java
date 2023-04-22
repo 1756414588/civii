@@ -1,7 +1,7 @@
 package com.game.domain.s;
 
 /**
- * @author cpz
+ *
  * @date 2020/9/24 10:31
  * @description 虫族入侵 积分商店
  */

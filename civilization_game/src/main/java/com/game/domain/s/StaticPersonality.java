@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * @author cpz
+ *
  * @date 2021/1/26 14:11
  * @description 个性化 头像 聊天框
  */

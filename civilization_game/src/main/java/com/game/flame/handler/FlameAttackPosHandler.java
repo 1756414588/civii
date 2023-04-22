@@ -12,7 +12,7 @@ import com.game.server.GameServer;
 public class FlameAttackPosHandler extends ClientHandler {
 	@Override
 	public void action() {
-		GameServer.getInstance().mainLogicServer.addCommand(() -> {
+		 GameServer.getInstance().mainLogicServer.addCommand(() -> {
 			getService(FlameWarService.class).attackFlame(msg.getExtension(FlameWarPb.AttackFlameRq.ext), this);
 		}, DealType.MAIN);
 	}

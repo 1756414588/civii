@@ -39,7 +39,6 @@ import com.game.rank.RankInfo;
 import com.game.rank.RebelScoreRankMgr;
 import com.game.server.GameServer;
 import com.game.server.datafacede.SavePlayerServer;
-import com.game.server.exec.LoginExecutor;
 import com.game.service.AccountService;
 import com.game.service.CityGameService;
 import com.game.service.WorldActPlanService;
@@ -700,9 +699,7 @@ public class PlayerManager extends BaseManager {
 	}
 
 	public void recordLogin(Account account) {
-		SpringUtil.getBean(LoginExecutor.class).add(() -> {
-			accountDao.recordLoginTime(account);
-		});
+		accountDao.recordLoginTime(account);
 	}
 
 	// 初始化玩家数据[注册]

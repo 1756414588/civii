@@ -1,23 +1,7 @@
 package com.game.manager;
 
-import com.game.server.exec.LoginExecutor;
-import com.game.spring.SpringUtil;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import com.game.constant.MailId;
-import com.game.service.WarningService;
-import com.game.util.StringUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import com.game.constant.MailConst;
+import com.game.constant.MailId;
 import com.game.dao.p.SendMailDao;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticMailDataMgr;
@@ -25,9 +9,21 @@ import com.game.domain.Player;
 import com.game.domain.p.Mail;
 import com.game.domain.s.StaticMail;
 import com.game.pb.CommonPb;
+import com.game.service.WarningService;
 import com.game.servlet.domain.MailType;
 import com.game.servlet.domain.SendMail;
 import com.game.util.LogHelper;
+import com.game.util.StringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.PostConstruct;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Component
 public class MailManager {
@@ -109,10 +105,7 @@ public class MailManager {
                     //活动名称相同
                     if (m.getParam()[0] == param[0]) {
                         //return掉 不给玩家奖励
-                        SpringUtil.getBean(LoginExecutor.class).add(() -> {
-                            //异步发送邮件预警
-                            warningService.sendMail(param[0],mail);
-                        });
+                        warningService.sendMail(param[0],mail);
                         return mail;
                     }
                 }

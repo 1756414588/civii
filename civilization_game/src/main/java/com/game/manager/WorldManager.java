@@ -325,18 +325,17 @@ public class WorldManager extends BaseManager {
 	}
 
 	public void flushWarInfos() {
-		LogicServer mainLogicServer = GameServer.getInstance().mainLogicServer;
-		if (mainLogicServer != null) {
-			mainLogicServer.addCommand(() -> {
-				if (allWar.size() >= 0) {
-					for (Player player : playerManager.getOnlinePlayer()) {
-						sendWar(player);
-					}
+		logicServer.addCommand(() -> {
+			if (allWar.size() >= 0) {
+				for (Player player : playerManager.getOnlinePlayer()) {
+					sendWar(player);
 				}
-			});
-		}
+			}
+		});
 	}
 
+	@Autowired
+	LogicServer logicServer;
 	/**
 	 * 通知在线玩家行军线变更
 	 *
@@ -5848,7 +5847,7 @@ public class WorldManager extends BaseManager {
 
 		int oldMapId = worldManager.getMapId(pos);
 		if (mapId != oldMapId) {
-			LogicServer mainLogicServer = GameServer.getInstance().mainLogicServer;
+			LogicServer mainLogicServer =  logicServer;
 			if (mainLogicServer != null) {
 				mainLogicServer.addCommand(() -> {
 					worldManager.sendWar(player);

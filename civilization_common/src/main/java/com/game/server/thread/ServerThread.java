@@ -19,11 +19,11 @@ public class ServerThread extends Thread {
     protected int heart;
 
     // 运行标志
-    private boolean stop;
+    private volatile boolean stop = false;
 
-    public boolean stopped = false;
+//    public boolean stopped = false;
 
-    private boolean processingCompleted = false;
+//    private boolean processingCompleted = false;
 
     public ServerThread(ThreadGroup group, String threadName, int heart) {
         super(group, threadName);
@@ -47,21 +47,11 @@ public class ServerThread extends Thread {
             // 启动计时线程
             timer.start();
         }
-
-        stop = false;
-        int loop = 0;
-        long start = 0;
-        long end = 0;
-        long timeCost = 0;
-        String className = "";
-        String mainName = this.getName();
         while (!stop) {
             ICommand command = command_queue.poll();
             if (command == null) {
                 try {
                     synchronized (this) {
-                        loop = 0;
-                        processingCompleted = true;
                         wait();
                     }
                 } catch (Exception e) {
@@ -69,34 +59,13 @@ public class ServerThread extends Thread {
                 }
             } else {
                 try {
-                    loop++;
-                    processingCompleted = false;
-                    start = System.currentTimeMillis();
                     command.action();
-                    end = System.currentTimeMillis();
-
-                    timeCost = end - start;
-                    if (timeCost > 100) {
-                        className = command.getClass().getSimpleName();
-                        LogHelper.SAVE_LOGGER.error(mainName + "-->" + className + " haust:" + timeCost);
-                    }
-
-                    if (loop > 1000) {
-                        loop = 0;
-                        try {
-                            Thread.sleep(1);
-                        } catch (Exception e) {
-							LogHelper.ERROR_LOGGER.error("ServerThread", e);
-						}
-                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     LogHelper.ERROR_LOGGER.error(command.getClass().getSimpleName() + " exception -->" + e.getMessage(), e);
                 }
             }
         }
-
-        stopped = true;
     }
 
     public void stop(boolean flag) {
@@ -105,16 +74,6 @@ public class ServerThread extends Thread {
             this.timer.stop(flag);
         }
         this.command_queue.clear();
-        try {
-            synchronized (this) {
-                if (processingCompleted) {
-                    processingCompleted = false;
-                    notify();
-                }
-            }
-        } catch (Exception e) {
-            LogHelper.ERROR_LOGGER.error("Server Thread " + threadName + " Notify Exception:" + e.getMessage(), e);
-        }
     }
 
     /**

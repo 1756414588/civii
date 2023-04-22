@@ -5,7 +5,7 @@ import com.game.pb.WorldBoxPb;
 import com.game.service.WorldBoxService;
 
 /**
- * @author cpz
+ *
  * @date 2021/1/7 17:41
  * @description
  */

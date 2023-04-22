@@ -11,7 +11,7 @@ import com.game.server.GameServer;
 public class FlameLogOutHandler extends ClientHandler {
 	@Override
 	public void action() {
-		GameServer.getInstance().mainLogicServer.addCommand(() -> {
+		 GameServer.getInstance().mainLogicServer.addCommand(() -> {
 			getService(FlameWarService.class).logOutMap(this);
 		}, DealType.MAIN);
 	}

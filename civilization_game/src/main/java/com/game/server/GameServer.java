@@ -89,8 +89,8 @@ public class GameServer extends AbsServer {
 
 			//TODO 优化此处待优化
 			ServerManager serverManager = SpringUtil.getBean(ServerManager.class);
-			mainLogicServer = new LogicServer(serverManager.getServer().getServerName(), 500, 100);
-
+//			mainLogicServer = new LogicServer(serverManager.getServer().getServerName(), 500, 100);
+			mainLogicServer = SpringUtil.getBean(LogicServer.class);
 			// 数据存储服务
 			dataFacedeServer = new DataFacedeServer();
 			dataFacedeServer.start();

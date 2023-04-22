@@ -51,7 +51,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class FlameWarManager {
-
+    @Autowired
+    LogicServer logicServer;
     @Autowired
     private PlayerManager playerManager;
     @Autowired
@@ -223,12 +224,11 @@ public class FlameWarManager {
             return;
         }
         List<StaticFlameFlushMine> flameFlushMineMap = staticFlameWarMgr.getFlameFlushMineMap();
-        LogicServer mainLogicServer = GameServer.getInstance().mainLogicServer;
         // 定时刷矿
         flameFlushMineMap.forEach(x -> {
             long l = x.getRefreshTime() - TimeHelper.curentTime() + worldActPlan.getOpenTime();
             if (l > 0) {
-                mainLogicServer.scheduledExecutorService.schedule(() -> {
+                logicServer.scheduledExecutorService.schedule(() -> {
                     flushMine(x);
                 }, l, TimeUnit.MILLISECONDS);
             }
@@ -400,7 +400,7 @@ public class FlameWarManager {
                 flameMap.getNode().remove(next.getPos());
             }
         }
-        GameServer.getInstance().mainLogicServer.addCommand(() -> {
+         logicServer.addCommand(() -> {
             flameWarService.synCountryInfo();
             if (currentTime > nextRankTime) {
                 nextRankTime = currentTime + 60 * 1000;
@@ -607,7 +607,7 @@ public class FlameWarManager {
 
     public void synFlameActivity(WorldActPlan worldActPlan, long endTime) {
 
-        GameServer.getInstance().mainLogicServer.addCommand(() -> {
+         logicServer.addCommand(() -> {
             FlameWarPb.SynFlameWarStateRq.Builder builder = FlameWarPb.SynFlameWarStateRq.newBuilder();
             builder.setStatus(worldActPlan.getState());
             builder.setEndTime(endTime);
@@ -1175,7 +1175,7 @@ public class FlameWarManager {
      * @param player
      */
     public void cancelFlameMarch(WorldPb.MarchCancelRq req, Player player) {
-        GameServer.getInstance().mainLogicServer.addCommand(() -> {
+         logicServer.addCommand(() -> {
             WorldManager worldManager = SpringUtil.getBean(WorldManager.class);
             WorldData worldData = worldManager.getWolrdInfo();
             if (worldData == null) {
