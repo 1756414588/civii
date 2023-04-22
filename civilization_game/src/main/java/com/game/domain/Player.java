@@ -30,6 +30,7 @@ import com.game.worldmap.March;
 import com.game.worldmap.MarchType;
 import com.game.worldmap.Pos;
 import com.google.protobuf.InvalidProtocolBufferException;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.internal.StringUtil;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -197,7 +198,7 @@ public class Player {
     public boolean isLogin = false;
 
     public boolean immediateSave = false;
-//	public ChannelHandlerContext ctx;
+	private ChannelHandlerContext ctx;
 
     // 行军信息
     private LostRes lostRes = new LostRes();
@@ -3577,4 +3578,11 @@ public class Player {
         ser.setAchiPbInfo(this.achievementInfo.encode());
     }
 
+    public ChannelHandlerContext getCtx() {
+        return ctx;
+    }
+
+    public void setCtx(ChannelHandlerContext ctx) {
+        this.ctx = ctx;
+    }
 }

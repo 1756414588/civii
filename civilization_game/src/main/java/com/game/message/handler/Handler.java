@@ -1,5 +1,7 @@
 package com.game.message.handler;
 
+import com.game.domain.Player;
+import com.game.network.ChannelHandler;
 import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -128,4 +130,8 @@ abstract public class Handler implements ICommand {
 		}
 		return clientIp;
 	}
+
+	public abstract void event(Base msg, Player player);
+
+	public abstract void reg();
 }

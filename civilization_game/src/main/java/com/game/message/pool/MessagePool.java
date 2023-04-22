@@ -2,6 +2,7 @@ package com.game.message.pool;
 
 import com.game.flame.handler.*;
 import com.game.message.handler.ClientHandler;
+import com.game.message.handler.Handler;
 import com.game.message.handler.ServerHandler;
 import com.game.message.handler.cs.*;
 import com.game.message.handler.register.RegisterHandler;
@@ -38,12 +39,15 @@ import com.game.pb.StaffPb.*;
 import com.game.util.LogHelper;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class MessagePool {
 
 	private HashMap<Integer, Class<? extends ClientHandler>> clientHandlers = new HashMap<Integer, Class<? extends ClientHandler>>();
 	private HashMap<Integer, Class<? extends ServerHandler>> serverHandlers = new HashMap<Integer, Class<? extends ServerHandler>>();
 	private HashMap<Integer, Integer> rsMsgCmd = new HashMap<Integer, Integer>();
+
+
 
 	// 注意新协议注册之前,一定要加到GameServer里面
 	// ex: StaffPb.registerAllExtensions(registry);
