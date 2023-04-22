@@ -139,7 +139,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author 陈奎
+ *
  * @Description 登录成功后，进行相关角色的数据拉取事件
  * @Date 2022/10/20 14:35
  **/

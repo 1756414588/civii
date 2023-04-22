@@ -23,8 +23,6 @@ import com.game.pb.*;
 import com.game.pb.BasePb.Base;
 import com.game.pb.RolePb.*;
 import com.game.server.GameServer;
-import com.game.server.exec.HttpExecutor;
-import com.game.server.exec.LoginExecutor;
 import com.game.spring.SpringUtil;
 import com.game.uc.CdkeyItem;
 import com.game.uc.Message;
@@ -374,9 +372,8 @@ public class AccountService {
 		Date date = player.account.getFirstLoginDate();
 		if (date == null || !TimeHelper.isSameDay(date.getTime())) {
 			player.account.setFirstLoginDate(new Date());
-			SpringUtil.getBean(LoginExecutor.class).add(() -> {
-				accountDao.updateFirstLoginDate(player.account);
-			});
+			accountDao.updateFirstLoginDate(player.account);
+
 		}
 	}
 
@@ -447,40 +444,38 @@ public class AccountService {
 		int serverId = player.account.getServerId();
 		int channel = player.account.getChannel();
 		String cdk = req.getCdk();
-		SpringUtil.getBean(HttpExecutor.class).add(() -> {
-			Message message = serveice.getCdkAward(lorldId, channel, serverId, cdk, player.getLevel());
-			if (message.getCode() != UcCodeEnum.SUCCESS.getCode() && message.getCode() != UcCodeEnum.CDK_LEVEL_NOT_ENOUTH.getCode()) {
+		Message message = serveice.getCdkAward(lorldId, channel, serverId, cdk, player.getLevel());
+		if (message.getCode() != UcCodeEnum.SUCCESS.getCode() && message.getCode() != UcCodeEnum.CDK_LEVEL_NOT_ENOUTH.getCode()) {
+			handler.sendErrorMsgToPlayer(GameError.CDK_IS_ERROR);
+			return;
+		}
+		if (message.getCode() == UcCodeEnum.CDK_LEVEL_NOT_ENOUTH.getCode()) {
+			int limit = 0;
+			try {
+				limit = Integer.parseInt(message.getData());
+			} catch (Exception e) {
 				handler.sendErrorMsgToPlayer(GameError.CDK_IS_ERROR);
 				return;
 			}
-			if (message.getCode() == UcCodeEnum.CDK_LEVEL_NOT_ENOUTH.getCode()) {
-				int limit = 0;
-				try {
-					limit = Integer.parseInt(message.getData());
-				} catch (Exception e) {
-					handler.sendErrorMsgToPlayer(GameError.CDK_IS_ERROR);
-					return;
-				}
-				RolePb.UseCdkRs.Builder builder = RolePb.UseCdkRs.newBuilder();
-				builder.setLimitlevel(limit);
-				handler.sendMsgToPlayer(RolePb.UseCdkRs.ext, builder.build());
-				return;
-			}
-			List<CdkeyItem> cdkeyItems = JSONObject.parseArray(message.getData(), CdkeyItem.class);
 			RolePb.UseCdkRs.Builder builder = RolePb.UseCdkRs.newBuilder();
-			if (cdkeyItems != null && cdkeyItems.size() > 0) {
-				for (CdkeyItem cdkItem : cdkeyItems) {
-					int keyId = playerManager.addAward(player, cdkItem.getItemtype(), cdkItem.getItemid(), cdkItem.getItemnum(), Reason.USE_CDK_AWARD);
-					CommonPb.Award.Builder award = CommonPb.Award.newBuilder();
-					award.setCount(cdkItem.getItemnum());
-					award.setId(cdkItem.getItemid());
-					award.setType(cdkItem.getItemtype());
-					award.setKeyId(keyId);
-					builder.addAwards(award);
-				}
-			}
+			builder.setLimitlevel(limit);
 			handler.sendMsgToPlayer(RolePb.UseCdkRs.ext, builder.build());
-		});
+			return;
+		}
+		List<CdkeyItem> cdkeyItems = JSONObject.parseArray(message.getData(), CdkeyItem.class);
+		RolePb.UseCdkRs.Builder builder = RolePb.UseCdkRs.newBuilder();
+		if (cdkeyItems != null && cdkeyItems.size() > 0) {
+			for (CdkeyItem cdkItem : cdkeyItems) {
+				int keyId = playerManager.addAward(player, cdkItem.getItemtype(), cdkItem.getItemid(), cdkItem.getItemnum(), Reason.USE_CDK_AWARD);
+				CommonPb.Award.Builder award = CommonPb.Award.newBuilder();
+				award.setCount(cdkItem.getItemnum());
+				award.setId(cdkItem.getItemid());
+				award.setType(cdkItem.getItemtype());
+				award.setKeyId(keyId);
+				builder.addAwards(award);
+			}
+		}
+		handler.sendMsgToPlayer(RolePb.UseCdkRs.ext, builder.build());
 	}
 
 	/**

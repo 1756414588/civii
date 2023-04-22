@@ -1,7 +1,7 @@
 package com.game.load;
 
 /**
- * @Author 陈奎
+ *
  * @Description 启动服务器时初始化的接口
  * @Date 2022/9/9 11:30
  **/

@@ -5,7 +5,7 @@ import com.game.pb.BasePb.Base;
 import com.game.pb.ChatPb;
 
 /**
- * @Author 陈奎
+ *
  * @Description收到分享消息,玩家参与协助
  * @Date 2022/10/20 17:33
  **/

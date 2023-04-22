@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author 陈奎
+ *
  * @Description测试用户类
  * @Date 2023/3/21 11:33
  **/

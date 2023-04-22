@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 购买礼包的计费点
  *
- * @author 陈奎
+ *
  * @version 1.0
  * @filename
  * @time 2017-6-5 下午5:26:58

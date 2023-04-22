@@ -14,7 +14,7 @@ import com.game.util.BasePbHelper;
 import com.game.util.LogHelper;
 
 /**
- * @Author 陈奎
+ *
  * @Description 请求地图上的信息
  * @Date 2022/9/16 17:42
  **/

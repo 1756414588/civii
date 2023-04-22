@@ -52,7 +52,7 @@ import com.game.util.LogHelper;
 import com.google.protobuf.ExtensionRegistry;
 
 /**
- * @Author 陈奎
+ *
  * @Description protobuf注册文件
  * @Date 2022/9/9 11:30
  **/

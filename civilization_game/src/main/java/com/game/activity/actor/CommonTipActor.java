@@ -10,7 +10,7 @@ import com.game.domain.s.ActivityBase;
  * GetActivityAward主要使用
  * 其他模块均可使用（如有不同之处，请勿添加修改变量，新建actor）
  *
- * @author 陈奎
+ *
  */
 public class CommonTipActor extends BaseActivityActor {
 

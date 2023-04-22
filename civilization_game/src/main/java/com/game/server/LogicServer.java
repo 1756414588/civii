@@ -59,12 +59,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @Author 陈奎
- * @Description 逻辑服务
- * @Date 2022/9/9 11:30
- **/
-
 public class LogicServer implements Runnable {
 
 	static Logger logger = LoggerFactory.getLogger(LogicServer.class);
@@ -88,7 +82,7 @@ public class LogicServer implements Runnable {
 		threadGroup = new ThreadGroup(serverName);
 		createServerThread(DealType.MAIN);
 		createServerThread(DealType.SAVE_DATA);
-		createServerThread(DealType.TIMER_LOGIC);
+//		createServerThread(DealType.TIMER_LOGIC);
 	}
 
 	private void createServerThread(DealType dealType) {
@@ -166,10 +160,10 @@ public class LogicServer implements Runnable {
 		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new ActManoeuvreTimer());
 		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new ActFlameWarTimer());
 
-		threadPool.get(DealType.TIMER_LOGIC.getCode()).addTimerEvent(new ActivityCloseTimer());
-		threadPool.get(DealType.TIMER_LOGIC.getCode()).addTimerEvent(new ActivityTipTimer());
-		threadPool.get(DealType.TIMER_LOGIC.getCode()).addTimerEvent(new BattleTimer());
-		threadPool.get(DealType.TIMER_LOGIC.getCode()).addTimerEvent(new CheckArmyTimer());
+		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new ActivityCloseTimer());
+		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new ActivityTipTimer());
+		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new BattleTimer());
+		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new CheckArmyTimer());
 
 		//渔场派遣队列定时器
 		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new FishingQueueTimer());

@@ -10,7 +10,7 @@ import com.game.server.GateServer;
 import com.game.util.BasePbHelper;
 
 /**
- * @Author 陈奎
+ *
  * @Description 心跳定时器
  * @Date 2022/9/9 11:30
  **/

@@ -14,10 +14,8 @@ import com.game.manager.*;
 import com.game.message.handler.DealType;
 import com.game.server.GameServer;
 import com.game.server.ICommand;
-import com.game.server.exec.HttpExecutor;
 import com.game.service.ActivityService;
 import com.game.service.WorldTargetTaskService;
-import com.game.spring.SpringUtil;
 import com.game.util.HttpUtil;
 import com.game.util.HttpUtils;
 import com.game.util.LogHelper;
@@ -280,14 +278,12 @@ public class ServerStatisticsJob {
 //	}
     // 无尽塔防错误日志上报
     public void recordEndlessTDErrorData(EndlessTDErrorLog endlessTDErrorLog) {
-        SpringUtil.getBean(HttpExecutor.class).add(() -> {
-            String url = gmUrl.substring(0, gmUrl.lastIndexOf(":") + 1) + "1000/api/endlessTDErrorLog.do";
-            try {
-                HttpUtils.sentPost(url, JSONObject.toJSONString(endlessTDErrorLog));
-            } catch (Exception e) {
-                LogHelper.ERROR_LOGGER.debug("record EndlessTD ErrorData fail url-->[{}]", url);
-            }
-        });
+        String url = gmUrl.substring(0, gmUrl.lastIndexOf(":") + 1) + "1000/api/endlessTDErrorLog.do";
+        try {
+            HttpUtils.sentPost(url, JSONObject.toJSONString(endlessTDErrorLog));
+        } catch (Exception e) {
+            LogHelper.ERROR_LOGGER.debug("record EndlessTD ErrorData fail url-->[{}]", url);
+        }
     }
 
     //零点活动相关处理

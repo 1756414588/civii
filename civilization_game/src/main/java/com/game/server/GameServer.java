@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.Setter;
 
 /**
- * @Author 陈奎
+ *
  * @Description 游戏服务器
  * @Date 2022/9/9 11:30
  **/
@@ -87,9 +87,6 @@ public class GameServer extends AbsServer {
 			// 加载pb
 			this.registerPbFile();
 
-			// 处理服务
-			ExecServer.getInst().init();
-
 			//TODO 优化此处待优化
 			ServerManager serverManager = SpringUtil.getBean(ServerManager.class);
 			mainLogicServer = new LogicServer(serverManager.getServer().getServerName(), 500, 100);
@@ -130,9 +127,6 @@ public class GameServer extends AbsServer {
 		hostServer.stop();
 		try {
 
-			// 优雅关闭任务执行器
-			ExecServer.getInst().shutDownGraceful();
-			LogHelper.GAME_LOGGER.info("【任务执行器】关闭..");
 
 			mainLogicServer.shutDownGraceful();
 			LogHelper.GAME_LOGGER.info("【业务线程】关闭..");

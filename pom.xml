@@ -37,8 +37,8 @@
         <module>civilization_uc</module>
         <module>civilization_recharge</module>
         <module>civilization_gate</module>
-        <module>civilization_war</module>
-        <module>civilization_robot</module>
+<!--        <module>civilization_war</module>-->
+<!--        <module>civilization_robot</module>-->
         <module>civilization_pb</module>
     </modules>
 

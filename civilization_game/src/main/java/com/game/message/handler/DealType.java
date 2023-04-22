@@ -7,8 +7,8 @@ public enum DealType {
 	},
 	SAVE_DATA(2, "SAVE_DATA") {
 	},
-	TIMER_LOGIC(3, "TIMER_LOGIC") {
-	},
+//	TIMER_LOGIC(3, "TIMER_LOGIC") {
+//	},
 	HTTP_LOG(4, "HTTP_LOG") {
 	},
 	;

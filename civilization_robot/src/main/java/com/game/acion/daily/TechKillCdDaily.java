@@ -3,7 +3,7 @@ package com.game.acion.daily;
 import com.game.domain.p.DailyMessage;
 
 /**
- * @Author 陈奎
+ *
  * @Description科技秒CD
  * @Date 2022/10/21 10:53
  **/

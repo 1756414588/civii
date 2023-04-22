@@ -6,7 +6,7 @@ import com.game.spring.SpringUtil;
 import com.game.timer.TimerEvent;
 
 /**
- * @Author 陈奎
+ *
  * @Description退出事件
  * @Date 2022/10/26 10:26
  **/

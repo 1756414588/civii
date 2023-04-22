@@ -16,7 +16,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
- * @Author 陈奎
+ *
  * @Description gate服连接游戏服的连接处理器
  * @Date 2022/9/9 11:30
  **/

@@ -7,7 +7,7 @@ import com.game.util.random.BaseBoxItem;
 import java.util.List;
 
 /**
- * @author 陈奎
+ *
  * @version 1.0
  * @filename
  * @time 2016-12-17 下午7:59:49

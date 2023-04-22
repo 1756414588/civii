@@ -10,7 +10,7 @@ import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author 陈奎
+ *
  * @Description聊天分享管理
  * @Date 2022/10/27 15:00
  **/

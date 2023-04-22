@@ -10,7 +10,7 @@ import com.game.pb.WorldPb.AttendCountryWarRq;
 import com.game.util.BasePbHelper;
 
 /**
- * @Author 陈奎
+ *
  * @Description 参加国战信息
  * @Date 2022/10/27 10:22
  **/

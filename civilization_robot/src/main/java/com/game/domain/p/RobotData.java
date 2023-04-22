@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @Author 陈奎
+ *
  * @Description机器人数据
  * @Date 2022/10/20 18:04
  **/

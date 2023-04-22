@@ -18,7 +18,7 @@ import java.util.Optional;
 /**
  * 日常训练 训练任意数量士兵 训练完士兵能领奖则通知客户端红点 领奖红点走通用ActRewardTipEvent事件
  *
- * @author 陈奎
+ *
  */
 @Component
 public class ActDailyTrainrsEvent extends BaseActivityEvent {

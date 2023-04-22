@@ -25,7 +25,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @author 陈奎
+ *
  */
 
 public class ActRecord implements Cloneable {

@@ -13,7 +13,7 @@ import com.game.util.TimeHelper;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author 陈奎
+ *
  * @Description 所有的登录请求已成功
  * @Date 2022/9/19 11:23
  **/

@@ -1,7 +1,7 @@
 package com.game.timer;
 
 /**
- * @Author 陈奎
+ *
  * @Description
  * @Date 2022/11/1 14:59
  **/

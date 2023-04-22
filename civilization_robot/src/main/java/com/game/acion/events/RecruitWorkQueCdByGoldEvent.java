@@ -10,7 +10,7 @@ import com.game.pb.SoldierPb.RecruitWorkQueCdRq;
 import com.game.util.BasePbHelper;
 
 /**
- * @Author 陈奎
+ *
  * @Description金币秒士兵招CD
  * @Date 2022/9/27 15:21
  **/

@@ -12,7 +12,7 @@ import com.game.pb.BuildingPb.UpBuildingRq;
 import com.game.util.BasePbHelper;
 
 /**
- * @Author 陈奎
+ *
  * @Description日常建筑升级
  * @Date 2022/10/21 10:53
  **/

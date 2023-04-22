@@ -7,7 +7,7 @@ import com.game.spring.SpringUtil;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * @Author 陈奎
+ *
  * @Description 母巢之战活动数据存储线程
  * @Date 2022/9/9 11:30
  **/

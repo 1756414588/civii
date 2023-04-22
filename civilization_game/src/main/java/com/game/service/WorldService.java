@@ -1,14 +1,44 @@
 package com.game.service;
 
-import com.game.domain.Award;
-import com.game.domain.MapDistance;
+import com.game.chat.domain.Chat;
+import com.game.chat.domain.SystemChat;
+import com.game.constant.*;
+import com.game.dataMgr.*;
+import com.game.domain.*;
+import com.game.domain.p.*;
+import com.game.domain.s.*;
+import com.game.flame.FlameMap;
+import com.game.flame.FlamePlayer;
+import com.game.flame.FlameWarManager;
 import com.game.log.LogUser;
-import com.game.server.exec.LoginExecutor;
+import com.game.log.constant.OilOperateType;
+import com.game.log.constant.ResOperateType;
+import com.game.log.consumer.EventManager;
+import com.game.log.domain.RoleResourceChangeLog;
+import com.game.log.domain.RoleResourceLog;
+import com.game.manager.*;
+import com.game.message.handler.ClientHandler;
+import com.game.message.handler.cs.*;
+import com.game.pb.CommonPb;
+import com.game.pb.CommonPb.ThreeInt;
+import com.game.pb.WorldPb;
+import com.game.pb.WorldPb.*;
+import com.game.server.GameServer;
 import com.game.spring.SpringUtil;
+import com.game.util.*;
+import com.game.worldmap.Resource;
+import com.game.worldmap.*;
 import com.game.worldmap.fight.IWar;
 import com.game.worldmap.fight.war.BigMonsterWarInfo;
 import com.game.worldmap.fight.war.CountryCityWarInfo;
 import com.game.worldmap.fight.war.ZergWarInfo;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,48 +47,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.game.chat.domain.Chat;
-import com.game.chat.domain.SystemChat;
-import com.game.constant.*;
-import com.game.dataMgr.*;
-import com.game.domain.Nation;
-import com.game.domain.Player;
-import com.game.domain.WorldData;
-import com.game.domain.p.*;
-import com.game.domain.s.*;
-import com.game.flame.FlameMap;
-import com.game.flame.FlamePlayer;
-import com.game.flame.FlameWarManager;
-import com.game.log.constant.OilOperateType;
-import com.game.log.constant.ResOperateType;
-import com.game.log.consumer.EventManager;
-import com.game.log.domain.RoleResourceChangeLog;
-import com.game.log.domain.RoleResourceLog;
-import com.game.manager.*;
-import com.game.message.handler.ClientHandler;
-import com.game.message.handler.cs.AttendRebelWarHandler;
-import com.game.message.handler.cs.FindNearMonsterHandler;
-import com.game.message.handler.cs.GetRebelWarHandler;
-import com.game.message.handler.cs.RebelFightHelpHandler;
-import com.game.message.handler.cs.RebelFightShareHandler;
-import com.game.message.handler.cs.*;
-import com.game.pb.CommonPb;
-import com.game.pb.CommonPb.ThreeInt;
-import com.game.pb.WorldPb;
-import com.game.pb.WorldPb.*;
-import com.game.server.GameServer;
-import com.game.util.*;
-import com.game.worldmap.*;
-import com.game.worldmap.Resource;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
 
 @Service
 public class WorldService {
@@ -451,14 +439,12 @@ public class WorldService {
         HashBasedTable<Integer, Integer, Map<Integer, Integer>> monsterFlushRate = staticWorldMgr.getMonsterFlushRate();
         // 刷怪上限
         int monsterNumRange = staticLimitMgr.getNum(SimpleId.WORLD_MONSTER_NUM);
-
-        SpringUtil.getBean(LoginExecutor.class).add(() -> {
-            List<Entity> list = new ArrayList<>();
-            playerManager.getOnlinePlayer().parallelStream().forEach(player -> {
-                flushPlayerMonster(player, cellNum, monsterFlushNum, monsterFlushRate, monsterNumRange, list);
-            });
-            worldManager.synEntityAddRq(list);
+        List<Entity> list = new ArrayList<>();
+        playerManager.getOnlinePlayer().parallelStream().forEach(player -> {
+            flushPlayerMonster(player, cellNum, monsterFlushNum, monsterFlushRate, monsterNumRange, list);
         });
+        worldManager.synEntityAddRq(list);
+
     }
 
     public void flushPlayerMonster(Player player, int cellNum, HashBasedTable<Integer, Integer, Map<Integer, Integer>> monsterFlushNum, HashBasedTable<Integer, Integer, Map<Integer, Integer>> monsterFlushRate, int monsterNumRange, List<Entity> list) {

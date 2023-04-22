@@ -4,7 +4,7 @@ import com.game.domain.s.ActShopItem;
 import com.game.pb.DataPb;
 
 /**
- * @author 陈奎
+ *
  * @version 1.0
  * @filename
  * @time 2017-3-8 上午10:40:16

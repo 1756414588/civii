@@ -14,7 +14,7 @@ import com.game.pb.BasePb.Base;
 import com.game.util.LogHelper;
 
 /**
- * @Author 陈奎
+ *
  * @Description 秒科研进度
  * @Date 2022/9/15 18:04
  **/

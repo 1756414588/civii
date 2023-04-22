@@ -10,7 +10,7 @@ import com.game.pb.WorldPb.GetBigMonsterWarRq;
 import com.game.util.BasePbHelper;
 
 /**
- * @Author 陈奎
+ *
  * @Description 拉取巨型虫族战斗数据
  * @Date 2022/10/27 10:22
  **/

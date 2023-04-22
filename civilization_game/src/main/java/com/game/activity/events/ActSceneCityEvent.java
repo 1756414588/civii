@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * 攻城掠地
  *
- * @author 陈奎
+ *
  */
 @Component
 public class ActSceneCityEvent extends BaseActivityEvent {

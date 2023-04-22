@@ -1,7 +1,7 @@
 package com.game.define;
 
 /**
- * @Author 陈奎
+ *
  * @Description 服务器节点类型
  * @Date 2022/9/9 11:30
  **/

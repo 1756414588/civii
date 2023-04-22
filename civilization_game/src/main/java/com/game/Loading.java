@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @Author 陈奎
+ *
  * @Description 加载数据类(注意该类只能放到game或更上层的包目录下, 否则会读不到加载数据)
  * @Date 2023/4/6 17:39
  **/

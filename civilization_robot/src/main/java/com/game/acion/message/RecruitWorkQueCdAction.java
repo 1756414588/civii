@@ -10,7 +10,7 @@ import com.game.pb.BasePb.Base;
 import com.game.util.LogHelper;
 
 /**
- * @Author 陈奎
+ *
  * @Description 秒招募CD
  * @Date 2022/9/15 18:04
  **/

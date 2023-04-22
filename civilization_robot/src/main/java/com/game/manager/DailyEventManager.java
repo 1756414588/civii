@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author 陈奎
+ *
  * @Description机器人日常行为攻打野怪据点刷地图
  * @Date 2022/10/20 20:24
  **/

@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * 世界征战
  *
- * @author 陈奎
+ *
  */
 @Component
 public class ActWorldBattleEvent extends BaseActivityEvent {

@@ -18,7 +18,7 @@ import java.util.Optional;
 /**
  * 剿灭虫族 因为领奖奖励和击杀虫族均在外部进行了活动状态更新，故此处肢解调用同一个方法
  *
- * @author 陈奎
+ *
  */
 @Component
 public class ActMonsterEvent extends BaseActivityEvent {

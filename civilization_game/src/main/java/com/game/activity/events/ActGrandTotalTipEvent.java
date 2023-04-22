@@ -18,7 +18,7 @@ import java.util.Optional;
 /**
  * 累积充值 本活动,月卡，特价礼包，限时礼包均计入充值额度
  *
- * @author 陈奎
+ *
  */
 @Component
 public class ActGrandTotalTipEvent extends BaseActivityEvent {

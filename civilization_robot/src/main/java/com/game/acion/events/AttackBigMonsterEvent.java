@@ -12,7 +12,7 @@ import com.game.pb.WorldPb.AttendCountryWarRq;
 import com.game.util.BasePbHelper;
 
 /**
- * @Author 陈奎
+ *
  * @Description 攻打巨型虫族
  * @Date 2022/10/27 10:22
  **/

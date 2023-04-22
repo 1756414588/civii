@@ -50,13 +50,35 @@ public class BattleManager extends BaseManager {
 
 	@Override
 	public void load() throws Exception{
-		Package pack = FightProcess.class.getPackage();
-		Set<Class<?>> allClasses = ClassUtil.getClasses(pack);
+//		Package pack = FightProcess.class.getPackage();
+//		Set<Class<?>> allClasses = ClassUtil.getClasses(pack);
+//
+//		for (Class<?> clazz : allClasses) {
+//			Fight fight = clazz.getAnnotation(Fight.class);
+//			if (fight != null) {
+//				IFightProcess process = (IFightProcess) SpringUtil.getBean(clazz);
+//				process.init(fight.warType(), fight.marthes());
+//				for (int warType : fight.warType()) {
+//					fightProcessHashMap.put(warType, process);
+//				}
+//				for (int marchType : fight.marthes()) {
+//					marchProcessHashMap.put(marchType, process);
+//				}
+//				// 处理器列表
+//				fightProcessList.add(process);
+//			}
+//
+//			WorldActCmd actCmd = clazz.getAnnotation(WorldActCmd.class);
+//			if (actCmd != null) {
+//				IFightProcess process = (IFightProcess) SpringUtil.getBean(clazz);
+//				worldActPlanHashMap.put(actCmd.actId(), process);
+//			}
+//		}
 
-		for (Class<?> clazz : allClasses) {
-			Fight fight = clazz.getAnnotation(Fight.class);
+		Map<String, IFightProcess> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(IFightProcess.class);
+		beansOfType.values().forEach(process->{
+			Fight fight = process.getClass().getAnnotation(Fight.class);
 			if (fight != null) {
-				IFightProcess process = (IFightProcess) SpringUtil.getBean(clazz);
 				process.init(fight.warType(), fight.marthes());
 				for (int warType : fight.warType()) {
 					fightProcessHashMap.put(warType, process);
@@ -67,13 +89,11 @@ public class BattleManager extends BaseManager {
 				// 处理器列表
 				fightProcessList.add(process);
 			}
-
-			WorldActCmd actCmd = clazz.getAnnotation(WorldActCmd.class);
+			WorldActCmd actCmd = process.getClass().getAnnotation(WorldActCmd.class);
 			if (actCmd != null) {
-				IFightProcess process = (IFightProcess) SpringUtil.getBean(clazz);
 				worldActPlanHashMap.put(actCmd.actId(), process);
 			}
-		}
+		});
 	}
 
 	@Override

@@ -8,7 +8,7 @@ import com.game.service.GmToolService;
 
 /**
  * @filename 	
- * @author 陈奎
+ *
  * @version 1.0
  * @time 2017-3-15 下午3:42:42
  * @describe 

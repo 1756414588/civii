@@ -54,7 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @author 陈奎
+ *
  * @version 创建时间：2021-12-20 下午17:36:23
  * @Desc 【沙盘演武】管理类
  */
