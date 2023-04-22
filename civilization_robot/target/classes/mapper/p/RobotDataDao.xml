@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.RobotDataDao">
+
+  <select id="load" resultType="com.game.domain.p.RobotData">
+        select * from p_robot_data
+  </select>
+
+  <insert id="insert" parameterType="com.game.domain.p.RobotData" useGeneratedKeys="true" keyProperty="keyId">
+        insert into p_robot_data(accountKey,account,`token`,serverId,guildId,loginDate,createDate) values(#{accountKey},#{account},#{token},#{serverId},#{guildId},#{loginDate},#{createDate})
+    </insert>
+
+  <update id="update" parameterType="com.game.domain.p.RobotData">
+       update p_robot_data set
+       `token` = #{token},
+        commandLv = #{commandLv},
+        country = #{country},
+        pos = #{pos},
+        dailyDate = #{dailyDate},
+        messageId = #{messageId},
+        `status` = #{status},
+         guildId = #{guildId},
+        `guildState` = #{guildState},
+        `online` = #{online},
+        chatShow = #{chatShow},
+        attackCity = #{attackCity},
+        loginDate = #{loginDate},
+        logoutDate = #{logoutDate},
+        nick = #{nick},
+        roleId = #{roleId}
+       where keyId = #{keyId}
+    </update>
+
+</mapper>
