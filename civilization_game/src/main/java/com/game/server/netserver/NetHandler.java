@@ -10,10 +10,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
-/**
- * @Description 内部连接句柄
- * @Date 2022/9/9 11:30
- **/
 
 public class NetHandler extends SimpleChannelInboundHandler<Packet> implements IPacketHandler {
 
@@ -74,7 +70,6 @@ public class NetHandler extends SimpleChannelInboundHandler<Packet> implements I
             //}
             String className = handler.getClass().getSimpleName();
             LogHelper.GAME_LOGGER.info("timeCost {} playerId:{} cmd:{} haust:{}", className, handler.getRoleId(), packet.getCmd(), timeCost);
-
         } catch (Exception e) {
             LogHelper.ERROR_LOGGER.error("MessageWork doHandler error channelId:{} cmd{} cause:{}", ChannelUtil.getRoleId(ctx), cmd, e.getMessage(), e);
         }

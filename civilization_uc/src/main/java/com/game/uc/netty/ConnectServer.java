@@ -141,6 +141,7 @@ class HeartbeatHandler extends ChannelInboundHandlerAdapter {
     }
 }
 
+@ChannelHandler.Sharable
 class MessageHandler extends SimpleChannelInboundHandler<Base> {
 
     private ConnectServer server;
@@ -159,7 +160,6 @@ class MessageHandler extends SimpleChannelInboundHandler<Base> {
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Base msg) throws Exception {
-        // TODO Auto-generated method stub
         server.doCommand(ctx, msg);
     }
 

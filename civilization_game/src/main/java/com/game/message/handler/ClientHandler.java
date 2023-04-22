@@ -10,6 +10,8 @@ import com.game.server.netserver.MessageFilter;
 import com.game.util.LogHelper;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.InvalidProtocolBufferException;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 
 
@@ -65,7 +67,7 @@ abstract public class ClientHandler extends Handler {
 
     public void sendMsgToPlayer(Base.Builder builder) {
         Packet packet = PacketCreator.create(builder.build(), getRoleId(), getChannelId(), getPacket().getSeq(), getPacket().getCmd());
-        getCtx().writeAndFlush(packet);
+        ChannelFuture channelFuture = getCtx().writeAndFlush(packet);
         if (!MessageFilter.isFilterPrint(packet.getCmd())) {
             LogHelper.CHANNEL_LOGGER.info("sendToClient channelId:{} playerId:{} cmd:{}", packet.getChannelId(), packet.getRoleId(), packet.getCmd());
         }
