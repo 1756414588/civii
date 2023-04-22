@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.uc.UServerInfoDao">
+
+  <update id="insertPlayerExist" parameterType="PlayerExist" useGeneratedKeys="true" keyProperty="id">
+        insert into u_serverinfos(accountKey,serverId,country,nick,level,portrait,lordId,createDate)
+        values(#{accountKey},#{serverId},#{country},#{nick},#{level},#{portrait},#{lordId},#{createDate});
+    </update>
+
+  <resultMap id="PlayerExistMap" type="com.game.pay.channel.PlayerExist"></resultMap>
+  <select id="findPlayerExist" parameterType="int" resultMap="PlayerExistMap">
+        select * from u_serverinfos where serverId =#{serverId};
+    </select>
+
+  <select id="findAllPlayerExist" resultMap="PlayerExistMap">
+        select * from u_serverinfos;
+    </select>
+
+  <update id="updatePlayerExist" parameterType="PlayerExist">
+        update u_serverinfos set nick=#{nick},level=#{level},portrait=#{portrait},country=#{country},lordId=#{lordId} where id =#{id};
+    </update>
+
+  <select id="load" resultMap="PlayerExistMap">
+    <foreach collection="parMap" item="ent" index="key" separator="union">
+      select * from u_serverinfos where serverId =#{key} and accountKey in
+      <foreach collection="ent" item="accountKey" separator="," open="(" close=")">
+        #{accountKey}
+      </foreach>
+    </foreach>
+  </select>
+
+  <select id="loadOne" parameterType="Map" resultMap="PlayerExistMap">
+        select * from u_serverinfos where accountKey = #{accountKey} and serverId  =#{serverId};
+    </select>
+</mapper>

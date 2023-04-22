@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.DetailDao">
+
+    <select id="selectDetail" parameterType="Long" resultType="com.game.domain.p.Detail">
+		select * from p_detail where lordId=#{lordId}
+	</select>
+
+    <update id="insertDetail" parameterType="com.game.domain.p.Detail">
+		insert into p_detail(
+			   lordId,
+			   maxKey,
+			   roleData,
+			   mail,
+			   embattleData,
+			   missionData,
+			   buildingData,
+			   resourceData,
+			   employData,
+			   advanceHero,
+			   taskData,
+			   primaryCollectData,
+			   marchData,
+			   lostResData,
+			   activityData,
+			   simpleData,
+			   nationData,
+			   defenseArmyData,
+			   meetingTaskData,
+			   miningData,
+			   worldPersonalGoal,
+			   resPacketData,
+			   sweepHeroData,
+			   effectData,
+			   beautyData,
+			   tdData,
+			   recordData,
+			   worldBox,
+			   personalSignature,
+			   frame,
+			   personChat,
+			   dailyTask,
+			   weekCard,
+			   broodInfo,
+			   buildFortress,
+			   endlessTDInfo
+		) values (
+			#{lordId},
+			#{maxKey},
+			#{roleData},
+			#{mail},
+			#{embattleData},
+			#{missionData},
+			#{buildingData},
+			#{resourceData},
+			#{employData},
+			#{advanceHero},
+			#{taskData},
+			#{primaryCollectData},
+			#{marchData},
+			#{lostResData},
+			#{activityData},
+			#{simpleData},
+			#{nationData},
+			#{defenseArmyData},
+			#{meetingTaskData},
+			#{miningData},
+			#{worldPersonalGoal},
+			#{resPacketData},
+			#{sweepHeroData},
+			#{effectData},
+			#{beautyData},
+			#{tdData},
+			#{recordData},
+			#{worldBox},
+			#{personalSignature},
+			#{frame},
+			#{personChat},
+			#{dailyTask},
+			#{weekCard},
+			#{broodInfo},
+			#{buildFortress},
+			#{endlessTDInfo}
+		)
+	</update>
+
+    <update id="updateDetail" parameterType="com.game.domain.p.Detail">
+		update p_detail
+		set roleData = #{roleData}
+			, mail = #{mail}
+			, maxKey = #{maxKey}
+			, embattleData = #{embattleData}
+			, missionData = #{missionData}
+			, buildingData = #{buildingData}
+			, resourceData = #{resourceData}
+			, employData = #{employData}
+			, advanceHero = #{advanceHero}
+			, taskData = #{taskData}
+			, marchData = #{marchData}
+			, lostResData = #{lostResData}
+			, activityData = #{activityData}
+			, simpleData = #{simpleData}
+			, nationData = #{nationData}
+			, miningData =#{miningData}
+			, defenseArmyData =#{defenseArmyData}
+			, meetingTaskData =#{meetingTaskData}
+			, worldPersonalGoal=#{worldPersonalGoal}
+			, resPacketData =#{resPacketData}
+			, sweepHeroData = #{sweepHeroData}
+			, effectData = #{effectData}
+			, beautyData = #{beautyData}
+			, tdData = #{tdData}
+			, recordData= #{recordData}
+			, worldBox = #{worldBox}
+			, frame=#{frame}
+			, personalSignature = #{personalSignature}
+			, personChat = #{personChat}
+			, dailyTask = #{dailyTask}
+			, weekCard = #{weekCard}
+			,broodInfo=	#{broodInfo}
+			,buildFortress=#{buildFortress}
+			,endlessTDInfo=#{endlessTDInfo}
+          		, fishingData=#{fishingData}
+		where lordId = #{lordId}
+	</update>
+
+    <select id="loadDetail" parameterType="Map" resultType="com.game.domain.p.Detail">
+		select * from p_detail where lordId &gt; #{curIndex} order by lordId limit 0, #{count}
+	</select>
+
+</mapper>

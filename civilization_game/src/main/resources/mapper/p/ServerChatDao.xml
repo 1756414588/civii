@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.game.dao.p.ServerChatDao">
+  <resultMap id="BaseResultMap" type="com.game.domain.p.Chat">
+    <result column="style" jdbcType="INTEGER" property="style" />
+    <result column="lordId" jdbcType="BIGINT" property="lordId" />
+    <result column="country" jdbcType="INTEGER" property="country" />
+    <result column="title" jdbcType="INTEGER" property="title" />
+    <result column="level" jdbcType="INTEGER" property="level" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="portrait" jdbcType="INTEGER" property="portrait" />
+    <result column="x" jdbcType="INTEGER" property="x" />
+    <result column="y" jdbcType="INTEGER" property="y" />
+    <result column="msg" jdbcType="VARCHAR" property="msg" />
+    <result column="time" jdbcType="BIGINT" property="time" />
+    <result column="chatId" jdbcType="INTEGER" property="chatId" />
+    <result column="param" jdbcType="VARCHAR" property="param" />
+    <result column="mailKeyId" jdbcType="INTEGER" property="mailKeyId" />
+    <result column="gm" jdbcType="INTEGER" property="gm" />
+    <result column="guider" jdbcType="INTEGER" property="guider" />
+    <result column="officerId" jdbcType="INTEGER" property="officerId" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+  </resultMap>
+  <insert id="insertSelective" parameterType="com.game.domain.p.Chat">
+    insert into s_chat
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="style != null">
+        style,
+      </if>
+      <if test="lordId != null">
+        lordId,
+      </if>
+      <if test="country != null">
+        country,
+      </if>
+      <if test="title != null">
+        title,
+      </if>
+      <if test="level != null">
+        level,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="portrait != null">
+        portrait,
+      </if>
+      <if test="x != null">
+        x,
+      </if>
+      <if test="y != null">
+        y,
+      </if>
+      <if test="msg != null">
+        msg,
+      </if>
+      <if test="time != null">
+        time,
+      </if>
+      <if test="chatId != null">
+        chatId,
+      </if>
+      <if test="param != null">
+        param,
+      </if>
+      <if test="mailKeyId != null">
+        mailKeyId,
+      </if>
+      <if test="gm != null">
+        gm,
+      </if>
+      <if test="guider != null">
+        guider,
+      </if>
+      <if test="officerId != null">
+        officerId,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="chatType != null">
+        chatType,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="style != null">
+        #{style,jdbcType=INTEGER},
+      </if>
+      <if test="lordId != null">
+        #{lordId,jdbcType=BIGINT},
+      </if>
+      <if test="country != null">
+        #{country,jdbcType=INTEGER},
+      </if>
+      <if test="title != null">
+        #{title,jdbcType=INTEGER},
+      </if>
+      <if test="level != null">
+        #{level,jdbcType=INTEGER},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="portrait != null">
+        #{portrait,jdbcType=INTEGER},
+      </if>
+      <if test="x != null">
+        #{x,jdbcType=INTEGER},
+      </if>
+      <if test="y != null">
+        #{y,jdbcType=INTEGER},
+      </if>
+      <if test="msg != null">
+        #{msg,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null">
+        #{time,jdbcType=BIGINT},
+      </if>
+      <if test="chatId != null">
+        #{chatId,jdbcType=INTEGER},
+      </if>
+      <if test="param != null">
+        #{param,jdbcType=VARCHAR},
+      </if>
+      <if test="mailKeyId != null">
+        #{mailKeyId,jdbcType=INTEGER},
+      </if>
+      <if test="gm != null">
+        #{gm,jdbcType=INTEGER},
+      </if>
+      <if test="guider != null">
+        #{guider,jdbcType=INTEGER},
+      </if>
+      <if test="officerId != null">
+        #{officerId,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=INTEGER},
+      </if><if test="chatType != null">
+        #{chatType,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  
+  <delete id= "cleanChat">
+  	TRUNCATE TABLE s_chat;
+  </delete>
+
+  <select id="selectAllServerChats" resultMap="BaseResultMap">
+    select * from s_chat
+  </select>
+</mapper>

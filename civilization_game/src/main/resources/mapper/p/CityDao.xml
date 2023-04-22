@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.CityDao">
+
+	<select id="selectCity" parameterType="Integer" resultType="com.game.domain.p.City">
+		select * from p_city where cityId = #{cityId}
+	</select>
+
+	<insert id="insertCity" parameterType="com.game.domain.p.City">
+		insert into p_city(cityId
+			, country
+			, lordId
+			, endTime
+			, protectedTime
+			, isDestroyed
+			, lastSaveTime
+			, electionData
+			, electionEndTime
+		) values (#{cityId}
+			, #{country}
+			, #{lordId}
+			, #{endTime}
+			, #{protectedTime}
+			, #{isDestroyed}
+			, #{lastSaveTime}
+			, #{electionData}
+			, #{electionEndTime}
+		)
+	</insert>
+
+	<update id="updateCity" parameterType="com.game.domain.p.City">
+        update p_city 
+        set country = #{country}
+        	, lordId = #{lordId}
+        	, endTime = #{endTime}
+        	, protectedTime = #{protectedTime}
+        	, isDestroyed = #{isDestroyed}
+        	, lastSaveTime = #{lastSaveTime}
+        	, electionData = #{electionData}
+        	, electionEndTime = #{electionEndTime}
+        	, monsterData = #{monsterData}
+        	, sendAwardTime = #{sendAwardTime}
+        	, cityLv = #{cityLv}
+        	, makeItemTime = #{makeItemTime}
+        	, awardNum = #{awardNum}
+        	, warAttender = #{warAttender}
+        	, people = #{people}
+        	, nextAttackTime = #{nextAttackTime}
+        	, state = #{state}
+        	, breakTime = #{breakTime}
+        	, cityTime = #{cityTime}
+        	, flush = #{flush}
+        	, exp = #{exp}
+        	, cityName = #{cityName}
+        where cityId = #{cityId}
+	</update>
+
+    <select id="selectCityList" resultType="com.game.domain.p.City">
+        select * from p_city
+    </select>
+
+
+</mapper>

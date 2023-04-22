@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.PDataDao">
+
+
+  <select id="loadAllItem" parameterType="Map" resultType="com.game.domain.p.Item">
+    select * from p_item where lordId=#{lordId}
+  </select>
+
+  <update id="replaceItem" parameterType="com.game.domain.p.Item">
+    replace into p_item values (#{lordId},#{itemId},#{itemNum});
+  </update>
+
+  <update id="replaceBroodWar" parameterType="com.game.domain.p.BroodWarData">
+    replace into p_brood_war values (
+    #{cityId},
+    #{attackQueue},
+    #{defenceQueue},
+    #{state},
+    #{nextAttackTime},
+    #{endTime},
+    #{defenceCountry},
+    #{openBuyBuffTime},
+    #{reports},
+    #{rank},
+    #{lastCountry},
+    #{dictator},
+    #{occupyTime},
+    #{occupyPercentage}
+    );
+  </update>
+
+  <select id="loadBroodWar" parameterType="Map" resultType="com.game.domain.p.BroodWarData">
+    select * from p_brood_war
+  </select>
+
+  <insert id="insertBroodWarHof" parameterType="com.game.domain.p.BroodWarHofData">
+    insert into p_brood_war_hof(rank,lordId,time)values(
+    #{rank},#{lordId},#{time}
+    );
+  </insert>
+
+
+  <select id="loadBroodWarHof" parameterType="Map" resultType="com.game.domain.p.BroodWarHofData">
+    select * from p_brood_war_hof order by rank desc
+  </select>
+
+  <update id="cleanReport">
+    TRUNCATE p_brood_war_report;
+  </update>
+
+  <insert id="saveReport" parameterType="com.game.domain.p.BroodWarReportData">
+    insert into p_brood_war_report(report)value(#{report});
+  </insert>
+
+  <select id="loadReport" parameterType="Map" resultType="com.game.domain.p.BroodWarReportData">
+    select * from p_brood_war_report order by id asc;
+  </select>
+
+  <select id="loadPostion" parameterType="Map" resultType="com.game.domain.p.BroodWarPosition">
+    select * from p_brood_war_position;
+  </select>
+
+  <insert id="replacePostion" parameterType="com.game.domain.p.BroodWarPosition">
+    replace into p_brood_war_position(position,lordId,rank)values(#{position},#{lordId},#{rank});
+  </insert>
+</mapper>

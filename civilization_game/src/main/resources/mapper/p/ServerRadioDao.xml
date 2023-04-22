@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.game.dao.p.ServerRadioDao">
+  <resultMap id="BaseResultMap" type="com.game.servlet.domain.ServerRadio">
+    <id column="key_id" jdbcType="BIGINT" property="keyId" />
+    <result column="language" jdbcType="INTEGER" property="language" />
+    <result column="message" jdbcType="VARCHAR" property="message" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="channel" jdbcType="VARCHAR" property="channel" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="frequency" jdbcType="INTEGER" property="frequency" />
+    <result column="remove" jdbcType="INTEGER" property="remove" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="delete_time" jdbcType="TIMESTAMP" property="deleteTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    key_id, language, message, start_time, end_time, channel, status, frequency, remove, 
+    create_time, update_time, delete_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from p_server_radio
+    where key_id = #{keyId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from p_server_radio
+    where key_id = #{keyId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.game.servlet.domain.ServerRadio">
+    insert into p_server_radio (key_id, language, message, 
+      start_time, end_time, channel, 
+      status, frequency, remove, 
+      create_time, update_time, delete_time
+      )
+    values (#{keyId,jdbcType=BIGINT}, #{language,jdbcType=INTEGER}, #{message,jdbcType=VARCHAR}, 
+      #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{channel},
+      #{status,jdbcType=INTEGER}, #{frequency,jdbcType=INTEGER}, #{remove,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{deleteTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.game.servlet.domain.ServerRadio" useGeneratedKeys="true" keyProperty="keyId">
+    insert into p_server_radio
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="keyId != null">
+        key_id,
+      </if>
+      <if test="language != null">
+        language,
+      </if>
+      <if test="message != null">
+        message,
+      </if>
+      <if test="startTime != null">
+        start_time,
+      </if>
+      <if test="endTime != null">
+        end_time,
+      </if>
+      <if test="channel != null">
+        channel,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="frequency != null">
+        frequency,
+      </if>
+      <if test="remove != null">
+        remove,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="deleteTime != null">
+        delete_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="keyId != null">
+        #{keyId,jdbcType=BIGINT},
+      </if>
+      <if test="language != null">
+        #{language,jdbcType=INTEGER},
+      </if>
+      <if test="message != null">
+        #{message,jdbcType=VARCHAR},
+      </if>
+      <if test="startTime != null">
+        #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="channel != null">
+        #{channel},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="frequency != null">
+        #{frequency,jdbcType=INTEGER},
+      </if>
+      <if test="remove != null">
+        #{remove,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deleteTime != null">
+        #{deleteTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.game.servlet.domain.ServerRadio">
+    update p_server_radio
+    <set>
+      <if test="language != null">
+        language = #{language,jdbcType=INTEGER},
+      </if>
+      <if test="message != null">
+        message = #{message,jdbcType=VARCHAR},
+      </if>
+      <if test="startTime != null">
+        start_time = #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="channel != null">
+        channel = #{channel},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="frequency != null">
+        frequency = #{frequency,jdbcType=INTEGER},
+      </if>
+      <if test="remove != null">
+        remove = #{remove,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deleteTime != null">
+        delete_time = #{deleteTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where key_id = #{keyId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.game.servlet.domain.ServerRadio">
+    update p_server_radio
+    set language = #{language,jdbcType=INTEGER},
+      message = #{message,jdbcType=VARCHAR},
+      start_time = #{startTime,jdbcType=TIMESTAMP},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      channel = #{channel},
+      status = #{status,jdbcType=INTEGER},
+      frequency = #{frequency,jdbcType=INTEGER},
+      remove = #{remove,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      delete_time = #{deleteTime,jdbcType=TIMESTAMP}
+    where key_id = #{keyId,jdbcType=BIGINT}
+  </update>
+  
+  <select id="selectAllServerRadio" resultMap="BaseResultMap">
+		select * from p_server_radio where status != 3
+	</select>
+</mapper>

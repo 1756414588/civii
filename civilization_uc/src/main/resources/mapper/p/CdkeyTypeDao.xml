@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.game.uc.dao.ifs.p.CdkeyTypeDao">
+  <resultMap id="BaseResultMap" type="com.game.uc.CdkeyType">
+    <id column="autoid" jdbcType="INTEGER" property="autoid" />
+    <result column="type" jdbcType="CHAR" property="type" />
+    <result column="name" jdbcType="CHAR" property="name" />
+    <result column="giftbagid" jdbcType="INTEGER" property="giftbagid" />
+    <result column="channel" jdbcType="INTEGER" property="channel" />
+    <result column="universal" jdbcType="INTEGER" property="universal" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    autoid, type, name, giftbagid, channel, universal
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from cdkey_type
+    where autoid = #{autoid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from cdkey_type
+    where autoid = #{autoid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.game.uc.CdkeyType">
+    insert into cdkey_type (autoid, type, name, 
+      giftbagid, channel, universal
+      )
+    values (#{autoid,jdbcType=INTEGER}, #{type,jdbcType=CHAR}, #{name,jdbcType=CHAR}, 
+      #{giftbagid,jdbcType=INTEGER}, #{channel,jdbcType=INTEGER}, #{universal,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.game.uc.CdkeyType">
+    insert into cdkey_type
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="autoid != null">
+        autoid,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="giftbagid != null">
+        giftbagid,
+      </if>
+      <if test="channel != null">
+        channel,
+      </if>
+      <if test="universal != null">
+        universal,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="autoid != null">
+        #{autoid,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=CHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=CHAR},
+      </if>
+      <if test="giftbagid != null">
+        #{giftbagid,jdbcType=INTEGER},
+      </if>
+      <if test="channel != null">
+        #{channel,jdbcType=INTEGER},
+      </if>
+      <if test="universal != null">
+        #{universal,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.game.uc.CdkeyType">
+    update cdkey_type
+    <set>
+      <if test="type != null">
+        type = #{type,jdbcType=CHAR},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=CHAR},
+      </if>
+      <if test="giftbagid != null">
+        giftbagid = #{giftbagid,jdbcType=INTEGER},
+      </if>
+      <if test="channel != null">
+        channel = #{channel,jdbcType=INTEGER},
+      </if>
+      <if test="universal != null">
+        universal = #{universal,jdbcType=INTEGER},
+      </if>
+    </set>
+    where autoid = #{autoid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.game.uc.CdkeyType">
+    update cdkey_type
+    set type = #{type,jdbcType=CHAR},
+      name = #{name,jdbcType=CHAR},
+      giftbagid = #{giftbagid,jdbcType=INTEGER},
+      channel = #{channel,jdbcType=INTEGER},
+      universal = #{universal,jdbcType=INTEGER}
+    where autoid = #{autoid,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectAll"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from cdkey_type
+  </select>
+</mapper>

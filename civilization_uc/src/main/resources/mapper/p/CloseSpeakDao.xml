@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.game.uc.dao.ifs.p.CloseSpeakDao">
+  <resultMap id="BaseResultMap" type="com.game.uc.CloseSpeak">
+    <id column="roleId" jdbcType="BIGINT" property="roleid" />
+    <result column="server_id" jdbcType="INTEGER" property="serverId" />
+    <result column="account_key" jdbcType="INTEGER" property="accountKey" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="close_desc" jdbcType="VARCHAR" property="closeDesc" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    roleId, server_id, account_key, end_time, close_desc
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from u_close_speak
+    where roleId = #{roleid,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from u_close_speak
+    where roleId = #{roleid,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.game.uc.CloseSpeak">
+    insert into u_close_speak (roleId, server_id, account_key,
+      end_time, close_desc)
+    values (#{roleid,jdbcType=BIGINT}, #{serverId,jdbcType=INTEGER}, #{accountKey,jdbcType=INTEGER},
+      #{endTime,jdbcType=TIMESTAMP}, #{closeDesc,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.game.uc.CloseSpeak">
+    insert into u_close_speak
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="roleid != null">
+        roleId,
+      </if>
+      <if test="serverId != null">
+        server_id,
+      </if>
+      <if test="accountKey != null">
+        account_key,
+      </if>
+      <if test="endTime != null">
+        end_time,
+      </if>
+      <if test="closeDesc != null">
+        close_desc,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="roleid != null">
+        #{roleid,jdbcType=BIGINT},
+      </if>
+      <if test="serverId != null">
+        #{serverId,jdbcType=INTEGER},
+      </if>
+      <if test="accountKey != null">
+        #{accountKey,jdbcType=INTEGER},
+      </if>
+      <if test="endTime != null">
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="closeDesc != null">
+        #{closeDesc,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.game.uc.CloseSpeak">
+    update u_close_speak
+    <set>
+      <if test="serverId != null">
+        server_id = #{serverId,jdbcType=INTEGER},
+      </if>
+      <if test="accountKey != null">
+        account_key = #{accountKey,jdbcType=INTEGER},
+      </if>
+      <if test="endTime != null">
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="closeDesc != null">
+        close_desc = #{closeDesc,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where roleId = #{roleid,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.game.uc.CloseSpeak">
+    update u_close_speak
+    set server_id = #{serverId,jdbcType=INTEGER},
+      account_key = #{accountKey,jdbcType=INTEGER},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      close_desc = #{closeDesc,jdbcType=VARCHAR}
+    where roleId = #{roleid,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectAll"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from u_close_speak
+  </select>
+</mapper>

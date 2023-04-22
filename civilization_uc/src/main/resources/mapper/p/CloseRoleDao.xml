@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.game.uc.dao.ifs.p.CloseRoleDao">
+  <resultMap id="BaseResultMap" type="com.game.uc.CloseRole">
+    <id column="roleId" jdbcType="BIGINT" property="roleid" />
+    <id column="server_id" jdbcType="INTEGER" property="serverId" />
+    <result column="account_key" jdbcType="INTEGER" property="accountKey" />
+    <result column="endTime" jdbcType="TIMESTAMP" property="endtime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    roleId, server_id, account_key, endTime
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="com.game.uc.CloseRoleKey" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from u_close_role
+    where roleId = #{roleid,jdbcType=BIGINT}
+      and server_id = #{serverId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.game.uc.CloseRoleKey">
+    delete from u_close_role
+    where roleId = #{roleid,jdbcType=BIGINT}
+      and server_id = #{serverId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.game.uc.CloseRole">
+    insert into u_close_role (roleId, server_id, account_key, 
+      endTime)
+    values (#{roleid,jdbcType=BIGINT}, #{serverId,jdbcType=INTEGER}, #{accountKey,jdbcType=INTEGER}, 
+      #{endtime,jdbcType=TIMESTAMP}
+  </insert>
+  <insert id="insertSelective" parameterType="com.game.uc.CloseRole">
+    insert into u_close_role
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="roleid != null">
+        roleId,
+      </if>
+      <if test="serverId != null">
+        server_id,
+      </if>
+      <if test="accountKey != null">
+        account_key,
+      </if>
+      <if test="endtime != null">
+        endTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="roleid != null">
+        #{roleid,jdbcType=BIGINT},
+      </if>
+      <if test="serverId != null">
+        #{serverId,jdbcType=INTEGER},
+      </if>
+      <if test="accountKey != null">
+        #{accountKey,jdbcType=INTEGER},
+      </if>
+      <if test="endtime != null">
+        #{endtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.game.uc.CloseRole">
+    update u_close_role
+    <set>
+      <if test="accountKey != null">
+        account_key = #{accountKey,jdbcType=INTEGER},
+      </if>
+      <if test="endtime != null">
+        endTime = #{endtime,jdbcType=TIMESTAMP},
+      </if>
+
+    </set>
+    where roleId = #{roleid,jdbcType=BIGINT}
+      and server_id = #{serverId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.game.uc.CloseRole">
+    update u_close_role
+    set account_key = #{accountKey,jdbcType=INTEGER},
+      endTime = #{endtime,jdbcType=TIMESTAMP}
+    where roleId = #{roleid,jdbcType=BIGINT}
+      and server_id = #{serverId,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectAll"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from u_close_role
+  </select>
+</mapper>

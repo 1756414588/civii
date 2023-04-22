@@ -1,0 +1,2256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.s.StaticDataDao">
+
+    <resultMap id="lordMap" type="com.game.domain.s.StaticIniLord">
+        <id column="keyId" property="keyId"/>
+        <result column="tanks" property="tanks"
+                typeHandler="com.game.handle.MapIntTypeHandler"/>
+        <result column="props" property="props"
+                typeHandler="com.game.handle.MapIntTypeHandler"/>
+        <result column="equips" property="equips"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="heros" property="heros"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="openBuildings" property="openBuildings"
+                typeHandler="com.game.handle.MapIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectLord" resultMap="lordMap">
+        select * from s_ini_lord
+    </select>
+
+    <resultMap id="lordLvMap" type="com.game.domain.s.StaticLordLv">
+        <result column="awards" property="awards"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectLordLv" resultMap="lordLvMap">
+        select * from s_lord_lv
+    </select>
+
+    <!--<select id="selectStaticLost" resultType="StaticLost">-->
+    <!--select * from s_lost-->
+    <!--</select>-->
+
+    <resultMap id="propMap" type="com.game.domain.s.StaticProp">
+        <id column="propId" property="propId"/>
+        <result column="effectValue" property="effectValue"
+                typeHandler="com.game.handle.ListListLongTypeHandler"/>
+    </resultMap>
+
+    <select id="selectProp" resultMap="propMap">
+        select * from s_prop
+    </select>
+
+    <resultMap id="awardsMap" type="com.game.domain.s.StaticAwards">
+        <id column="awardId" property="awardId"/>
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectAwardsMap" resultMap="awardsMap">
+		select * from s_awards
+	</select>
+
+    <resultMap id="heroMap" type="com.game.domain.s.StaticHero">
+        <result column="heroChip" property="heroChip"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectHeroMap" resultMap="heroMap">
+		select * from s_hero
+	</select>
+
+
+    <select id="selectHeroExpList" resultType="com.game.domain.s.StaticHeroLv">
+		select * from s_hero_lv
+	</select>
+
+    <resultMap id="mailMap" type="com.game.domain.s.StaticMail">
+        <result column="shareIndex" property="shareIndex"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="titleIndex" property="titleIndex"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectMail" resultMap="mailMap">
+		select * from s_mail
+	</select>
+
+    <resultMap id="vipMap" type="com.game.domain.s.StaticVip">
+        <result column="giftList" property="giftList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="appointmentPrice" property="appointmentPrice"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="gamePrice" property="gamePrice"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="specialGift" property="specialGift"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectVip" resultMap="vipMap">
+		select * from s_vip order by
+		vip
+	</select>
+
+    <select id="selectPay" resultType="com.game.domain.s.StaticPay">
+		select * from s_pay order by
+		payId
+	</select>
+
+    <select id="selectPayPoint" resultType="com.game.domain.s.StaticPayPoint">
+		select * from s_pay_point
+	</select>
+
+    <select id="selectMailPlat" resultType="com.game.domain.s.StaticMailPlat">
+		SELECT * FROM s_mail_plat
+	</select>
+
+    <select id="selectHeroPropList" resultType="com.game.domain.s.StaticHeroProp">
+		select * from s_hero_prop
+	</select>
+
+
+    <resultMap id="equipMap" type="com.game.domain.s.StaticEquip">
+        <result column="skillId" property="skillId"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="compose" property="compose"
+                typeHandler="com.game.handle.ListListLongTypeHandler"/>
+        <result column="decompose" property="decompose"
+                typeHandler="com.game.handle.ListListLongTypeHandler"/>
+    </resultMap>
+
+    <select id="selectEquipMap" resultMap="equipMap">
+		select * from s_equip
+	</select>
+
+    <resultMap id="skillMap" type="com.game.domain.s.StaticSkill">
+
+    </resultMap>
+
+    <select id="selectSkillMap" resultMap="skillMap">
+		select * from s_skill
+	</select>
+
+
+    <resultMap id="StaticLimit" type="com.game.domain.s.StaticLimit">
+        <result column="maxHeroLevel" property="maxHeroLevel"/>
+        <result column="maxEquipSlot" property="maxEquipSlot"/>
+        <result column="initHeroLevel" property="initHeroLevel"/>
+        <result column=" initEquipSlot" property="initEquipSlot"/>
+        <result column="equipSlotNum" property="equipSlotNum"/>
+        <result column="washSkillPrice" property="washSkillPrice"/>
+        <result column="washHeroPrice" property="washHeroPrice"/>
+        <result column="washPortion" property="washPortion"/>
+        <result column="soliderLines" property="soliderLines"/>
+        <result column="collectInterval" property="collectInterval"/>
+        <result column="maxCollectTimes" property="maxCollectTimes"/>
+        <result column="maxIron" property="maxIron"/>
+        <result column="maxCopper" property="maxCopper"/>
+        <result column="maxOil" property="maxOil"/>
+        <result column="maxStone" property="maxStone"/>
+        <result column="maxBuildTeams" property="maxBuildTeams"/>
+        <result column="maxEnegy" property="maxEnegy"/>
+        <result column="energyInterval" property="energyInterval"/>
+        <result column="maxHonor" property="maxHonor"/>
+        <result column="maxUseEnergy" property="maxUseEnergy"/>
+        <result column="buildTimePrice" property="buildTimePrice"/>
+        <result column="oneDayBuildTeamCost" property="oneDayBuildTeamCost"/>
+        <result column="sevenDayBuildTeamCost" property="sevenDayBuildTeamCost"/>
+        <result column="soldierSpeed" property="soldierSpeed"/>
+        <result column="recruitMinTime" property="recruitMinTime"/>
+        <result column="recruitMaxTime" property="recruitMaxTime"/>
+        <result column="recruitOilCost" property="recruitOilCost"/>
+        <result column="equipCdPrice" property="equipCdPrice"/>
+        <result column="maxWashHeroTimes" property="maxWashHeroTimes"/>
+        <result column="maxWashSkillTimes" property="maxWashSkillTimes"/>
+        <result column="washSkillInterval" property="washSkillInterval"/>
+        <result column="washHeroInterval" property="washHeroInterval"/>
+        <result column="lootHeroNeedLevel" property="lootHeroNeedLevel"/>
+        <result column="commonHeroPeriod" property="commonHeroPeriod"/>
+        <result column="goodHeroPeriod" property="goodHeroPeriod"/>
+        <result column="heroAdvanceLordLv" property="heroAdvanceLordLv"/>
+        <result column="goodHeroLordLv" property="goodHeroLordLv"/>
+        <result column="advanceCost" property="advanceCost"/>
+        <result column="goodHeroProcessAdd" property="goodHeroProcessAdd"/>
+        <result column="advanceItemId" property="advanceItemId"/>
+        <result column="killTechCdPrice" property="killTechCdPrice"/>
+        <result column="recoverPeople" property="recoverPeople"/>
+        <result column="escapePeople" property="escapePeople"/>
+        <result column="capturePeople" property="capturePeople"/>
+        <result column="recoverPeopleInterval" property="recoverPeopleInterval"/>
+        <result column="maxAutoBuildTimes" property="maxAutoBuildTimes"/>
+        <result column="maxWallTimes" property="maxWallTimes"/>
+        <result column="cleanAccount" property="cleanAccount" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="warbookShop" property="warbookShop" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectLimit" resultMap="StaticLimit">
+		select * from s_limit
+	</select>
+
+    <resultMap id="buyEquipSlotMap" type="com.game.domain.s.StaticBuyEqupSlot">
+
+    </resultMap>
+
+    <select id="selectBuyEquipSlot" resultMap="buyEquipSlotMap">
+		select * from
+		s_buy_equip_slot
+	</select>
+
+    <resultMap id="skillLvRateMap" type="com.game.domain.s.StaticSkillLvRate">
+
+    </resultMap>
+
+    <resultMap id="soldierLvMap" type="com.game.domain.s.StaticSoldierLv">
+
+    </resultMap>
+
+    <select id="selectStaticSoldierLv" resultMap="soldierLvMap">
+		select * from
+		s_soldier_lv
+	</select>
+
+
+    <select id="selectStaticCapacityTimes" resultType="com.game.domain.s.StaticCapacityTimes">
+		select * from
+		s_capacity_times
+	</select>
+
+    <resultMap id="buySoldierTime" type="com.game.domain.s.StaticBuySolodierTime">
+
+    </resultMap>
+
+    <select id="selectStaticBuySolodierTime" resultMap="buySoldierTime">
+		select * from
+		s_soldier_buytime
+	</select>
+
+
+    <resultMap id="heroWashMap" type="com.game.domain.s.StaticHeroWash">
+        <result column="washRate" property="washRate"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticHeroWash" resultMap="heroWashMap">
+		select * from
+		s_hero_wash
+	</select>
+
+
+    <resultMap id="missionMap" type="com.game.domain.s.StaticMission">
+        <result column="monsterIds" property="monsterIds"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="resource" property="resource"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="countryEquip" property="countryEquip"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="heroInfo" property="heroInfo"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="nextMission" property="nextMission"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="equipPaper" property="equipPaper"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="buyInfo" property="buyInfo"
+                typeHandler="com.game.handle.MapIntTypeHandler"/>
+        <result column="starCondition" property="starCondition"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="resourceLandId" property="resourceLandId"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="randHero" property="randHero"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="star1Award" property="star1Award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="star2Award" property="star2Award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="star3Award" property="star3Award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="beautyAward" property="beautyAward"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectMissionMap" resultMap="missionMap">
+		select * from s_mission
+	</select>
+
+
+    <resultMap id="monsterMap" type="com.game.domain.s.StaticMonster">
+
+    </resultMap>
+
+    <select id="selectMonsterMap" resultMap="monsterMap">
+		select * from
+		s_pve_monster
+	</select>
+
+    <resultMap id="staticBattleMap" type="com.game.domain.s.StaticBattle">
+        <result column="floatFactor" property="floatFactor"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+
+        <result column="restraintFactor" property="restraintFactor"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+
+    </resultMap>
+
+    <select id="selectStaticBattle" resultMap="staticBattleMap">
+		select * from s_battle
+	</select>
+
+
+    <resultMap id="buildingLvsMap" type="com.game.domain.s.StaticBuildingLv">
+        <result column="upCond" property="upCond"
+                typeHandler="com.game.handle.ListListLongTypeHandler"/>
+        <result column="resourceCond" property="resourceCond"
+                typeHandler="com.game.handle.ListListLongTypeHandler"/>
+        <result column="action" property="action"
+                typeHandler="com.game.handle.ListListLongTypeHandler"/>
+        <result column="resourceOut" property="resourceOut"
+                typeHandler="com.game.handle.ListLongTypeHandler"/>
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="beautyAward" property="beautyAward"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectBuildingLvMap" resultMap="buildingLvsMap">
+		select * from s_building_lv
+	</select>
+
+
+    <resultMap id="employeeMap" type="com.game.domain.s.StaticEmployee">
+        <result column="resAddFlag" property="resAddFlag"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticEmployee" resultMap="employeeMap">
+		select * from
+		s_employ
+	</select>
+
+
+    <resultMap id="buildingTypeMap" type="com.game.domain.s.StaticBuildingType">
+
+    </resultMap>
+
+    <select id="selectStaticBuilding" resultMap="buildingTypeMap">
+		select * from
+		s_building_type
+	</select>
+
+    <resultMap id="buildingMap" type="com.game.domain.s.StaticBuilding">
+        <id column="buildingId" property="buildingId"/>
+        <result column="rebuildingId" property="rebuildingId"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectBuildingMap" resultMap="buildingMap">
+		select * from
+		s_building
+	</select>
+
+    <resultMap id="techTypeMap" type="com.game.domain.s.StaticTechType">
+
+    </resultMap>
+
+    <select id="selectTechTypeMap" resultMap="techTypeMap">
+		select * from
+		s_tech_type
+	</select>
+
+    <resultMap id="techLevelsMap" type="com.game.domain.s.StaticTechInfo">
+        <result column="resourceCond" property="resourceCond"
+                typeHandler="com.game.handle.ListListLongTypeHandler"/>
+        <result column="effectValue" property="effectValue"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="openCond" property="openCond"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+
+    </resultMap>
+
+
+    <select id="selectTechLevelsMap" resultMap="techLevelsMap">
+		select * from
+		s_tech_lv
+	</select>
+
+    <resultMap id="staticDepotMap" type="com.game.domain.s.StaticDepot">
+        <result column="goldDepot" property="goldDepot"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="depotList" property="depotList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticDepot" resultMap="staticDepotMap">
+		select * from s_depot
+		order by `level` asc
+	</select>
+
+    <resultMap id="capacityTimesMap" type="com.game.domain.s.StaticCapacityTimes">
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticCapacityTimesMap" resultMap="capacityTimesMap">
+		select *
+		from s_capacity_times
+	</select>
+
+    <resultMap id="vipBuyMap" type="com.game.domain.s.StaticVipBuy">
+        <result column="effect" property="effect"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticVipBuy" resultMap="vipBuyMap">
+		SELECT * FROM
+		s_vip_buy
+		ORDER BY id
+	</select>
+
+    <resultMap id="staticEnergyPriceMap" type="com.game.domain.s.StaticEnergyPrice">
+
+    </resultMap>
+
+    <select id="selectEnergyPrice" resultMap="staticEnergyPriceMap">
+		select * from
+		s_energy_price
+	</select>
+
+
+    <resultMap id="lootHeroMap" type="com.game.domain.s.StaticLootHero">
+
+    </resultMap>
+
+    <select id="selectStaticLootHero" resultMap="lootHeroMap">
+		select * from
+		s_hero_loot
+	</select>
+
+
+    <resultMap id="heroAdvanceMap" type="com.game.domain.s.StaticHeroAdvance">
+
+    </resultMap>
+
+    <select id="selectStaticHeroAdvance" resultMap="heroAdvanceMap">
+		select * from
+		s_hero_advance
+	</select>
+
+
+    <resultMap id="staticPropBuildingMap" type="com.game.domain.s.StaticPropBuilding">
+
+    </resultMap>
+
+    <select id="selectStaticPropBuilding" resultMap="staticPropBuildingMap">
+		select * from
+		s_prop_building
+	</select>
+
+    <resultMap id="taskMap" type="com.game.domain.s.StaticTask">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListLongTypeHandler"/>
+        <result column="param" property="param"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="openBuildingId" property="openBuildingId"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="mulTriggerId" property="mulTriggerId"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+
+    </resultMap>
+
+    <select id="selectTaskMap" resultMap="taskMap">
+		select * from s_task
+	</select>
+
+    <resultMap id="worldMap" type="com.game.domain.s.StaticWorldMap">
+        <result column="city" property="city"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectWorldMap" resultMap="worldMap">
+		select * from s_world_map
+	</select>
+
+    <resultMap id="cityMap" type="com.game.domain.s.StaticWorldCity">
+        <result column="monsters" property="monsters"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="preMonsters" property="preMonsters"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="output" property="output"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="buff" property="buff"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+
+    <select id="selectWorldCity" resultMap="cityMap">
+		select * from
+		s_world_city
+	</select>
+
+    <select id="selectWorldResourceMap" resultType="com.game.domain.s.StaticWorldResource">
+		select * from
+		s_world_resource
+	</select>
+
+    <resultMap id="workShopMap" type="com.game.domain.s.StaticWorkShop">
+        <result column="resource" property="resource"
+                typeHandler="com.game.handle.ListListLongTypeHandler"/>
+
+        <result column="lootList" property="lootList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+
+        <result column="time" property="time"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+
+        <result column="lootRate" property="lootRate"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectWorkShopMap" resultMap="workShopMap">
+		select * from
+		s_workshop
+	</select>
+
+    <select id="selectWorkShopBuyMap" resultType="com.game.domain.s.StaticWorkShopBuy">
+		select * from
+		s_workshop_buy
+	</select>
+
+    <select id="selectPeopleMap" resultType="com.game.domain.s.StaticPeople">
+		select * from
+		s_workshop_people
+	</select>
+
+
+    <resultMap id="killEquipMap" type="com.game.domain.s.StaticKillEquip">
+        <result column="compound" property="compound"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+
+    </resultMap>
+
+
+    <select id="selectStaticKillEquip" resultMap="killEquipMap">
+		select * from
+		s_kill_equip
+	</select>
+
+
+    <resultMap id="killEquipLevelMap" type="com.game.domain.s.StaticKillEquipLevel">
+        <result column="property" property="property"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="gold" property="gold"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+
+    <select id="selectStaticKillEquipLevel" resultMap="killEquipLevelMap">
+		select * from
+		s_kill_equip_lv
+	</select>
+
+
+    <resultMap id="killEquipRateMap" type="com.game.domain.s.StaticKillEquipRate">
+        <result column="rate" property="rate"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticKillEquipRate" resultMap="killEquipRateMap">
+		select * from
+		s_kill_equip_rate
+	</select>
+
+    <select id="selectActDial" resultType="com.game.domain.s.StaticActDial">
+		select * from s_act_dial
+	</select>
+
+    <select id="selectActDialStone" resultType="com.game.domain.s.StaticActDialStone">
+		select * from
+		s_act_dial_stone
+	</select>
+
+    <select id="selectActDialLuck" resultType="com.game.domain.s.StaticActDialLuck">
+		select * from
+		s_act_dial_luck
+	</select>
+
+    <resultMap id="staticActDialPurpMap" type="com.game.domain.s.StaticActDialPurp">
+        <result column="buyAward" property="buyAward"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActDialPurp" resultMap="staticActDialPurpMap">
+		select * from
+		s_act_equip_dial
+	</select>
+
+    <resultMap id="staticActAwardMap" type="com.game.domain.s.StaticActAward">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActAward" resultMap="staticActAwardMap">
+		select * from
+		s_activity_award
+	</select>
+
+    <resultMap id="staticDailyCheckinAwardsMap" type="com.game.domain.s.StaticDailyCheckin">
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="double" property="critical"/>
+    </resultMap>
+
+    <select id="selectDailyCheckinAwards" resultMap="staticDailyCheckinAwardsMap">
+		select * from
+		s_daily_checkin
+	</select>
+
+    <resultMap id="staticActCommandMap" type="com.game.domain.s.StaticActCommand">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="limit" property="limit"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActCommand" resultMap="staticActCommandMap">
+		select * from
+		s_act_command
+	</select>
+
+    <resultMap id="staticRegisterConfigMap" type="com.game.domain.s.StaticRegisterConfig">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectRegisterConfig" resultMap="staticRegisterConfigMap">
+		select * from
+		s_register_award
+	</select>
+
+    <resultMap id="staticMentorMap" type="com.game.domain.s.StaticMentorAward">
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectMentorAward" resultMap="staticMentorMap">
+		select * from
+		s_mentor_award
+	</select>
+
+    <resultMap id="staticFriendshipScoreShopMap" type="com.game.domain.s.StaticFriendshipScoreShop">
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectFriendshipScoreShop" resultMap="staticFriendshipScoreShopMap">
+		select * from
+		s_friendship_score_shop
+	</select>
+
+    <resultMap id="staticApprenticeAwardMap" type="com.game.domain.s.StaticApprenticeAward">
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectApprenticeAward" resultMap="staticApprenticeAwardMap">
+		select * from
+		s_apprentice_award
+	</select>
+
+    <select id="selectMentorRank" resultType="com.game.domain.s.StaticApprenticeRank">
+		select * from s_act_mentor_rank
+	</select>
+
+    <select id="selectActivity" resultType="com.game.domain.s.StaticActivity">
+		select * from s_activity
+	</select>
+
+    <select id="selectActPlan" resultType="com.game.domain.s.StaticActivityPlan">
+		select * from
+		s_activity_plan
+	</select>
+
+    <resultMap id="staticActQuotaMap" type="com.game.domain.s.StaticActQuota">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActQuota" resultMap="staticActQuotaMap">
+		select * from s_act_quota
+	</select>
+
+    <select id="selectActTask" resultType="com.game.domain.s.StaticActTask">
+		select * from s_act_task
+	</select>
+
+    <resultMap id="staticActShopMap" type="com.game.domain.s.StaticActShop">
+        <result column="sellList" property="sellList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActShop" resultMap="staticActShopMap">
+		select * from s_act_shop
+	</select>
+
+    <resultMap id="worldMonsterMap" type="com.game.domain.s.StaticWorldMonster">
+        <result column="dropList" property="dropList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="monsterIds" property="monsterIds"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+
+        <result column="extraDrop" property="extraDrop"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectWorldMonsterMap" resultMap="worldMonsterMap">
+		select * from
+		s_world_monster
+	</select>
+
+    <select id="selectWorldPlayer" resultType="com.game.domain.s.StaticWorldPlayer">
+		select * from
+		s_world_player_test
+	</select>
+
+    <resultMap id="simpleConfig" type="com.game.domain.s.StaticSimpleConfig">
+        <result column="addition" property="addition"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectSimpleConfig" resultMap="simpleConfig">
+		select * from
+		s_simple_config
+	</select>
+
+
+    <resultMap id="primaryResourceMap" type="com.game.domain.s.StaticPrimaryResource">
+        <result column="effect" property="effect"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectPrimaryResource" resultMap="primaryResourceMap">
+		select * from
+		s_world_primary_resource
+	</select>
+
+    <resultMap id="mysteriousCaveMap" type="com.game.domain.s.StaticMysteriousCave">
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectMysteriousCave" resultMap="mysteriousCaveMap">
+		select * from
+		s_world_mysteriouscave
+	</select>
+
+    <select id="selectMysteriousCaveList" resultType="com.game.domain.s.StaticMysteriousCave">
+		select * from
+		s_world_mysteriouscave
+	</select>
+
+    <resultMap id="monsterFlushMap" type="com.game.domain.s.StaticMonsterFlush">
+        <result column="lowRange" property="lowRange"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="middleRange" property="middleRange"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="highRange" property="highRange"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectMonsterFlush" resultMap="monsterFlushMap">
+		select * from
+		s_world_monster_flush
+	</select>
+
+    <resultMap id="monsterNumMap" type="com.game.domain.s.StaticMonsterNum">
+        <result column="monsters" property="monsters"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectMonsterNum" resultMap="monsterNumMap">
+		select * from
+		s_world_monster_num
+	</select>
+
+    <select id="selectActFoot" resultType="com.game.domain.s.StaticActFoot">
+		select * from s_act_foot
+	</select>
+
+    <select id="selectWorldResNumMap" resultType="com.game.domain.s.StaticWorldResNum">
+		select * from
+		s_world_resource_num
+	</select>
+
+    <select id="selectWareMap" resultType="com.game.domain.s.StaticWare">
+		select * from
+		s_ware
+	</select>
+
+    <resultMap id="countryTaskMap" type="com.game.domain.s.StaticCountryTask">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="extraAward" property="extraAward"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectCountryTask" resultMap="countryTaskMap">
+		select * from
+		s_country_task
+	</select>
+
+    <resultMap id="countryGloryMap" type="com.game.domain.s.StaticCountryGlory">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectCountryGlory" resultMap="countryGloryMap">
+		select * from
+		s_country_glory
+	</select>
+
+    <select id="selectCountryRecord" resultType="com.game.domain.s.StaticCountryDaily">
+		select * from
+		s_country_daily
+	</select>
+
+    <select id="selectCountryRank" resultType="com.game.domain.s.StaticCountryRank">
+		select * from
+		s_country_rank
+	</select>
+
+    <resultMap id="heros" type="com.game.domain.s.StaticCountryHero">
+        <result column="propId" property="propId"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="getRate1" property="getRate1"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="getRate2" property="getRate2"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="activate" property="activate"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectCountryHero" resultMap="heros">
+		select * from
+		s_country_hero
+	</select>
+
+    <resultMap id="countryTitleMap" type="com.game.domain.s.StaticCountryTitle">
+        <result column="propList" property="propList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="worldBoxDrop" property="worldBoxDrop"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="upgradeAward" property="upgradeAward"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="dailyAward" property="dailyAward" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="promotionAward" property="promotionAward" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectCountryTitle" resultMap="countryTitleMap">
+		select * from
+		s_country_title
+	</select>
+
+
+    <resultMap id="worldTargetMap" type="com.game.domain.s.StaticWorldTarget">
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticWorldTarget" resultMap="worldTargetMap">
+		select * from
+		s_world_target
+	</select>
+
+    <select id="selectCountryBuild" resultType="com.game.domain.s.StaticCountryBuild">
+		select * from
+		s_country_build
+	</select>
+
+    <select id="selectCountryLevel" resultType="com.game.domain.s.StaticCountryLevel">
+		select * from
+		s_country_level
+	</select>
+
+    <select id="selectScoutMap" resultType="com.game.domain.s.StaticScout">
+		select * from s_scout
+	</select>
+
+    <select id="selectScoutLvMap" resultType="com.game.domain.s.StaticScoutLv">
+		select * from
+		s_scout_lv
+	</select>
+
+    <select id="selectMapMoveMap" resultType="com.game.domain.s.StaticMapMove">
+		select * from s_mapmove
+	</select>
+
+
+    <resultMap id="loginAwardMap" type="com.game.domain.s.StaticLoginAward">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectLoginAward" resultMap="loginAwardMap">
+		select * from
+		s_login_award
+	</select>
+
+    <select id="selectCountryGovern" resultType="com.game.domain.s.StaticCountryGovern">
+		select * from
+		s_country_govern
+	</select>
+
+    <select id="selectWallMonster" resultType="com.game.domain.s.StaticWallMonster">
+		select * from
+		s_wall_monster
+	</select>
+
+    <select id="selectWallMonsterLv" resultType="com.game.domain.s.StaticWallMonsterLv">
+		select * from
+		s_wall_monster_lv
+	</select>
+
+
+    <resultMap id="newStateMap" type="com.game.domain.s.StaticNewState">
+        <result column="openBuilding" property="openBuilding"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticNewState" resultMap="newStateMap">
+		select * from
+		s_new_state
+	</select>
+
+    <select id="selectWorldExpMap" resultType="com.game.domain.s.StaticWorldExp">
+		select * from
+		s_world_exp
+	</select>
+
+
+    <select id="selectPlayerKickMap" resultType="com.game.domain.s.StaticPlayerKick">
+		select * from
+		s_player_kick
+	</select>
+
+    <select id="selectSquareMonsterMap" resultType="com.game.domain.s.StaticSquareMonster">
+		select * from
+		s_square_monster
+	</select>
+
+    <select id="selectFortressMonsterMap" resultType="com.game.domain.s.StaticFortressMonster">
+		select * from
+		s_world_fortress_monster
+	</select>
+
+    <select id="selectFortressResource" resultType="com.game.domain.s.StaticFortressResource">
+		select * from
+		s_world_fortress_resource
+	</select>
+
+    <select id="selectChat" resultType="com.game.domain.s.StaticChat">
+		select * from s_chat
+	</select>
+
+    <resultMap id="actDropMap" type="com.game.domain.s.StaticActDrop">
+        <result column="dropList" property="dropList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActDrop" resultMap="actDropMap">
+		select * from s_act_drop
+	</select>
+
+    <select id="selectActDouble" resultType="com.game.domain.s.StaticActDouble">
+		select * from
+		s_act_double
+	</select>
+
+    <select id="selectWashSkillRate" resultType="com.game.domain.s.StaticWashSkill">
+		select * from s_wash_skill
+	</select>
+
+    <select id="selectStaticExchange" resultType="com.game.domain.s.StaticExchange">
+		select * from s_res_exchange
+	</select>
+
+    <select id="selectSeasonMap" resultType="com.game.domain.s.StaticSeason">
+		select * from s_season
+	</select>
+
+
+    <select id="selectChatShow" resultType="com.game.domain.s.StaticChatShow">
+		select * from s_chat_show
+	</select>
+
+    <select id="selectActMonster" resultType="com.game.domain.s.StaticActMonster">
+		select * from s_act_monster
+	</select>
+
+    <select id="selectExchangeItem" resultType="com.game.domain.s.StaticExchangeItem">
+		select * from s_act_exchange_item
+	</select>
+
+    <resultMap id="exchangeHeroMap" type="com.game.domain.s.StaticExchangeHero">
+        <result column="items" property="items"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="loot1" property="loot1"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="loot2" property="loot2"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectExchangeHero" resultMap="exchangeHeroMap">
+		select * from s_act_exchange_hero
+	</select>
+
+
+    <resultMap id="pvpCostMap" type="com.game.domain.s.StaticPvpCost">
+        <result column="cost" property="cost"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectWorldPvpCost" resultMap="pvpCostMap">
+		select * from s_world_pvp_cost
+	</select>
+
+    <resultMap id="actPayGiftMap" type="com.game.domain.s.StaticActPayGift">
+        <result column="sellList" property="sellList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActPayGift" resultMap="actPayGiftMap">
+		select * from s_act_pay_gift
+	</select>
+
+    <resultMap id="actPayCardMap" type="com.game.domain.s.StaticActPayCard">
+        <result column="sellList" property="sellList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActPayCard" resultMap="actPayCardMap">
+		select * from s_pay_card
+	</select>
+
+
+    <resultMap id="actPayMoneyMap" type="com.game.domain.s.StaticActPayMoney">
+        <result column="sellList" property="sellList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActPayMoney" resultMap="actPayMoneyMap">
+		select * from s_act_pay_money
+	</select>
+
+
+    <resultMap id="actPayArmsMap" type="com.game.domain.s.StaticActPayArms">
+        <result column="sellList" property="sellList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActPayArms" resultMap="actPayArmsMap">
+		select * from s_act_pay_arms
+	</select>
+
+    <select id="selectPvpRankMap" resultType="com.game.domain.s.StaticPvpRank">
+		select * from s_world_pvp_rank
+	</select>
+
+    <select id="selectPvpTotalKillMap" resultType="com.game.domain.s.StaticPvpTotalKill">
+		select * from s_world_pvp_total_kill
+	</select>
+
+
+    <resultMap id="pvpDigMap" type="com.game.domain.s.StaticPvpDig">
+        <result column="lootProp" property="lootProp"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="lootPaper" property="lootPaper"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectPvpDigMap" resultMap="pvpDigMap">
+		select * from s_world_pvp_dig
+	</select>
+
+
+    <select id="selectPvpExchange" resultType="com.game.domain.s.StaticPvpExchange">
+		select * from s_world_pvp_exchange
+	</select>
+
+
+    <select id="selectBroodWarShop" resultType="com.game.domain.s.StaticPvpExchange">
+        select * from s_brood_war_shop
+    </select>
+
+
+    <select id="selectBattleLvMap" resultType="com.game.domain.s.StaticPvpBattleLv">
+		select * from s_world_pvp_battle_lv
+	</select>
+
+    <select id="selectHeroEscape" resultType="com.game.domain.s.StaticCountryHeroEscape">
+		select * from s_country_hero_escape
+	</select>
+
+    <resultMap id="firstPayMap" type="com.game.domain.s.StaticActFirstPay">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActFirstPay" resultMap="firstPayMap">
+        select * from s_act_first_pay
+    </select>
+
+    <select id="selectActRankDisplay" resultType="com.game.domain.s.StaticActRankDisplay">
+        select * from s_act_rank_display
+    </select>
+
+
+    <resultMap id="actSevenMap" type="com.game.domain.s.StaticActSeven">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActSeven" resultMap="actSevenMap">
+        select * from s_act_seven
+    </select>
+
+    <select id="selectStaffTaskMap" resultType="com.game.domain.s.StaticStaffTask">
+        select * from s_staff_task
+    </select>
+
+    <resultMap id="roitMonsterMap" type="com.game.domain.s.StaticRiotMonster">
+        <id column="keyId" property="keyId"/>
+        <result column="monster" property="monster"
+                typeHandler="com.game.handle.TableTypeHandler"/>
+
+    </resultMap>
+
+    <select id="selectRoitMonster" resultMap="roitMonsterMap">
+        select * from s_riot_act_monster
+    </select>
+
+    <select id="selectRoitTime" resultType="com.game.domain.s.StaticRoitTime">
+        select * from s_riot_act_time
+    </select>
+
+    <resultMap id="staticRoitItemShop" type="com.game.domain.s.StaticRoitItemShop">
+        <result column="effect" property="effect" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectItemShop" resultMap="staticRoitItemShop">
+        select * from s_riot_item_shop
+    </select>
+
+    <select id="selectRoitScoreShop" resultType="com.game.domain.s.StaticRoitScoreShop">
+        select * from s_riot_score_shop
+    </select>
+
+    <resultMap id="roitWaveMonsterMap" type="com.game.domain.s.StaticRoitWaveMonster">
+        <id column="keyId" property="keyId"/>
+        <id column="type" property="type"/>
+        <result column="monsters" property="monsters" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectRoitWave" resultMap="roitWaveMonsterMap">
+        select * from s_riot_wave_monster
+    </select>
+
+
+    <select id="selectRiotAward" resultType="com.game.domain.s.StaticRiotAward">
+        select * from s_riot_award
+    </select>
+
+
+    <select id="selectInitName" resultType="com.game.domain.s.StaticInitName">
+        select * from s_ini_name
+    </select>
+
+    <select id="selectPortraitMap" resultType="com.game.domain.s.StaticPortrait">
+        select * from s_portrait
+    </select>
+
+
+    <resultMap id="redDialMap" type="com.game.domain.s.StaticActRedDial">
+        <result column="price" property="price"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="lootRate1" property="lootRate1"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="lootRate2" property="lootRate2"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="mustLoot" property="mustLoot"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActRedDial" resultMap="redDialMap">
+        select * from s_act_red_dial
+    </select>
+
+
+    <resultMap id="stealCityMap" type="com.game.domain.s.StaticActStealCity">
+        <result column="time1" property="time1"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="time2" property="time2"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="time3" property="time3"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="city1" property="city1"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="city2" property="city2"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="city3" property="city3"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="awards" property="awards"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+
+    </resultMap>
+
+    <select id="selectActStealCity" resultMap="stealCityMap">
+        select * from s_act_steal_city
+    </select>
+
+
+    <select id="selectMeetingCommand" resultType="com.game.domain.s.StaticMeetingCommand">
+		select * from s_meeting_command
+	</select>
+
+    <resultMap id="meetingSoldier" type="com.game.domain.s.StaticMeetingSoldier">
+        <result column="effect" property="effects"
+                typeHandler="com.game.handle.MapIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectMeetingSoldier" resultMap="meetingSoldier">
+		select * from s_meeting_soldier
+	</select>
+
+
+    <select id="selectMeetingTask" resultType="com.game.domain.s.StaticMeetingTask">
+		select * from s_meeting_task
+	</select>
+
+    <resultMap id="worldNewTarget" type="com.game.domain.s.StaticWorldNewTarget">
+        <result column="campRanking" property="campRanking" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="activateFuntion" property="activateFuntion"
+                typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectWorldNewTarget" resultMap="worldNewTarget">
+		select * from s_world_new_target
+	</select>
+
+    <resultMap id="lairRank" type="com.game.domain.s.StaticLairRank">
+        <result column="rankRand" property="rankRand" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="getStaticLairRank" resultMap="lairRank">
+		select * from s_lair_rank
+	</select>
+
+
+    <resultMap id="staticActWorldBoss" type="com.game.domain.s.StaticActWorldBoss">
+        <result column="randomDrop" property="randomDrop" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectActWorldBoss" resultMap="staticActWorldBoss">
+		select * from s_act_new_world_boss
+	</select>
+
+    <resultMap id="resPackager" type="com.game.domain.s.StaticResPackager">
+        <result column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticResPackager" resultMap="resPackager">
+		select * from s_res_packager
+	</select>
+
+
+    <select id="selectStaticOpen" resultType="com.game.domain.s.StaticOpen">
+		select * from s_open
+	</select>
+
+
+    <resultMap id="worldActPlan" type="com.game.domain.s.StaticWorldActPlan">
+        <result column="continue" property="continues" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectWorldActPlan" resultMap="worldActPlan">
+		select * from s_world_act_plan
+	</select>
+
+
+    <select id="selectStaticRebelExchange" resultType="com.game.domain.s.StaticRebelExchange">
+		select * from s_rebel_exchange
+	</select>
+
+
+    <resultMap id="staticRebelRankAward" type="com.game.domain.s.StaticRebelRankAward">
+        <result column="bayssegmenting" property="bayssegmenting" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticRebelRankAward" resultMap="staticRebelRankAward">
+		select * from s_rebel_rank_award
+	</select>
+
+
+    <resultMap id="staticRebelZergDrop" type="com.game.domain.s.StaticRebelZergDrop">
+        <result column="drop" property="drop" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticRebelZergDrop" resultMap="staticRebelZergDrop">
+		select * from s_rebel_zerg_drop
+	</select>
+
+
+    <resultMap id="staticWorldCityType" type="com.game.domain.s.StaticWorldCityType">
+        <result column="monsters" property="monsters" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="output" property="output" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+
+    <select id="selectStaticWorldCityType" resultMap="staticWorldCityType">
+		select * from s_world_city_type
+	</select>
+
+    <!--美女系统相关的数据  -->
+    <resultMap id="staticBeautyMap" type="com.game.domain.s.StaticBeautyBase">
+        <result column="param" property="param" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticBeautyBases" resultMap="staticBeautyMap">
+        select * from s_beauty_2d
+    </select>
+
+    <resultMap id="StaticBeautyDateSkills" type="com.game.domain.s.StaticBeautyDateSkills">
+        <id column="id" property="id"/>
+        <result column="value" property="value" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticBeautyDateSkills" resultMap="StaticBeautyDateSkills">
+        select * from s_beauty_skill_2d
+    </select>
+
+    <resultMap id="staticBeautyStarSkills" type="com.game.domain.s.StaticBeautyDateSkills">
+        <id column="id" property="id"/>
+        <result column="value" property="value" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticBeautyStarSkills" resultMap="staticBeautyStarSkills">
+        select * from s_beauty_star_2d
+    </select>
+
+    <!--配饰系统相关的数据  -->
+    <resultMap id="staticOmament" type="com.game.domain.s.StaticOmament">
+        <result column="property" property="property" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticOmament" resultMap="staticOmament">
+		select * from s_omament
+	</select>
+    <select id="selectStaticOmamentByType"
+            resultType="com.game.domain.s.StaticOmament">
+		select * from s_omament where type = #{type}
+	</select>
+    <select id="selectStaticOmType"
+            resultType="com.game.domain.s.StaticOmType">
+		select * from s_omament_slot
+	</select>
+
+
+    <resultMap id="StaticJourney" type="com.game.domain.s.StaticJourney">
+        <result column="monsterIds" property="monsterIds" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="stableAwards" property="stableAwards" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="randomAwards" property="randomAwards" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="randomAwardId" property="randomAwardId"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticJourney" resultMap="StaticJourney">
+		select * from s_journey
+	</select>
+
+    <select id="selectStaticJourneyPrice" resultType="com.game.domain.s.StaticJourneyPrice">
+		select * from s_journey_price
+	</select>
+
+    <resultMap id="towerWarLevel" type="com.game.domain.s.StaticTowerWarLevel">
+        <id column="id" property="id"/>
+        <result column="condition" property="condition" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="start_limit" property="start_limit" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="award_list_1" property="award_list_1" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="award_list_2" property="award_list_2" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="award_list_3" property="award_list_3" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="wave_list" property="wave_list" typeHandler="com.game.handle.MapListListTypeHandler"/>
+        <result column="way_list" property="way_list" typeHandler="com.game.handle.MapListIntegerHandler"/>
+        <result column="tower_list" property="tower_list" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="monster_list" property="monster_list" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="tower_base_list" property="tower_base_list"
+                typeHandler="com.game.handle.ListListDoubleTypeHandler"/>
+        <result column="way_point_list" property="way_point_list"
+                typeHandler="com.game.handle.ListListDoubleTypeHandler"/>
+        <result column="camera_limit" property="camera_limit" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadAllStaticTowerWarLevel" resultMap="towerWarLevel">
+		select * from s_tower_war_level
+	</select>
+
+    <resultMap id="towerWarMap" type="com.game.domain.s.StaticTowerWarMap">
+        <id column="id" property="id"/>
+        <result column="level_list" property="level_list" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadAllStaticTowerWarMap" resultMap="towerWarMap">
+		select * from s_tower_war_map
+	</select>
+
+    <select id="loadAllStaticTowerWarMonster" resultType="com.game.domain.s.StaticTowerWarMonster">
+		select * from s_tower_war_monster
+	</select>
+
+    <select id="loadStaticTowerWarTower" resultType="com.game.domain.s.StaticTowerWarTower">
+		select * from s_tower_war_tower
+	</select>
+
+    <resultMap id="towerWarWave" type="com.game.domain.s.StaticTowerWarWave">
+        <id column="id" property="id"/>
+        <result column="monster_list" property="monster_list"
+                typeHandler="com.game.handle.ListListDoubleTypeHandler"/>
+    </resultMap>
+
+    <select id="loadStaticTowerWarWave" resultMap="towerWarWave">
+		select * from s_tower_war_wave
+	</select>
+
+
+    <resultMap id="towerWarBonus" type="com.game.domain.s.StaticTowerWarBonus">
+        <id column="id" property="id"/>
+    </resultMap>
+    <select id="loadStaticTowerWarBonus" resultMap="towerWarBonus">
+		select * from s_tower_war_bonus
+	</select>
+
+    <resultMap id="FirstBloodAward" type="com.game.domain.s.StaticFirstBloodAward">
+        <id column="cityType" property="cityType"/>
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticFirstBloodAward" resultMap="FirstBloodAward">
+		select * from s_city_first_blood
+	</select>
+
+    <resultMap id="ActHope" type="com.game.domain.s.StaticActHope">
+        <id column="level" property="level"/>
+    </resultMap>
+    <select id="loadStaticActHope" resultMap="ActHope">
+		select * from s_act_hope
+	</select>
+
+    <resultMap id="ActEquipUpdate" type="com.game.domain.s.StaticActEquipUpdate">
+        <result column="awardList" property="awardList"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticActEquipUpdate" resultMap="ActEquipUpdate">
+		select * from s_act_equip_update
+	</select>
+
+    <resultMap id="PassPortAward" type="com.game.domain.s.StaticPassPortAward">
+        <id column="id" property="id"/>
+        <id column="awardId" property="awardId"/>
+        <id column="lv" property="lv"/>
+        <id column="type" property="type"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectPassPortAward" resultMap="PassPortAward">
+        select * from s_passport_award
+    </select>
+
+
+    <resultMap id="PassPortTask" type="com.game.domain.s.StaticPassPortTask">
+        <id column="id" property="id"/>
+        <id column="type" property="type"/>
+        <id column="taskType" property="taskType"/>
+        <id column="weekNum" property="weekNum"/>
+        <id column="cond" property="cond"/>
+        <id column="content" property="content"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="score" property="score"/>
+    </resultMap>
+    <select id="selectPassPortTask" resultMap="PassPortTask">
+        select * from s_passport_task
+    </select>
+
+    <resultMap id="staticCityGame" type="com.game.domain.s.StaticCityGame">
+        <result column="award" property="award"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticCityGame" resultMap="staticCityGame">
+		select * from s_citygames
+	</select>
+
+    <resultMap id="passPortLvMap" type="com.game.domain.s.StaticPassPortLv">
+        <id column="lv" property="lv"/>
+        <id column="score" property="score"/>
+    </resultMap>
+
+    <select id="loadStaticPassPortLv" resultMap="passPortLvMap">
+		select * from s_passport_lv
+	</select>
+
+    <resultMap id="staticPayPassPorts" type="com.game.domain.s.StaticPayPassPort">
+        <id column="keyId" property="keyId"/>
+        <id column="awardId" property="awardId"/>
+        <id column="money" property="money"/>
+        <id column="limit" property="limit"/>
+        <result column="sellList" property="sellList" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="viewList" property="viewList" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="vipExp" property="vipExp"/>
+    </resultMap>
+    <select id="selectStaticPayPassPorts" resultMap="staticPayPassPorts">
+        select * from s_act_pay_passport
+    </select>
+
+    <select id="selectActFreeBuy" resultType="com.game.domain.s.StaticActFreeBuy">
+		select * from s_act_freebuy
+	</select>
+    <select id="selectDialCost" resultType="com.game.domain.s.StaticDialCost">
+		select * from s_dial_cost
+	</select>
+    <!--兵书相关配置-->
+    <resultMap id="StaticWarBooks" type="com.game.domain.s.StaticWarBook">
+        <result column="baseProperty" property="baseProperty" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="skill" property="skill" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="randSkillNum" property="randSkillNum" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticWarBooks" resultMap="StaticWarBooks">
+        select * from  s_warbook;
+    </select>
+
+    <resultMap id="StaticWarBookBaseProperty" type="com.game.domain.s.StaticWarBookBaseProperty">
+        <result column="affect" property="affect" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectWarBookBaseProperty" resultMap="StaticWarBookBaseProperty">
+        select * from  s_warbook_base_property;
+    </select>
+
+    <resultMap id="StaticWarBookSkill" type="com.game.domain.s.StaticWarBookSkill">
+        <result column="affect" property="affect" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectWarBookSkill" resultMap="StaticWarBookSkill">
+        select * from  s_warbook_skill;
+    </select>
+
+    <select id="selectWarBookDrop" resultType="com.game.domain.s.StaticWarBookDrop">
+		select * from s_warbook_drop
+	</select>
+
+    <resultMap id="StaticWarBookDecom" type="com.game.domain.s.StaticWarBookDecom">
+        <result column="baseStrongProp" property="baseStrongProp"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="decomposeAward" property="decomposeAward"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="warbookProability" property="warbookProability"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectWarBookDecom" resultMap="StaticWarBookDecom">
+        select * from  s_warbook_decompose;
+    </select>
+
+    <resultMap id="StaticWarBookBuy" type="com.game.domain.s.StaticWarBookBuy">
+        <result column="rand" property="rand" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectWarBookBuy" resultMap="StaticWarBookBuy">
+        select * from s_warbook_buy;
+    </select>
+
+    <resultMap id="StaticWarBookShopGoods" type="com.game.domain.s.StaticWarBookShopGoods">
+        <result column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="price" property="price" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="selectWarBookShopGoods" resultMap="StaticWarBookShopGoods">
+        select * from s_warbook_shop_goods;
+    </select>
+
+    <resultMap id="StaticWarBookExchanges" type="com.game.domain.s.StaticWarBookExchange">
+        <result column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="selectWarBookExchanges" resultMap="StaticWarBookExchanges">
+        select * from s_warbook_exchange;
+    </select>
+
+    <resultMap id="StaticBookSkillEffectTypes" type="com.game.domain.s.StaticBookSkillEffectType">
+        <result column="param" property="param" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="selectBookSkillEffectType" resultMap="StaticBookSkillEffectTypes">
+        select * from s_warbook_effect;
+    </select>
+    <!--兵书相关配置-->
+    <resultMap id="allActExchangeMap" type="com.game.domain.s.StaticActExchange">
+        <result column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="selectActExchange" resultMap="allActExchangeMap">
+		select * from s_act_exchange
+	</select>
+
+    <!--双旦礼包start-->
+    <resultMap id="staticActivityChrismas" type="com.game.domain.s.StaticActivityChrismas">
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticActivityChrismas" resultMap="staticActivityChrismas">
+		select * from s_act_chrismas
+	</select>
+
+    <resultMap id="staticActivityChrismasAwar" type="com.game.domain.s.StaticActivityChrismasAward">
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticActivityChrismasAward" resultMap="staticActivityChrismasAwar">
+		select * from s_act_chrismas_award
+	</select>
+    <!--双旦礼包end-->
+
+    <!--美女邮件-->
+    <resultMap id="staticMailAward" type="com.game.domain.s.StaticMailAward">
+        <result column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticMailAward" resultMap="staticMailAward">
+		select * from s_mail_award
+	</select>
+
+
+    <!--世界宝箱 start-->
+    <resultMap id="staticWorldBox" type="com.game.domain.s.StaticWorldBox">
+        <result column="stapleAward" property="stapleAward" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="randomAwardNum" property="randomAwardNum"
+                typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="randomAward" property="randomAward" typeHandler="com.game.handle.ListListListTypeHandler"/>
+        <result column="needChat" property="needChat" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="need" property="need" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticWorldBox" resultMap="staticWorldBox">
+		select * from s_world_box
+	</select>
+
+    <resultMap id="staticWorldBoxCollect" type="com.game.domain.s.StaticWorldBoxCollect">
+        <result column="mark" property="mark" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticWorldBoxCollect" resultMap="staticWorldBoxCollect">
+		select * from s_world_box_collect
+	</select>
+    <!--世界宝箱 end-->
+
+    <!--个性化-->
+    <resultMap id="staticPersonality" type="com.game.domain.s.StaticPersonality">
+        <result column="openCond" property="openCond" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticPersonality" resultMap="staticPersonality">
+		select * from s_personality
+	</select>
+    <!--个性化end-->
+
+    <!--主城皮肤 start-->
+    <resultMap id="StaticBaseSkin" type="com.game.domain.s.StaticBaseSkin">
+        <result column="needNum" property="needNum" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="rand" property="rand" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticBaseSkin" resultMap="StaticBaseSkin">
+        select * from s_base_skin
+    </select>
+
+    <resultMap id="StaticBaseSkinSkill" type="com.game.domain.s.StaticSkinSkill">
+        <result column="effectValue" property="effectValue" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticSkinSkills" resultMap="StaticBaseSkinSkill">
+        select * from s_base_skin_skill
+    </select>
+    <!--主城皮肤 end-->
+
+    <resultMap id="staticMyExchange" type="com.game.domain.s.StaticMyExchange">
+        <result column="cost" property="cost" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="queryAllMyExchange" resultMap="staticMyExchange">
+         select * from s_act_meiying_exchange
+    </select>
+    <!--日常任务-->
+    <resultMap id="staticTaskDaily" type="com.game.domain.s.StaticTaskDaily">
+    </resultMap>
+    <select id="loadStaticTaskDaily" resultMap="staticTaskDaily">
+        select * from s_task_daily
+    </select>
+
+    <resultMap id="staticTaskDailyAward" type="com.game.domain.s.StaticTaskDailyAward">
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticTaskDailyAward" resultMap="staticTaskDailyAward">
+        select * from s_task_daily_award
+    </select>
+
+    <resultMap id="staticHeroTask" type="com.game.domain.s.StaticHeroTask">
+        <result column="awardlist" property="awardlist" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="param" property="param" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticHeroTask" resultMap="staticHeroTask">
+        select * from s_hero_task
+    </select>
+
+    <resultMap id="staticLimitGift" type="com.game.domain.s.StaticLimitGift">
+        <result column="awardList" property="awardList" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="limit" property="limit" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="timelimit" property="timelimit" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="typeid" property="typeid" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticLimitGift" resultMap="staticLimitGift">
+        select * from s_limit_gift
+    </select>
+
+
+    <resultMap id="staticDialAward" type="com.game.domain.s.StaticDialAwards">
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="queryALLDialAwardConfig" resultMap="staticDialAward">
+        select * from s_act_dial_awards
+    </select>
+
+    <!--巨型虫族-->
+    <resultMap id="staticGiantZerg" type="com.game.domain.s.StaticGiantZerg">
+        <result column="monsterIds" property="monsterIds" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="firstAward" property="firstAward" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="refreshArea" property="refreshArea" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticGiantZerg" resultMap="staticGiantZerg">
+        select * from s_giantzerg
+    </select>
+    <resultMap id="staticGiantZergBuff" type="com.game.domain.s.StaticGiantZergBuff">
+    </resultMap>
+    <select id="loadStaticGiantZergBuff" resultMap="staticGiantZergBuff">
+        select * from s_giantzerg_buff
+    </select>
+    <!--巨型虫族end-->
+
+    <resultMap id="selectStaticBeautyDateResultMap" type="com.game.domain.s.StaticBeautyDate">
+        <id column="star" property="star"/>
+        <result column="chance" property="chance" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticBeautyDate" resultMap="selectStaticBeautyDateResultMap">
+        SELECT * FROM s_beauty_date_2d;
+    </select>
+
+    <resultMap id="selectStaticBeautyDateAwardResultMap" type="com.game.domain.s.StaticBeautyDateAward">
+        <id column="id" property="id"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticBeautyDateAward" resultMap="selectStaticBeautyDateAwardResultMap">
+        SELECT * FROM s_beauty_date_award_2d;
+    </select>
+
+    <resultMap id="payCal" type="com.game.domain.s.StaticPayCalculate">
+        <result column="activityId" property="activityId" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="queryPayCal" resultMap="payCal">
+        select  * from s_pay_calculate_record
+
+    </select>
+    <!--母巢配置-->
+    <resultMap id="staticBroodWarBuff" type="com.game.domain.s.StaticBroodWarBuff">
+        <result column="buff" property="buff" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="cost_res" property="cost_res" typeHandler="com.game.handle.ListListLongTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticBroodWarBuff" resultMap="staticBroodWarBuff">
+        select * from s_brood_war_buff
+    </select>
+
+    <resultMap id="diviHeroMap" type="com.game.domain.s.StaticHerDiviConfig">
+        <id column="id" property="id"/>
+        <result column="equiplist" property="equiplist" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="property" property="property" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="selectStaticDivi" resultMap="diviHeroMap">
+        SELECT * FROM s_hero_divine;
+    </select>
+
+
+    <select id="querySuperRes" resultType="com.game.domain.s.StaticSuperRes">
+        select * from s_large_resource;
+    </select>
+
+
+    <resultMap id="FortressLv" type="com.game.domain.s.StaticFortressLv">
+        <id column="lv" property="lv"/>
+    </resultMap>
+    <select id="queryFortressLv" resultMap="FortressLv">
+        select * from s_fortress_lv;
+    </select>
+
+    <resultMap id="FortressBuild" type="com.game.domain.s.StaticFortressBuild">
+        <id column="times" property="times"/>
+        <result column="needProp" property="needProp" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="queryFortressBuild" resultMap="FortressBuild">
+        select * from s_fortress_build;
+    </select>
+
+    <resultMap id="staticBroodWarCommand" type="com.game.domain.s.StaticBroodWarCommand">
+        <result column="buff" property="buff" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticBroodWarCommand" resultMap="staticBroodWarCommand">
+        select * from s_brood_war_command
+    </select>
+
+    <select id="loadStaticBroodWarShop" resultType="StaticBroodWarShop">
+        select * from s_brood_war_shop
+    </select>
+
+    <select id="loadStaticBroodBuffCost" resultType="StaticBroodBuffCost">
+        select * from s_brood_buff_cost
+    </select>
+
+    <select id="loadStaticBroodWarKillScore" resultType="StaticBroodWarKillScore">
+        select * from s_brood_war_kill_score
+    </select>
+
+    <resultMap id="staticZergMonsterResultMap" type="com.game.domain.s.StaticZergMonster">
+        <result column="monsters" property="monsters" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticZergMonster" resultMap="staticZergMonsterResultMap">
+        SELECT * FROM s_zerg_monstor
+  </select>
+    <resultMap id="selectStaticResourceGift" type="StaticResourceGift">
+        <result column="awardList" property="awardList" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticResourceGift" resultMap="selectStaticResourceGift">
+        select * from s_resource_gift;
+    </select>
+
+    <select id="loadStaticZergShop" resultType="com.game.domain.s.StaticZergShop">
+        select * from s_zerg_shop;
+    </select>
+
+    <select id="loadStaticZergRound" resultType="com.game.domain.s.StaticZergRound">
+        select * from s_zerg_round;
+  </select>
+
+    <resultMap id="heroTalent" type="com.game.domain.s.StaticHeroTalent">
+        <result column="consume" property="consume" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="effect" property="effect" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+
+    <select id="selectHeroTalent" resultMap="heroTalent">
+		select * from s_hero_talent
+	</select>
+
+
+    <select id="loadStaticManoeuvreMatch" resultType="com.game.domain.s.StaticManoeuvreMatch">
+        select * from s_manoeuvre_match;
+  </select>
+
+    <resultMap id="staticManoeuvreShopMap" type="com.game.domain.s.StaticManoeuvreShop">
+        <result column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticManoeuvreShop" resultMap="staticManoeuvreShopMap">
+        select * from s_manoeuvre_shop;
+  </select>
+
+    <resultMap id="selectStaticManoeuvreRankAward" type="com.game.domain.s.StaticManoeuvreRankAward">
+        <result column="awardList" property="awardList" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticManoeuvreRankAward" resultMap="selectStaticManoeuvreRankAward">
+        select * from s_manoeuvre_rank_award;
+  </select>
+
+    <resultMap id="endlessBonusMap" type="com.game.domain.s.StaticTowerWarBonus">
+        <id column="id" property="id"/>
+    </resultMap>
+    <select id="loadStaticEndlessBonus" resultMap="endlessBonusMap">
+    select * from s_td_endless_bonus;
+  </select>
+
+    <resultMap id="endlessArmoryMap" type="com.game.domain.s.StaticEndlessArmory">
+        <id column="id" property="id"/>
+        <result column="prop" property="prop" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <result column="discount" property="discount" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticEndlessShop" resultMap="endlessArmoryMap">
+    select * from s_td_endless_shop;
+  </select>
+
+    <select id="loadStaticEndlessArmory" resultMap="endlessArmoryMap">
+    select * from s_td_endless_armory;
+  </select>
+
+    <resultMap id="endlessAwardMap" type="com.game.domain.s.StaticEndlessAward">
+        <id column="id" property="id"/>
+        <result column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticEndlessAward" resultMap="endlessAwardMap">
+    select * from s_td_endless_award;
+  </select>
+
+    <resultMap id="endlessBaseinfoMap" type="com.game.domain.s.StaticEndlessBaseinfo">
+        <id column="id" property="id"/>
+        <id column="resource" property="resource"/>
+        <id column="condition" property="condition" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <id column="tower_list" property="tower_list" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="monster_list" property="monster_list" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <id column="way_point_list" property="way_point_list"
+            typeHandler="com.game.handle.ListListDoubleTypeHandler"/>
+        <id column="tower_base_list" property="tower_base_list"
+            typeHandler="com.game.handle.ListListDoubleTypeHandler"/>
+        <id column="camera_limit" property="camera_limit" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <id column="camera_init" property="camera_init" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <id column="level_zergbuff" property="level_zergbuff" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="level_loop" property="level_loop" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticEndlessBaseInfo" resultMap="endlessBaseinfoMap">
+    select * from s_td_endless_baseinfo;
+  </select>
+
+    <resultMap id="endlessLevelMap" type="com.game.domain.s.StaticEndlessLevel">
+        <id column="wave_list" property="wave_list" typeHandler="com.game.handle.MapMapListIntTypeHandler"/>
+        <id column="way_list" property="way_list" typeHandler="com.game.handle.MapListIntTypeHandler"/>
+        <id column="drop" property="drop" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="betterdrop" property="betterdrop" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticEndlessLevel" resultMap="endlessLevelMap">
+    select * from s_td_endless_level;
+  </select>
+
+    <resultMap id="endlessItemMap" type="com.game.domain.s.StaticEndlessItem">
+        <id column="effect" property="effect" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="td_type" property="tdType"/>
+        <id column="type_desc" property="typeDesc"/>
+        <id column="propid" property="propId"/>
+    </resultMap>
+    <select id="loadStaticEndlessItem" resultMap="endlessItemMap">
+    select * from s_td_endless_item;
+  </select>
+
+
+    <resultMap id="tdDropLimitMap" type="com.game.domain.s.StaticEndlessTDDropLimit">
+        <id column="id" property="id"/>
+        <id column="param" property="param" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <id column="param2" property="param2" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadEndlessTDDropLimit" resultMap="tdDropLimitMap">
+    select * from s_td_endless_droplimit;
+  </select>
+
+    <resultMap id="endlessTowerMap" type="com.game.domain.s.StaticTowerWarTower">
+        <id column="id" property="id"/>
+    </resultMap>
+    <select id="loadEndlessTower" resultMap="endlessTowerMap">
+    select * from s_td_endless_tower;
+  </select>
+
+
+    <resultMap id="endlessMonsterMap" type="com.game.domain.s.StaticTowerWarMonster">
+        <id column="id" property="id"/>
+        <id column="sound_death" property="soundDeath"/>
+        <id column="view_layer" property="viewLayer"/>
+    </resultMap>
+    <select id="loadEndlessMonster" resultMap="endlessMonsterMap">
+    select * from s_td_endless_monster;
+  </select>
+
+    <resultMap id="endlessWaveMap" type="com.game.domain.s.StaticTowerWarWave">
+        <id column="monster_list" property="monster_list" typeHandler="com.game.handle.ListListDoubleTypeHandler"/>
+    </resultMap>
+    <select id="loadEndlessWave" resultMap="endlessWaveMap">
+    select * from s_td_endless_wave;
+  </select>
+
+
+    <resultMap id="materialSubstituteVipMap" type="com.game.domain.s.StaticMaterialSubstituteVip">
+        <id column="vip" property="vip"/>
+    </resultMap>
+    <select id="loadMaterialSubstituteVip" resultMap="materialSubstituteVipMap">
+    select * from s_vip_material_substitute;
+  </select>
+
+    <select id="loadMaterialSubstituteCost" resultType="StaticMaterialSubstituteCost">
+    select * from s_material_substitute_cost;
+  </select>
+
+
+    <resultMap id="springFestivalMap" type="com.game.domain.s.StaticActSpringFestival">
+        <id column="keyld" property="keyId"/>
+        <id column="type" property="type"/>
+        <id column="awardld" property="awardId"/>
+        <id column="sortld" property="sortId"/>
+        <id column="cond" property="cond"/>
+        <id column="awardlist" property="awardList" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="desc" property="desc"/>
+        <id column="probability" property="probability"/>
+    </resultMap>
+    <select id="loadSpringFestival" resultMap="springFestivalMap">
+    select * from s_spring;
+  </select>
+
+    <resultMap id="springGiftMap" type="com.game.domain.s.StaticLimitGift">
+        <id column="awardList" property="awardList" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadSpringGift" resultMap="springGiftMap">
+    select * from s_spring_gift;
+  </select>
+
+    <resultMap id="tdSevenTaskMap" type="com.game.domain.s.StaticTDSevenTask">
+        <id column="param" property="param" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <id column="awardList" property="awardList" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticTDSevenTaskMap" resultMap="tdSevenTaskMap">
+    select * from s_act_td_seven;
+  </select>
+
+    <resultMap id="tdSevenBoxAwardMap" type="com.game.domain.s.StaticTDSevenBoxAward">
+        <id column="keyId" property="keyId"/>
+        <id column="awardList" property="awardList" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticTDSevenBoxAwardMap" resultMap="tdSevenBoxAwardMap">
+    select * from s_act_td_seven_award;
+  </select>
+
+    <select id="queryGroup" resultType="com.game.domain.s.StaticGroup">
+        select * from s_group;
+
+    </select>
+
+    <!--    钓鱼相关-->
+    <resultMap id="staticFish" type="com.game.domain.s.StaticFish">
+        <id column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticFish" resultMap="staticFish">
+        select *
+        from s_fish;
+    </select>
+
+    <resultMap id="staticFishBait" type="com.game.domain.s.StaticFishBait">
+        <id column="baitToFishProbability" property="baitToFishProbability"
+            typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticFishBait" resultMap="staticFishBait">
+        select *, fish as baitToFishProbability
+        from s_fish_bait;
+    </select>
+
+    <resultMap id="staticFishHeroGroup" type="com.game.domain.s.StaticFishHeroGroup">
+        <id column="heroIds" property="heroIds" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <id column="combination" property="combination" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <id column="groupToBaitProbability" property="groupToBaitProbability"
+            typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticFishHeroGroup" resultMap="staticFishHeroGroup">
+        select *, `group` as heroIds
+        from s_fish_hero_group;
+    </select>
+
+    <resultMap id="staticFishLv" type="com.game.domain.s.StaticFishLv">
+        <id column="hit" property="hit" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="size" property="size" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticFishLv" resultMap="staticFishLv">
+        select *
+        from s_fish_lv;
+    </select>
+
+    <resultMap id="staticFishShop" type="com.game.domain.s.StaticFishShop">
+        <id column="prop" property="prop" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticFishShop" resultMap="staticFishShop">
+        select *
+        from s_fish_shop;
+    </select>
+
+    <select id="loadSensitiveWord" resultType="com.game.domain.s.StaticSensitiveWord" parameterType="string">
+        select * from s_sensitive_word_server where ${_parameter} = 0;
+    </select>
+
+    <select id="loadFlameSafe" resultType="com.game.flame.entity.StaticFlameSafe">
+        select * from s_war_fire_safe;
+    </select>
+
+    <select id="loadFlameMin" resultType="com.game.flame.entity.StaticFlameMine">
+        select * from s_war_fire_mine_type;
+    </select>
+
+    <select id="loadFlameMinFlush" resultType="com.game.flame.entity.StaticFlameFlushMine">
+        select * from s_war_fire_mine;
+    </select>
+    <resultMap id="flameBuff" type="com.game.flame.entity.StaticFlameBuff">
+        <id column="id" property="id"/>
+        <id column="effect" property="effect" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadFlameBuff" resultMap="flameBuff">
+        select * from s_war_fire_buff;
+    </select>
+    <resultMap id="flameBuild" type="com.game.flame.entity.StaticFlameBuild">
+        <id column="id" property="id"/>
+        <id column="buff" property="buff" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadFlameBuild" resultMap="flameBuild">
+        select * from s_war_fire_build;
+    </select>
+    <resultMap id="flameShop" type="com.game.flame.entity.StaticFlameShop">
+        <id column="id" property="id"/>
+        <id column="prop" property="prop" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadFlameShop" resultMap="flameShop">
+        select * from s_war_fire_shop;
+    </select>
+    <select id="loadFlameRankGears" resultType="com.game.flame.entity.StaticFlameRankGear">
+        select * from s_war_fire_rank_gear;
+    </select>
+    <resultMap id="rankCamp" type="com.game.flame.entity.StaticFlameRankCamp">
+        <id column="id" property="id"/>
+    </resultMap>
+    <select id="loadFlameRankCamp" resultMap="rankCamp">
+        select * from s_war_fire_rank_camp;
+    </select>
+    <select id="loadFlameKill" resultType="com.game.flame.entity.StaticFlameKill">
+        select * from s_war_fire_kill;
+    </select>
+
+    <resultMap id="bulletWar" type="com.game.domain.s.StaticBulletWarLevel">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="extra_award" property="extra_award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadBulletWar" resultMap="bulletWar">
+        select * from s_bulletwar_level;
+    </select>
+
+    <select id="loadComPlan" resultType="com.game.season.StaticCompPlan">
+         select * from s_compseason_plan;
+    </select>
+
+    <resultMap id="seasonJourney" type="com.game.season.journey.entity.StaticSeasonJourney">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadSeasonJourney" resultMap="seasonJourney">
+        select * from s_compseason_journey;
+    </select>
+
+    <resultMap id="seasonJourneyAward" type="com.game.season.journey.entity.StaticJourneyAward">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadJourneyAward" resultMap="seasonJourneyAward">
+        select * from s_compseason_journey_award;
+    </select>
+
+    <resultMap id="seasonJourneyCamp" type="com.game.season.journey.entity.StaticJourneyCamp">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadJourneyCamp" resultMap="seasonJourneyCamp">
+         select * from s_compseason_journey_camp;
+    </select>
+
+    <resultMap id="seasonJourneyPerson" type="com.game.season.journey.entity.StaticJourneyPerson">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadJourneyPerson" resultMap="seasonJourneyPerson">
+         select * from s_compseason_journey_person;
+    </select>
+    <resultMap id="seasonJourneyRankOff" type="com.game.season.journey.entity.StaticJourneyRankOfficer">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadJourneyRankOff" resultMap="seasonJourneyRankOff">
+         select * from s_compseason_journey_officer;
+    </select>
+
+    <resultMap id="seasonTurn" type="com.game.season.turn.entity.StaticTurn">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticTurn" resultMap="seasonTurn">
+         select * from s_compseason_turntable;
+    </select>
+    <resultMap id="seasonTurnAward" type="com.game.season.turn.entity.StaticTurnAward">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticTurnAward" resultMap="seasonTurnAward">
+          select * from s_compseason_turntable_award;
+    </select>
+    <select id="loadStaticTurnConfig" resultType="com.game.season.turn.entity.StaticTurnConfig">
+        select * from s_compseason_cost;
+    </select>
+
+    <resultMap id="seasonLimitGift" type="com.game.season.directgift.entity.StaticSeasonLimitGift">
+        <id column="awardList" property="awardList" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticSeasonLimitGift" resultMap="seasonLimitGift">
+        select * from s_compseason_limit_gift;
+
+    </select>
+
+    <resultMap id="seasonPayGift" type="com.game.season.seasongift.entity.StaticSeasonPayGift">
+        <id column="sellList" property="sellList" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticSeasonPayGift" resultMap="seasonPayGift">
+        select * from s_act_pay_money;
+    </select>
+
+    <select id="loadStaticSeasonSeven" resultType="com.game.season.seven.entity.StaticSeasonSeven">
+        select * from s_compseason_seven;
+    </select>
+
+
+
+    <resultMap id="seasonSevenType" type="com.game.season.seven.entity.StaticSeasonSevenType">
+        <id column="section" property="section" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticSeasonSevenType" resultMap="seasonSevenType">
+         select * from s_compseason_seven_type;
+    </select>
+
+    <resultMap id="seasonSevenAward" type="com.game.season.seven.entity.StaticSeasonSevenAward">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticSeasonSevenAward" resultMap="seasonSevenAward">
+           select * from s_compseason_seven_award;
+    </select>
+
+    <resultMap id="seasonSevenRank" type="com.game.season.seven.entity.StaticSeasonSevenRank">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticSeasonSevenRank" resultMap="seasonSevenRank">
+          select * from s_compseason_seven_rank;
+    </select>
+
+    <resultMap id="seasonTreasury" type="com.game.season.grand.entity.StaticSeasonTreasury">
+        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticSeasonTreasury" resultMap="seasonTreasury">
+          select * from s_compseason_treasury;
+    </select>
+
+
+    <resultMap id="seasonSkill" type="com.game.season.hero.StaticComSkill">
+        <id column="upgrade" property="upgrade" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticSeasonSkill" resultMap="seasonSkill">
+          select * from s_compseason_skill;
+    </select>
+
+    <resultMap id="seasonProf" type="com.game.season.hero.StaticComProf">
+        <id column="upgrade" property="upgrade" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="addBasicPro" property="addBasicPro" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticComProf" resultMap="seasonProf">
+            select * from s_compseason_prof;
+    </select>
+
+    <resultMap id="seasonCompTalent" type="com.game.season.talent.entity.StaticCompTalent">
+        <id column="cost" property="cost" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticCompTalent" resultMap="seasonCompTalent">
+        select * from s_compseason_talent;
+    </select>
+
+    <resultMap id="seasonCompTalentUp" type="com.game.season.talent.entity.StaticCompTalentUp">
+        <id column="cost" property="cost" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="effect" property="effect" typeHandler="com.game.handle.ListListTypeHandler"/>
+        <id column="preTypeId" property="preTypeId" typeHandler="com.game.handle.ListIntTypeHandler"/>
+        <id column="totalCost" property="totalCost" typeHandler="com.game.handle.ListListTypeHandler"/>
+    </resultMap>
+    <select id="loadStaticCompTalentUp" resultMap="seasonCompTalentUp">
+        select * from s_compseason_talent_upgrade;
+    </select>
+
+    <select id="loadStaticCompTalentType" resultType="com.game.season.talent.entity.StaticCompTalentType">
+        select * from s_compseason_talent_type;
+    </select>
+
+</mapper>
+

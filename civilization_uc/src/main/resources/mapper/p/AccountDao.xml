@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.uc.dao.ifs.p.AccountDao">
+
+    <select id="selectByAccount" resultType="com.game.uc.Account">
+		select * from `u_account` where  account = #{account} limit 1
+	</select>
+
+	<select id="selectByKey" resultType="com.game.uc.Account">
+		select * from `u_account` where keyId = #{keyId}
+	</select>
+
+    <insert id="insertWithAccount" parameterType="com.game.uc.Account" useGeneratedKeys="true" keyProperty="keyId">
+		insert into u_account(channel
+			, account
+			, childNo
+			, baseVersion
+			, versionNo
+			, token
+			, deviceNo
+			, loginDate
+			, createDate
+		) values ( #{channel}
+			, #{account}
+			, #{childNo}
+			, #{baseVersion}
+			, #{versionNo}
+			, #{token}
+			, #{deviceNo}
+			, #{loginDate}
+			, #{createDate}
+		)
+	</insert>
+
+    <update id="updateAccount" parameterType="com.game.uc.Account">
+			update u_account
+			set account =#{account}
+			, childNo =#{childNo}
+			, baseVersion=#{baseVersion}
+			, versionNo=#{versionNo}
+			, token=#{token}
+			, deviceNo=#{deviceNo}
+			, loginDate=#{loginDate}
+			, createDate=#{createDate}
+			, firstSvr =${firstSvr}
+			, secondSvr =${secondSvr}
+			, thirdSvr = ${thirdSvr}
+			, serverInfos =#{serverInfos}
+			, gameDate =#{gameDate}
+			, loggedServer =#{loggedServer}
+	  where keyId = #{keyId}
+	</update>
+</mapper>

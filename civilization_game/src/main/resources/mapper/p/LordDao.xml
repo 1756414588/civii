@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.LordDao">
+  <select id="selectLordById" parameterType="Long"
+    resultType="com.game.domain.p.Lord">
+        select * from p_lord where lordId = #{lordId}
+    </select>
+
+  <select id="selectLordByRank" parameterType="Integer"
+    resultType="com.game.domain.p.Lord">
+        select * from p_lord a where a.nick is not null order by
+        level desc limit #{rank}
+    </select>
+
+  <select id="getLordListInId" resultType="com.game.domain.p.Lord">
+    select * from p_lord where lordId in
+    <foreach item="lordIds" index="index" collection="list"
+      open="(" separator="," close=")">
+      #{lordIds}
+    </foreach>
+  </select>
+
+  <select id="selectLordByNick" parameterType="String"
+    resultType="com.game.domain.p.Lord">
+        select * from p_lord where nick = #{nick}
+    </select>
+
+  <select id="sameNameCount" parameterType="String"
+    resultType="Integer">
+        select count(lordId) from p_lord where nick = #{nick}
+    </select>
+
+  <update id="updateGold" parameterType="com.game.domain.p.Lord">
+        update p_lord set gold =
+        #{gold}
+        , goldCost = #{goldCost}
+        , goldGive = #{goldGive}
+        where lordId = #{lordId}
+    </update>
+
+  <update id="updateVip" parameterType="com.game.domain.p.Lord">
+        update p_lord set ingot =
+        #{ingot}
+        , vip = #{vip}
+        where lordId = #{lordId}
+    </update>
+
+  <update id="updateLv" parameterType="com.game.domain.p.Lord">
+        update p_lord set exp =
+        #{exp}
+        , level = #{level}
+        , lvUpTime = #{lvUpTime}
+        where lordId = #{lordId}
+    </update>
+
+  <update id="updateGoldAndEquip"
+    parameterType="com.game.domain.p.Lord">
+        update p_lord set equip = #{equip}
+        , gold = #{gold}
+        , goldCost = #{goldCost}
+        where lordId = #{lordId}
+    </update>
+
+  <update id="updateNewState"
+    parameterType="com.game.domain.p.Lord">
+        update p_lord set newState = #{newState} where lordId =
+        #{lordId}
+    </update>
+
+  <resultMap id="lordMap" type="com.game.domain.p.Lord">
+    <result column="payStatus" property="payStatusList"
+      typeHandler="com.game.handle.ListIntTypeHandler"/>
+  </resultMap>
+
+  <select id="load" parameterType="Map" resultMap="lordMap">
+        select * from
+        p_lord where lordId &gt; #{curIndex} order by lordId limit 0,#{count}
+    </select>
+
+  <select id="queryAutoIncrement" parameterType="string"
+    resultType="int">
+        select auto_increment from information_schema.`TABLES`
+        where table_name= 'p_lord' and TABLE_SCHEMA=#{database}
+    </select>
+
+
+  <update id="updateLord" parameterType="com.game.domain.p.Lord">
+		replace into p_lord (
+		    lordId,
+        nick,
+        portrait,
+        sex,
+        level,
+        exp,
+        vip,
+        vipExp,
+        topup,
+        gold,
+        goldCost,
+        goldGive,
+        title,
+        honor,
+        newState,
+        country,
+        energy,
+        energyTime,
+        buyEnergy,
+        buyEnergyTime,
+        newerGift,
+        onTime,
+        olTime,
+        offTime,
+        ctTime,
+        olAward,
+        loginDays,
+        silence,
+        olMonth,
+        firstPay,
+        tvip,
+        tvipTime,
+        buyEquipSlotTimes,
+        washSkillTimes,
+        expertWashSkillTimes,
+        washHeroTimes,
+        soliderLines,
+        miss,
+        hit,
+        criti,
+        tenacity,
+        collectTimes,
+        collectEndTime,
+        battleScore,
+        monthCard,
+        seasonCard,
+        useEnergyNum,
+        useEnergyDay,
+        washSkillEndTime,
+        washHeroEndTime,
+        lootCommonHero,
+        lootCommonHeroTime,
+        lootGoodHeroEndTime,
+        lootGoodHeroFiveTimes,
+        lootGoodFreeTimes,
+        goodHeroProcess,
+        lootCommonFreeTimes,
+        protectedTime,
+        buildTeamTime,
+        people,
+        buyWorkShopQue,
+        recoverPeopleTime,
+        posX,
+        posY,
+        maxMonsterLv,
+        killMonsterNum,
+        worldKillMonsterStatus,
+        killWorldBossDay,wareTimes,
+        wareHighTimes,
+        wareBuildDay,
+        flyTimes,
+        flyDay,
+        onBuild,
+        autoBuildTimes,
+        autoWallTimes,
+        cityId,
+        vipEquip,
+        vipWorkShop,
+        vipTech,
+        freeBackTimes,
+        freeBackDay,
+        depotTime,
+        depotRefresh,
+        depotBuyTime,
+        loginAward,
+        minCountry,
+        soldierAuto,
+        loginMail,
+        onWall,
+        buildingScore,
+        exchangeRes,
+        mailShareDay,
+        mailTimes,
+        callTimes,
+        callDay,
+        callCount,
+        callReply,
+        callEndTime,
+        lvUpTime,
+        suggestCount,
+        suggestTime,
+        createState,
+        guideKey,
+        seekingTimes,
+        safety,
+        sGameTimes,
+        buySGameTimes,
+        buySeekingTimes,
+        freeSGameEndTime,
+        freeSeekingEndTime,
+        firstBReName,
+        payStatus,
+        openSpeak,
+        systemGold,
+        rechargeGold,
+        lastJourney,
+        journeyTimes,
+        freeJourneyEndTime,
+        buyJourneyEndTime,
+        buyJourneyTimes,
+        rebelCall,
+        killRebel,
+        attackPlayerNum,
+        attackCityNum,
+        curMainTask,
+        curMainDupicate,
+        buildGift,
+        firstPlaySGameTime,
+        warBookShopRefreshTime,
+        warBookShopRefresh,
+        dayRecharge,
+        wordBoxNum,
+        headIndex,
+        chatIndex,
+        killRoitNum,
+        bookEffectHoronCd,
+        skin,
+        clothes,
+        mergeServerStatus,
+        isSeven,
+        buyBookShopRefreshTime,
+        tdMoney
+		    )values(
+		    #{lordId},
+        #{nick},
+        #{portrait},
+        #{sex},
+        #{level},
+        #{exp},
+        #{vip},
+        #{vipExp},
+        #{topup},
+        #{gold},
+        #{goldCost},
+        #{goldGive},
+        #{title},
+        #{honor},
+        #{newState},
+        #{country},
+        #{energy},
+        #{energyTime},
+        #{buyEnergy},
+        #{buyEnergyTime},
+        #{newerGift},
+        #{onTime},
+        #{olTime},
+        #{offTime},
+        #{ctTime},
+        #{olAward},
+        #{loginDays},
+        #{silence},
+        #{olMonth},
+        #{firstPay},
+        #{tvip},
+        #{tvipTime},
+        #{buyEquipSlotTimes},
+        #{washSkillTimes},
+        #{expertWashSkillTimes},
+        #{washHeroTimes},
+        #{soliderLines},
+        #{miss},
+        #{hit},
+        #{criti},
+        #{tenacity},
+        #{collectTimes},
+        #{collectEndTime},
+        #{battleScore},
+        #{monthCard},
+        #{seasonCard},
+        #{useEnergyNum},
+        #{useEnergyDay},
+        #{washSkillEndTime},
+        #{washHeroEndTime},
+        #{lootCommonHero},
+        #{lootCommonHeroTime},
+        #{lootGoodHeroEndTime},
+        #{lootGoodHeroFiveTimes},
+        #{lootGoodFreeTimes},
+        #{goodHeroProcess},
+        #{lootCommonFreeTimes},
+        #{protectedTime},
+        #{buildTeamTime},
+        #{people},
+        #{buyWorkShopQue},
+        #{recoverPeopleTime},
+        #{posX},
+        #{posY},
+        #{maxMonsterLv},
+        #{killMonsterNum},
+        #{worldKillMonsterStatus},
+        #{killWorldBossDay},
+        #{wareTimes},
+        #{wareHighTimes},
+        #{wareBuildDay},
+        #{flyTimes},
+        #{flyDay},
+        #{onBuild},
+        #{autoBuildTimes},
+        #{autoWallTimes},
+        #{cityId},
+        #{vipEquip},
+        #{vipWorkShop},
+        #{vipTech},
+        #{freeBackTimes},
+        #{freeBackDay},
+        #{depotTime},
+        #{depotRefresh},
+        #{depotBuyTime},
+        #{loginAward},
+        #{minCountry},
+        #{soldierAuto},
+        #{loginMail},
+        #{onWall},
+        #{buildingScore},
+        #{exchangeRes},
+        #{mailShareDay},
+        #{mailTimes},
+        #{callTimes},
+        #{callDay},
+        #{callCount},
+        #{callReply},
+        #{callEndTime},
+        #{lvUpTime},
+        #{suggestCount},
+        #{suggestTime},
+        #{createState},
+        #{guideKey},
+        #{seekingTimes},
+        #{safety},
+        #{sGameTimes},
+        #{buySGameTimes},
+        #{buySeekingTimes},
+        #{freeSGameEndTime},
+        #{freeSeekingEndTime},
+        #{firstBReName},
+        #{payStatus},
+        #{openSpeak},
+        #{systemGold},
+        #{rechargeGold},
+        #{lastJourney},
+        #{journeyTimes},
+        #{freeJourneyEndTime},
+        #{buyJourneyEndTime},
+        #{buyJourneyTimes},
+        #{rebelCall},
+        #{killRebel},
+        #{attackPlayerNum},
+        #{attackCityNum},
+        #{curMainTask},
+        #{curMainDupicate},
+        #{buildGift},
+        #{firstPlaySGameTime},
+        #{warBookShopRefreshTime},
+        #{warBookShopRefresh},
+        #{dayRecharge},
+        #{wordBoxNum},
+        #{headIndex},
+        #{chatIndex},
+        #{killRoitNum},
+        #{bookEffectHoronCd},
+        #{skin},
+        #{clothes},
+        #{mergeServerStatus},
+        #{isSeven},
+        #{buyBookShopRefreshTime},
+        #{tdMoney}
+		);
+	</update>
+</mapper>

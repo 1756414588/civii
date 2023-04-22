@@ -1,0 +1,16 @@
+<?xml version ="1.0" encoding ="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.PublicDataDao">
+
+  <select id="queryPublicData" parameterType="Integer" resultType="PublicData">
+  select  * from  p_public_data where id = #{id};
+</select>
+
+  <update id="update" parameterType="PublicData">
+    replace  into p_public_data(id,lastSaveTime,endlessTDRank)values (#{id},#{lastSaveTime},#{endlessTDRank});
+  </update>
+
+
+</mapper>

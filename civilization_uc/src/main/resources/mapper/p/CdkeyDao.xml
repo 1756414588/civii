@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.game.uc.dao.ifs.p.CdkeyDao">
+    <resultMap id="BaseResultMap" type="com.game.uc.Cdkey">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="keyChar" jdbcType="CHAR" property="keychar"/>
+        <result column="channel" jdbcType="INTEGER" property="channel"/>
+        <result column="areaid" jdbcType="INTEGER" property="areaid"/>
+        <result column="keytype" jdbcType="INTEGER" property="keytype"/>
+        <result column="starttime" jdbcType="TIMESTAMP" property="starttime"/>
+        <result column="endtime" jdbcType="TIMESTAMP" property="endtime"/>
+        <result column="rewardobjectid" jdbcType="INTEGER" property="rewardobjectid"/>
+        <result column="isuse" jdbcType="INTEGER" property="isuse"/>
+        <result column="roleid" jdbcType="BIGINT" property="roleid"/>
+        <result column="createtime" jdbcType="TIMESTAMP" property="createtime"/>
+        <result column="universal" jdbcType="INTEGER" property="universal"/>
+        <result column="assign" jdbcType="TINYINT" property="assign"/>
+        <result column="use_level" jdbcType="TINYINT" property="use_level"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, keyChar, channel, areaid, keytype, starttime, endtime, rewardobjectid, isuse,
+        roleid, createtime, universal, assign,use_level
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from cdkey
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from cdkey
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.game.uc.Cdkey">
+        insert into cdkey (id, keyChar, channel,
+        areaid, keytype, starttime,
+        endtime, rewardobjectid, isuse,
+        roleid, createtime, universal,
+        assign)
+        values (#{id,jdbcType=INTEGER}, #{keychar,jdbcType=CHAR}, #{channel,jdbcType=INTEGER},
+        #{areaid,jdbcType=INTEGER}, #{keytype,jdbcType=INTEGER}, #{starttime,jdbcType=TIMESTAMP},
+        #{endtime,jdbcType=TIMESTAMP}, #{rewardobjectid,jdbcType=INTEGER}, #{isuse,jdbcType=INTEGER},
+        #{roleid,jdbcType=BIGINT}, #{createtime,jdbcType=TIMESTAMP}, #{universal,jdbcType=INTEGER},
+        #{assign,jdbcType=TINYINT})
+    </insert>
+    <insert id="insertSelective" parameterType="com.game.uc.Cdkey">
+        insert into cdkey
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="keychar != null">
+                keyChar,
+            </if>
+            <if test="channel != null">
+                channel,
+            </if>
+            <if test="areaid != null">
+                areaid,
+            </if>
+            <if test="keytype != null">
+                keytype,
+            </if>
+            <if test="starttime != null">
+                starttime,
+            </if>
+            <if test="endtime != null">
+                endtime,
+            </if>
+            <if test="rewardobjectid != null">
+                rewardobjectid,
+            </if>
+            <if test="isuse != null">
+                isuse,
+            </if>
+            <if test="roleid != null">
+                roleid,
+            </if>
+            <if test="createtime != null">
+                createtime,
+            </if>
+            <if test="universal != null">
+                universal,
+            </if>
+            <if test="assign != null">
+                assign,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="keychar != null">
+                #{keychar,jdbcType=CHAR},
+            </if>
+            <if test="channel != null">
+                #{channel,jdbcType=INTEGER},
+            </if>
+            <if test="areaid != null">
+                #{areaid,jdbcType=INTEGER},
+            </if>
+            <if test="keytype != null">
+                #{keytype,jdbcType=INTEGER},
+            </if>
+            <if test="starttime != null">
+                #{starttime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endtime != null">
+                #{endtime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="rewardobjectid != null">
+                #{rewardobjectid,jdbcType=INTEGER},
+            </if>
+            <if test="isuse != null">
+                #{isuse,jdbcType=INTEGER},
+            </if>
+            <if test="roleid != null">
+                #{roleid,jdbcType=BIGINT},
+            </if>
+            <if test="createtime != null">
+                #{createtime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="universal != null">
+                #{universal,jdbcType=INTEGER},
+            </if>
+            <if test="assign != null">
+                #{assign,jdbcType=TINYINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.game.uc.Cdkey">
+        update cdkey
+        <set>
+            <if test="keychar != null">
+                keyChar = #{keychar,jdbcType=CHAR},
+            </if>
+            <if test="channel != null">
+                channel = #{channel,jdbcType=INTEGER},
+            </if>
+            <if test="areaid != null">
+                areaid = #{areaid,jdbcType=INTEGER},
+            </if>
+            <if test="keytype != null">
+                keytype = #{keytype,jdbcType=INTEGER},
+            </if>
+            <if test="starttime != null">
+                starttime = #{starttime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endtime != null">
+                endtime = #{endtime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="rewardobjectid != null">
+                rewardobjectid = #{rewardobjectid,jdbcType=INTEGER},
+            </if>
+            <if test="isuse != null">
+                isuse = #{isuse,jdbcType=INTEGER},
+            </if>
+            <if test="roleid != null">
+                roleid = #{roleid,jdbcType=BIGINT},
+            </if>
+            <if test="createtime != null">
+                createtime = #{createtime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="universal != null">
+                universal = #{universal,jdbcType=INTEGER},
+            </if>
+            <if test="assign != null">
+                assign = #{assign,jdbcType=TINYINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.game.uc.Cdkey">
+        update cdkey
+        set keyChar = #{keychar,jdbcType=CHAR},
+        channel = #{channel,jdbcType=INTEGER},
+        areaid = #{areaid,jdbcType=INTEGER},
+        keytype = #{keytype,jdbcType=INTEGER},
+        starttime = #{starttime,jdbcType=TIMESTAMP},
+        endtime = #{endtime,jdbcType=TIMESTAMP},
+        rewardobjectid = #{rewardobjectid,jdbcType=INTEGER},
+        isuse = #{isuse,jdbcType=INTEGER},
+        roleid = #{roleid,jdbcType=BIGINT},
+        createtime = #{createtime,jdbcType=TIMESTAMP},
+        universal = #{universal,jdbcType=INTEGER},
+        assign = #{assign,jdbcType=TINYINT}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="selectCdkActivity" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from cdkey
+        where rewardobjectid = #{rewardobjectid,jdbcType=INTEGER}
+    </select>
+</mapper>

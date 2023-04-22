@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.game.uc.dao.ifs.p.CdkeyItemDao">
+  <resultMap id="BaseResultMap" type="com.game.uc.CdkeyItem">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="giftbagid" jdbcType="INTEGER" property="giftbagid" />
+    <result column="itemId" jdbcType="INTEGER" property="itemid" />
+    <result column="itemType" jdbcType="INTEGER" property="itemtype" />
+    <result column="itemNum" jdbcType="INTEGER" property="itemnum" />
+    <result column="itemName" jdbcType="VARCHAR" property="itemname" />
+    <result column="itemDesc" jdbcType="VARCHAR" property="itemdesc" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, giftbagid, itemId, itemType, itemNum, itemName, itemDesc
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from cdkey_item
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from cdkey_item
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.game.uc.CdkeyItem">
+    insert into cdkey_item (id, giftbagid, itemId, 
+      itemType, itemNum, itemName, 
+      itemDesc)
+    values (#{id,jdbcType=INTEGER}, #{giftbagid,jdbcType=INTEGER}, #{itemid,jdbcType=INTEGER}, 
+      #{itemtype,jdbcType=INTEGER}, #{itemnum,jdbcType=INTEGER}, #{itemname,jdbcType=VARCHAR}, 
+      #{itemdesc,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.game.uc.CdkeyItem">
+    insert into cdkey_item
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="giftbagid != null">
+        giftbagid,
+      </if>
+      <if test="itemid != null">
+        itemId,
+      </if>
+      <if test="itemtype != null">
+        itemType,
+      </if>
+      <if test="itemnum != null">
+        itemNum,
+      </if>
+      <if test="itemname != null">
+        itemName,
+      </if>
+      <if test="itemdesc != null">
+        itemDesc,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="giftbagid != null">
+        #{giftbagid,jdbcType=INTEGER},
+      </if>
+      <if test="itemid != null">
+        #{itemid,jdbcType=INTEGER},
+      </if>
+      <if test="itemtype != null">
+        #{itemtype,jdbcType=INTEGER},
+      </if>
+      <if test="itemnum != null">
+        #{itemnum,jdbcType=INTEGER},
+      </if>
+      <if test="itemname != null">
+        #{itemname,jdbcType=VARCHAR},
+      </if>
+      <if test="itemdesc != null">
+        #{itemdesc,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.game.uc.CdkeyItem">
+    update cdkey_item
+    <set>
+      <if test="giftbagid != null">
+        giftbagid = #{giftbagid,jdbcType=INTEGER},
+      </if>
+      <if test="itemid != null">
+        itemId = #{itemid,jdbcType=INTEGER},
+      </if>
+      <if test="itemtype != null">
+        itemType = #{itemtype,jdbcType=INTEGER},
+      </if>
+      <if test="itemnum != null">
+        itemNum = #{itemnum,jdbcType=INTEGER},
+      </if>
+      <if test="itemname != null">
+        itemName = #{itemname,jdbcType=VARCHAR},
+      </if>
+      <if test="itemdesc != null">
+        itemDesc = #{itemdesc,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.game.uc.CdkeyItem">
+    update cdkey_item
+    set giftbagid = #{giftbagid,jdbcType=INTEGER},
+      itemId = #{itemid,jdbcType=INTEGER},
+      itemType = #{itemtype,jdbcType=INTEGER},
+      itemNum = #{itemnum,jdbcType=INTEGER},
+      itemName = #{itemname,jdbcType=VARCHAR},
+      itemDesc = #{itemdesc,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectAll"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from cdkey_item
+  </select>
+</mapper>

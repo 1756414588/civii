@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.ActivityDao">
+    <select id="selectActivityList" resultType="com.game.domain.p.Activity">
+        select * from p_activity
+    </select>
+
+    <insert id="insertActivity" parameterType="com.game.domain.p.Activity">
+        insert into p_activity(activityId
+        , beginTime
+        , sortord
+        , awardId
+        , ranks
+        , addtion
+        , status
+        , `history`
+        , params
+        , records
+        , campMembers
+        , record
+        ) values (#{activityId}
+        , #{beginTime}
+        , #{sortord}
+        , #{awardId}
+        , #{ranks}
+        , #{addtion}
+        , #{status}
+        , #{history}
+        , #{params}
+        , #{records}
+        , #{campMembers}
+        , #{record}
+        )
+    </insert>
+
+    <update id="updateActivity" parameterType="com.game.domain.p.Activity">
+        update p_activity
+        set beginTime = #{beginTime}
+        , awardId = #{awardId}
+        , sortord = #{sortord}
+        , ranks = #{ranks}
+        , addtion = #{addtion}
+        , status = #{status}
+        , `history` = #{history}
+        , params = #{params}
+        , records = #{records}
+        , campMembers = #{campMembers}
+        , record=#{record}
+        where activityId = #{activityId}
+    </update>
+
+</mapper>

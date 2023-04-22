@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.CountryDao">
+    <select id="selectCountryList" resultType="com.game.domain.p.Country">
+		select * from p_country 
+	</select>
+
+    <insert id="insertCountry" parameterType="com.game.domain.p.Country">
+		insert into p_country(countryId
+			, level
+			, exp
+			, announcement
+			, publisher
+			, voteTime
+			, voteState
+			, appoint
+			, taskTime
+			, hero
+			, daily
+			, govern
+			, tempGovern
+			, glory
+			, countryRank
+			, killNum
+			, countryName
+			, modifyName
+			, checkState
+			, modifyTime
+			, modifyPlayer
+		) values (#{countryId}
+			, #{level}
+			, #{exp}
+			, #{announcement}
+			, #{publisher}
+			, #{voteTime}
+			, #{voteState}
+			, #{appoint}
+			, #{taskTime}
+			, #{hero}
+			, #{daily}
+			, #{govern}
+			, #{tempGovern}
+			, #{glory}
+			, #{countryRank}
+			, #{killNum}
+			, #{countryName}
+			, #{modifyName}
+			, #{checkState}
+			, #{modifyTime}
+			, #{modifyPlayer}
+		)
+	</insert>
+
+
+    <insert id="insertSelective" parameterType="com.game.domain.p.Country">
+        insert into p_country
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="countryId != null">
+                countryId,
+            </if>
+            <if test="level != null">
+                level,
+            </if>
+            <if test="exp != null">
+                exp,
+            </if>
+            <if test="announcement != null">
+                announcement,
+            </if>
+            <if test="publisher != null">
+                publisher,
+            </if>
+            <if test="voteTime != null">
+                voteTime,
+            </if>
+            <if test="voteHour != null">
+                voteHour,
+            </if>
+            <if test="voteState != null">
+                voteState,
+            </if>
+            <if test="taskTime != null">
+                taskTime,
+            </if>
+            <if test="appoint != null">
+                appoint,
+            </if>
+            <if test="soldierNum != null">
+                soldierNum,
+            </if>
+            <if test="rankTime != null">
+                rankTime,
+            </if>
+            <if test="killNum != null">
+                killNum,
+            </if>
+            <if test="countryName != null">
+                countryName,
+            </if>
+            <if test="modifyName != null">
+                modifyName,
+            </if>
+            <if test="checkState != null">
+                checkState,
+            </if>
+            <if test="modifyTime != null">
+                modifyTime,
+            </if>
+            <if test="modifyPlayer != null">
+                modifyPlayer,
+            </if>
+            <if test="hero != null">
+                hero,
+            </if>
+            <if test="daily != null">
+                daily,
+            </if>
+            <if test="govern != null">
+                govern,
+            </if>
+            <if test="tempGovern != null">
+                tempGovern,
+            </if>
+            <if test="glory != null">
+                glory,
+            </if>
+            <if test="countryRank != null">
+                countryRank,
+            </if>
+            <if test="countryHero != null">
+                countryHero,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="countryId != null">
+                #{countryId,jdbcType=INTEGER},
+            </if>
+            <if test="level != null">
+                #{level,jdbcType=INTEGER},
+            </if>
+            <if test="exp != null">
+                #{exp,jdbcType=INTEGER},
+            </if>
+            <if test="announcement != null">
+                #{announcement,jdbcType=VARCHAR},
+            </if>
+            <if test="publisher != null">
+                #{publisher,jdbcType=VARCHAR},
+            </if>
+            <if test="voteTime != null">
+                #{voteTime,jdbcType=BIGINT},
+            </if>
+            <if test="voteHour != null">
+                #{voteHour,jdbcType=INTEGER},
+            </if>
+            <if test="voteState != null">
+                #{voteState,jdbcType=INTEGER},
+            </if>
+            <if test="taskTime != null">
+                #{taskTime,jdbcType=BIGINT},
+            </if>
+            <if test="appoint != null">
+                #{appoint,jdbcType=INTEGER},
+            </if>
+            <if test="soldierNum != null">
+                #{soldierNum,jdbcType=INTEGER},
+            </if>
+            <if test="rankTime != null">
+                #{rankTime,jdbcType=BIGINT},
+            </if>
+            <if test="killNum != null">
+                #{killNum,jdbcType=INTEGER},
+            </if>
+            <if test="countryName != null">
+                #{countryName,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyName != null">
+                #{modifyName,jdbcType=VARCHAR},
+            </if>
+            <if test="checkState != null">
+                #{checkState,jdbcType=INTEGER},
+            </if>
+            <if test="modifyTime != null">
+                #{modifyTime,jdbcType=INTEGER},
+            </if>
+            <if test="modifyPlayer != null">
+                #{modifyPlayer,jdbcType=INTEGER},
+            </if>
+            <if test="hero != null">
+                #{hero,jdbcType=LONGVARBINARY},
+            </if>
+            <if test="daily != null">
+                #{daily,jdbcType=LONGVARBINARY},
+            </if>
+            <if test="govern != null">
+                #{govern,jdbcType=LONGVARBINARY},
+            </if>
+            <if test="tempGovern != null">
+                #{tempGovern,jdbcType=LONGVARBINARY},
+            </if>
+            <if test="glory != null">
+                #{glory,jdbcType=LONGVARBINARY},
+            </if>
+            <if test="countryRank != null">
+                #{countryRank,jdbcType=LONGVARBINARY},
+            </if>
+            <if test="countryHero != null">
+                #{countryHero,jdbcType=LONGVARBINARY},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="updateCountry" parameterType="com.game.domain.p.Country">
+		update p_country 
+		set level = #{level}
+			, exp = #{exp}
+			, announcement = #{announcement}
+			, publisher = #{publisher}
+			, voteTime = #{voteTime}
+			, voteState = #{voteState}
+			, taskTime = #{taskTime}
+			, rankTime = #{rankTime}
+			, hero = #{hero}
+			, daily = #{daily}
+			, govern = #{govern}
+			, tempGovern = #{tempGovern}
+			, glory = #{glory}
+			, appoint = #{appoint}
+			, countryRank = #{countryRank}
+			, countryHero = #{countryHero}
+			, soldierNum = #{soldierNum}
+			, killNum = #{killNum}
+			, countryName =#{countryName}
+			, modifyName =#{modifyName}
+			, checkState =#{checkState}
+			, modifyTime =#{modifyTime}
+			, modifyPlayer =#{modifyPlayer}
+		where countryId = #{countryId}
+	</update>
+
+</mapper>

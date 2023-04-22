@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.RobotMessageDao">
+
+  <select id="load" resultType="com.game.domain.p.RobotMessage">
+        select * from robot_msessage
+  </select>
+
+  <insert id="insert" parameterType="com.game.domain.p.RobotMessage" useGeneratedKeys="true" keyProperty="keyId">
+        insert into robot_msessage(`type`,requestCode , respondCode , param ,content , parentId,createTime)
+        values(#{type},#{requestCode}, #{respondCode}, #{param}, #{content}, #{parentId}, #{createTime})
+    </insert>
+
+
+  <update id="update" parameterType="com.game.domain.p.RobotMessage" useGeneratedKeys="true" keyProperty="keyId">
+        update robot_msessage set remainTime = #{remainTime} where keyId = #{keyId}
+    </update>
+
+</mapper>

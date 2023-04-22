@@ -1,0 +1,1 @@
+java -jar -Dprofile=development ./halo_game.jar &

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.PayDao">
+	<select id="selectPay" parameterType="map" resultType="com.game.domain.p.Pay">
+		select * from p_pay where platNo = #{platNo} and orderId = #{orderId}
+	</select>
+
+	<select id="selectRolePay" parameterType="map" resultType="com.game.domain.p.Pay">
+		select * from p_pay where serverId = #{serverId} and roleId = #{roleId}
+	</select>
+
+	<!-- <update id="updateState" parameterType="com.account.domain.Pay"> update p_pay set state = #{state} where keyId = #{keyId} </update> -->
+
+	<insert id="createPay" parameterType="com.game.domain.p.Pay" useGeneratedKeys="true" keyProperty="keyId">
+		insert into p_pay(platNo
+			, platId
+			, orderId
+			, serialId
+			, serverId
+			, roleId
+			, amount
+			, payTime
+			, channelId
+		) values ( #{platNo}
+			, #{platId}
+			, #{orderId}
+			, #{serialId}
+			, #{serverId}
+			, #{roleId}
+			, #{amount}
+			, #{payTime}
+			, #{channelId}
+		)
+	</insert>
+
+	<select id="selectPayBack" parameterType="map" resultType="com.game.domain.p.PayBack">
+		select * from p_pay_back where platNo = #{platNo} and platId = #{platId}
+	</select>
+
+	<update id="updatePayBack" parameterType="com.game.domain.p.PayBack">
+		update p_pay_back set got = #{got} where keyId = #{keyId}
+	</update>
+</mapper>

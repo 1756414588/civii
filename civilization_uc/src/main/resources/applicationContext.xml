@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+
+
+
+
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+
+
+    <!-- scan the package and the sub package -->
+    <!-- <context:component-scan base-package="com.game.controller">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan> -->
+
+
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <!-- <value>classpath:net.properties</value> -->
+                <value>classpath*:*.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <context:component-scan base-package="com.game.uc" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:include-filter type="annotation"
+                                expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
+
+    <!-- 自动扫描 -->
+    <context:component-scan base-package="com.game.uc"/>
+
+    <!-- 定义aspectj -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <!--定义jetty -->
+    <!-- jetty server start -->
+    <bean id="jettyRunner" class="com.game.uc.servlet.jetty.JettyServer" init-method="start">
+        <property name="port" value="${http.server.jetty.port}"/>
+        <property name="host" value="${http.server.jetty.host}"/>
+    </bean>
+
+    <import resource="spring-game-mybatis.xml"/>
+<!--    <import resource="spring-redis.xml"/>-->
+
+    <task:scheduler id="scheduler" pool-size="5"/>
+    <task:executor id="executor" pool-size="5"/>
+    <task:annotation-driven executor="executor" scheduler="scheduler" proxy-target-class="true"/>
+</beans>

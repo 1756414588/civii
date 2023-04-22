@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.WorldDao">
+
+	<select id="selectWorld" parameterType="Integer" resultType="com.game.domain.p.World">
+		select * from p_world where keyId=#{keyId}
+	</select>
+
+	<insert id="insertWorld" parameterType="com.game.domain.p.World">
+		insert into p_world(keyId) values(#{keyId})
+	</insert>
+
+	<update id="updateWorld" parameterType="com.game.domain.p.World">
+		replace into p_world (
+		keyId, bossData, lastSaveTime, targetData, season, seasonEndTime, effect, chatShowData,
+		pvpBattleData, worldTargetData, worldActPlanData, totalMaxOnLineNum, todayMaxOnLineNum, stealCityData,
+		refreshTime, seasonUp, riotLevel, bigMonster,zerg,remark,seasonAct
+		)values(
+		#{keyId}, #{bossData}, #{lastSaveTime}, #{targetData}, #{season}, #{seasonEndTime}, #{effect} ,#{chatShowData}
+		,#{pvpBattleData} ,#{worldTargetData} ,#{worldActPlanData} ,#{totalMaxOnLineNum} ,#{todayMaxOnLineNum},#{stealCityData}
+		, #{refreshTime} , #{seasonUp} , #{riotLevel} , #{bigMonster}, #{zerg}, #{remark}, #{seasonAct}
+		);
+	</update>
+
+</mapper>

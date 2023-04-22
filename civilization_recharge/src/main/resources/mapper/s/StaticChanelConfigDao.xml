@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.recharge.dao.ifs.s.StaticChanelConfigDao">
+	<resultMap id="BaseResultMap"
+		type="com.game.pay.channel.SChannelConfig">
+		<id column="keyId" jdbcType="INTEGER" property="keyId" />
+		<result column="platType" jdbcType="INTEGER"
+			property="platType" />
+		<result column="gameChannelId" jdbcType="VARCHAR"
+			property="gameChannelId" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="login_config" jdbcType="VARCHAR"
+			property="loginConfig" />
+		<result column="pay_config" jdbcType="VARCHAR"
+			property="payConfig" />
+		<result column="package_name" jdbcType="VARCHAR"
+			property="packageName" />
+		<result column="is_review" jdbcType="INTEGER"
+				property="is_review" />
+	</resultMap>
+
+	<select id="selectAllChannelConfig" resultMap="BaseResultMap">
+		select * from s_channel
+	</select>
+	
+	<select id="selectSChannelConfigByAppId" resultMap="BaseResultMap">
+		select * from s_channel where gameChannelId = #{gameChannelId}
+	</select>
+	
+	<select id="selectSChannelConfigByPackName" resultMap="BaseResultMap">
+		select * from s_channel where package_name = #{packageName}
+	</select>
+</mapper>

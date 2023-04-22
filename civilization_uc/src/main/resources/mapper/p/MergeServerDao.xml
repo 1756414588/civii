@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.uc.dao.ifs.p.MergeServerDao">
+    <select id="selectByMergeServer" resultType="com.game.uc.domain.p.MergeServer">
+        SELECT * FROM s_merge_server;
+    </select>
+
+    <select id="selectByPlayerExist" resultType="com.game.pay.channel.PlayerExist">
+        SELECT * FROM u_serverinfos;
+    </select>
+
+    <select id="selectByAccountKey" resultType="com.game.pay.channel.PlayerExist" parameterType="java.lang.Integer">
+        SELECT * FROM u_serverinfos where accountKey=#{accountKey};
+    </select>
+
+    <insert id="insertPlayerExist" parameterType="com.game.pay.channel.PlayerExist" useGeneratedKeys="true"
+            keyProperty="keyId">
+        insert into u_serverinfos(accountKey,serverId,country,nick,level,portrait,lordId,createDate)
+        values(#{accountKey},#{serverId},#{country},#{nick},#{level},#{portrait},#{lordId},#{createDate});
+    </insert>
+
+</mapper>

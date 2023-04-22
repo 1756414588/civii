@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.AccountDao">
+
+    <select id="selectAccount" parameterType="Map" resultType="com.game.domain.p.Account">
+        select * from p_account where accountKey = #{accountKey} and serverId = #{serverId}
+    </select>
+
+    <select id="selectAccountByKeyId" parameterType="int" resultType="com.game.domain.p.Account">
+        select * from p_account where keyId = #{keyId}
+    </select>
+
+    <select id="selectAccountMapByLords" resultType="com.game.domain.p.Account">
+        select * from p_account where lordId in
+        <foreach item="lordIds" index="index" collection="list" open="(" separator="," close=")">
+            #{lordIds}
+        </foreach>
+    </select>
+
+    <insert id="insertAccount" parameterType="com.game.domain.p.Account" useGeneratedKeys="true" keyProperty="keyId">
+        insert into p_account(accountKey
+        , serverId
+        , channel
+        , childNo
+        , lordId
+        , deviceNo
+        , createDate
+        , loginDays
+        , loginDate
+        , registerIp
+        , lastLoginIp
+        , firstLoginDate
+        ) values(#{accountKey}
+        , #{serverId}
+        , #{channel}
+        , #{childNo}
+        , #{lordId}
+        , #{deviceNo}
+        , #{createDate}
+        , #{loginDays}
+        , #{loginDate}
+        , #{registerIp}
+        , #{lastLoginIp}
+        , #{firstLoginDate}
+        )
+    </insert>
+
+    <update id="updateCreateRole" parameterType="com.game.domain.p.Account">
+        update p_account set created=1,lordId = #{lordId} ,createDate = #{createDate} where keyId = #{keyId}
+    </update>
+
+    <update id="updateIordId" parameterType="com.game.domain.p.Account">
+        update p_account set lordId = #{lordId}, created=0 where keyId = #{keyId}
+    </update>
+
+    <update id="updateFirstLoginDate" parameterType="com.game.domain.p.Account">
+        update p_account set firstLoginDate = #{firstLoginDate} where keyId = #{keyId}
+    </update>
+
+    <update id="recordLoginTime" parameterType="com.game.domain.p.Account">
+        update p_account
+        set deviceNo = #{deviceNo}
+        , childNo = #{childNo}
+        , loginDate = #{loginDate}
+        , loginDays = #{loginDays}
+        , forbid = #{forbid}
+        , lastLoginIp = #{lastLoginIp}
+        , channelAccount =#{channelAccount}
+        where keyId = #{keyId}
+    </update>
+
+    <select id="load" parameterType="Map" resultType="com.game.domain.p.Account">
+        select * from p_account where keyId > #{curIndex} order by keyId limit 0,#{count}
+    </select>
+
+    <update id="deleteIordId" parameterType="com.game.domain.p.Account">
+        update p_account set isDelete = #{isDelete} where keyId = #{keyId}
+    </update>
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="WARN" monitorInterval="120">
+    <!--ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF-->
+    <Properties>
+        <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSSS} [%thread]%-5level%logger{36}-[Line:%L]>%m%n</Property>
+        <Property name="logPattern">%d{yyyy-MM-dd HH:mm:ss},%m%n</Property>
+        <Property name="logDataDir">logs/collection</Property>
+        <Property name="logDataBakDir">data</Property>
+        <Property name="logDataName">%d{yyyy-MM-dd-HH}.log.%i</Property>
+    </Properties>
+    <appenders>
+        <!--输出台的控制-->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%d{HH:mm:ss:SSS}] [%p] - %l - %m%n"/>
+        </Console>
+
+        <!--配置游戏日志输出-->
+        <RollingRandomAccessFile name="profile" immediateFlush="true" fileName="logs/profile.log"
+                                 filePattern="bak/profile/%d{yyyy-MM-dd-HH}.log">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="ACCEPT"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--配置错误日志输出-->
+        <RollingRandomAccessFile name="error" immediateFlush="true" fileName="logs/error.log"
+                                 filePattern="bak/error/%d{yyyy-MM-dd-HH}.log">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <!--日志文件大于10 MB滚动一次-->
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--debug日志输出-->
+        <RollingRandomAccessFile name="debug" immediateFlush="true" fileName="logs/debug.log"
+                                 filePattern="bak/debug/%d{yyyy-MM-dd-HH}.log">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <!--日志文件大于10 MB滚动一次-->
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--配置独立数据data输出-->
+        <!--角色登陆-->
+        <RollingRandomAccessFile name="account_create" immediateFlush="true"
+                                 fileName="${logDataDir}/account_create.log"
+                                 filePattern="${logDataBakDir}/account_create/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--角色创建-->
+        <RollingRandomAccessFile name="account_login" immediateFlush="true"
+                                 fileName="${logDataDir}/account_login.log"
+                                 filePattern="${logDataBakDir}/account_login/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+    </appenders>
+
+    <Loggers>
+        <logger name="account_create" level="INFO" additivity="false">
+            <appender-ref ref="account_create"/>
+        </logger>
+        <logger name="account_login" level="INFO" additivity="false">
+            <appender-ref ref="account_login"/>
+        </logger>
+
+        <logger name="io.netty" level="ERROR" additivity="false"/>
+        <logger name="org.springframework" level="ERROR" additivity="false"/>
+        <logger name="org.mybatis" level="ERROR" additivity="false"/>
+        <logger name="org.apache" level="ERROR" additivity="false"/>
+        <logger name="com.zaxxer" level="ERROR" additivity="false"/>
+        <logger name="com.game.uc.dao" level="ERROR"/>
+        <logger name="org.eclipse" level="ERROR"/>
+        
+        <logger name="profile" level="DEBUG">
+            <appender-ref ref="profile"/>
+        </logger>
+        <!--上线更改为 ERROR-->
+        <root level="ALL">
+            <appender-ref ref="Console" level="DEBUG"/>
+        </root>
+    </Loggers>
+</configuration>

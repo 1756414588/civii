@@ -1,0 +1,33 @@
+<?xml version ="1.0" encoding ="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.ZergDao">
+
+  <resultMap id="zergResultMap" type="com.game.domain.p.Zerg">
+    <result column="attacks" property="attacks"
+      typeHandler="com.game.handle.ListIntTypeHandler"/>
+  </resultMap>
+
+  <select id="selectZerg" resultMap="zergResultMap">
+		select * from p_zerg
+	</select>
+
+  <update id="updateZerg" parameterType="com.game.domain.p.Zerg">
+        update p_zerg
+        set
+        `step` = #{step},
+        `wave` = #{wave},
+        `attacks` = #{attacks,jdbcType=VARCHAR,typeHandler=com.game.handle.ListIntTypeHandler},
+        `stepEndTime` = #{stepEndTime}
+        where keyId  = #{keyId}
+	</update>
+
+  <insert id="insertZerg" parameterType="com.game.domain.p.Zerg"
+    useGeneratedKeys="true" keyProperty="keyId">
+        insert into p_zerg(openDate,step,wave,attacks,cityId,mapId,x,y,stepEndTime,openTime)
+        values(#{openDate},#{step},#{wave},#{attacks,jdbcType=VARCHAR,typeHandler=com.game.handle.ListIntTypeHandler},#{cityId},#{mapId},#{x},#{y},#{stepEndTime},#{openTime})
+	</insert>
+
+
+</mapper>

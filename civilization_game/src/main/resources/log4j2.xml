@@ -1,0 +1,1112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="WARN" monitorInterval="120" shutdownHook="disable">
+    <!--ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF-->
+    <Properties>
+        <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSSS} [%thread]%-5logger{36}-[Line:%L]>%m%n</Property>
+        <Property name="logPattern">%d{yyyy-MM-dd HH:mm:ss},%m%n</Property>
+        <Property name="logDataDir">logs/collection</Property>
+        <Property name="logDataBakDir">data</Property>
+        <Property name="logDataName">%d{yyyy-MM-dd-HH}.log.%i</Property>
+    </Properties>
+    <appenders>
+
+        <!--输出台的控制-->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%date{HH:mm:ss:SSS}] [%thread][%file:%line] - %m%n"/>
+        </Console>
+
+        <!--玩具cmd命令输出-->
+        <RollingRandomAccessFile name="profile" immediateFlush="true" fileName="logs/profile.log"
+                                 filePattern="bak/profile/%d{yyyy-MM-dd-HH}.log.%i">
+            <PatternLayout pattern="%date{HH:mm:ss.SSS} - %msg%n"/>
+            <Policies>
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+
+        <RollingRandomAccessFile name="CHANNEL" immediateFlush="true" fileName="logs/channel.log"
+          filePattern="bak/channel/%d{yyyy-MM-dd-HH}.log.%i">
+            <PatternLayout pattern="%date{HH:mm:ss.SSS} - %msg%n"/>
+            <Policies>
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--启动相关输出-->
+        <RollingRandomAccessFile name="game" immediateFlush="true" fileName="logs/game.log"
+                                 filePattern="bak/game/game_%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread][%file:%line] - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--支付相关日志输出-->
+        <RollingRandomAccessFile name="pay" immediateFlush="true" fileName="logs/pay.log"
+                                 filePattern="bak/pay/pay_%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%date{HH:mm:ss.SSS} [%thread][%file:%line] - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--数据存储相关日志-->
+        <RollingRandomAccessFile name="save" immediateFlush="true" fileName="logs/save.log"
+                                 filePattern="bak/save/save%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%date{HH:mm:ss.SSS} [%thread][%file:%line] - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--游戏配置日志输出-->
+        <RollingRandomAccessFile name="ini_configure" immediateFlush="true" fileName="logs/configure.log"
+                                 filePattern="bak/configure/configure_%d{yyyy-MM-dd}">
+            <PatternLayout pattern="%date{HH:mm:ss.SSS} [%thread][%file:%line] - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--配置错误日志输出-->
+        <RollingRandomAccessFile name="error" immediateFlush="true" fileName="logs/error.log"
+                                 filePattern="bak/error/error_%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%date{HH:mm:ss.SSS} [%thread][%file:%line] - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--debug日志输出-->
+        <RollingRandomAccessFile name="debug" immediateFlush="true" fileName="logs/debug.log"
+                                 filePattern="bak/debug/%d{yyyy-MM-dd-HH}.log.%i">
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--配置独立数据data输出-->
+        <!--角色登陆-->
+        <RollingRandomAccessFile name="role_login" immediateFlush="true"
+                                 fileName="${logDataDir}/role_login.log"
+                                 filePattern="${logDataBakDir}/role_login/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--角色创建-->
+        <RollingRandomAccessFile name="role_create" immediateFlush="true"
+                                 fileName="${logDataDir}/role_create.log"
+                                 filePattern="${logDataBakDir}/role_create/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--角色升级-->
+        <RollingRandomAccessFile name="role_exp" immediateFlush="true"
+                                 fileName="${logDataDir}/role_exp.log"
+                                 filePattern="${logDataBakDir}/role_exp/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--英雄升级-->
+        <RollingRandomAccessFile name="hero_exp" immediateFlush="true"
+                                 fileName="${logDataDir}/hero_exp.log"
+                                 filePattern="${logDataBakDir}/hero_exp/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--英雄突破-->
+        <RollingRandomAccessFile name="hero_advance" immediateFlush="true"
+                                 fileName="${logDataDir}/hero_advance.log"
+                                 filePattern="${logDataBakDir}/hero_advance/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--英雄特训-->
+        <RollingRandomAccessFile name="hero_wash" immediateFlush="true"
+                                 fileName="${logDataDir}/hero_wash.log"
+                                 filePattern="${logDataBakDir}/hero_wash/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--英雄晋升传奇-->
+        <RollingRandomAccessFile name="hero_divine" immediateFlush="true"
+                                 fileName="${logDataDir}/hero_divine.log"
+                                 filePattern="${logDataBakDir}/hero_divine/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--军衔升级日志文件-->
+        <RollingRandomAccessFile name="role_title" immediateFlush="true"
+                                 fileName="${logDataDir}/role_title.log"
+                                 filePattern="${logDataBakDir}/role_title/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--资源产出和消耗日志文件-->
+        <RollingRandomAccessFile name="role_resource" immediateFlush="true"
+                                 fileName="${logDataDir}/role_resource.log"
+                                 filePattern="${logDataBakDir}/role_resource/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--装备精研日志文件-->
+        <RollingRandomAccessFile name="equip_wash" immediateFlush="true"
+                                 fileName="${logDataDir}/equip_wash.log"
+                                 filePattern="${logDataBakDir}/equip_wash/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--VIP升级日志-->
+        <RollingRandomAccessFile name="vip_exp" immediateFlush="true"
+                                 fileName="${logDataDir}/vip_exp.log"
+                                 filePattern="${logDataBakDir}/vip_exp/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--新手引导日志-->
+        <RollingRandomAccessFile name="role_guide" immediateFlush="true"
+                                 fileName="${logDataDir}/role_guide.log"
+                                 filePattern="${logDataBakDir}/role_guide/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--玩家关卡日志-->
+        <RollingRandomAccessFile name="role_misson" immediateFlush="true"
+                                 fileName="${logDataDir}/role_misson.log"
+                                 filePattern="${logDataBakDir}/role_misson/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--玩家任务日志-->
+        <RollingRandomAccessFile name="role_task" immediateFlush="true"
+                                 fileName="${logDataDir}/role_task.log"
+                                 filePattern="${logDataBakDir}/role_task/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--金币日志-->
+        <RollingRandomAccessFile name="role_iron_log" immediateFlush="true"
+                                 fileName="${logDataDir}/role_iron_log.log"
+                                 filePattern="${logDataBakDir}/role_iron_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--聊天日志-->
+        <RollingRandomAccessFile name="chat_log" immediateFlush="true"
+                                 fileName="${logDataDir}/chat_log.log"
+                                 filePattern="${logDataBakDir}/chat_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--钢铁-->
+        <RollingRandomAccessFile name="role_copper_log" immediateFlush="true"
+                                 fileName="${logDataDir}/role_copper_log.log"
+                                 filePattern="${logDataBakDir}/role_copper_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--食物-->
+        <RollingRandomAccessFile name="role_oil_log" immediateFlush="true"
+                                 fileName="${logDataDir}/role_oil_log.log"
+                                 filePattern="${logDataBakDir}/role_oil_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--晶体-->
+        <RollingRandomAccessFile name="role_stone_log" immediateFlush="true"
+                                 fileName="${logDataDir}/role_stone_log.log"
+                                 filePattern="${logDataBakDir}/role_stone_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--钻石-->
+        <RollingRandomAccessFile name="role_gold_log" immediateFlush="true"
+                                 fileName="${logDataDir}/role_gold_log.log"
+                                 filePattern="${logDataBakDir}/role_gold_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--装备分解-->
+        <RollingRandomAccessFile name="equip_decompound_log" immediateFlush="true"
+                                 fileName="${logDataDir}/equip_decompound_log.log"
+                                 filePattern="${logDataBakDir}/equip_decompound_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--神器升级-->
+        <RollingRandomAccessFile name="kill_equip_log" immediateFlush="true"
+                                 fileName="${logDataDir}/kill_equip_log.log"
+                                 filePattern="${logDataBakDir}/kill_equip_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--道具产出和消耗-->
+        <RollingRandomAccessFile name="role_item_log" immediateFlush="true"
+                                 fileName="${logDataDir}/role_item_log.log"
+                                 filePattern="${logDataBakDir}/role_item_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--塔防日志记录-->
+        <RollingRandomAccessFile name="td_log" immediateFlush="true"
+                                 fileName="${logDataDir}/td_log.log"
+                                 filePattern="${logDataBakDir}/td_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--美女数据-->
+        <RollingRandomAccessFile name="beauty_item_log" immediateFlush="true"
+                                 fileName="${logDataDir}/beauty_item_log.log"
+                                 filePattern="${logDataBakDir}/beauty_item_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--在线时长-->
+        <RollingRandomAccessFile name="login_log" immediateFlush="true"
+                                 fileName="${logDataDir}/login_log.log"
+                                 filePattern="${logDataBakDir}/login_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--体力恢复消耗-->
+        <RollingRandomAccessFile name="energy_log" immediateFlush="true"
+                                 fileName="${logDataDir}/energy_log.log"
+                                 filePattern="${logDataBakDir}/energy_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--母巢积分-->
+        <RollingRandomAccessFile name="hatchery_log" immediateFlush="true"
+                                 fileName="${logDataDir}/hatchery_log.log"
+                                 filePattern="${logDataBakDir}/hatchery_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--战斗记录-->
+        <RollingRandomAccessFile name="battle_log" immediateFlush="true"
+                                 fileName="${logDataDir}/battle_log.log"
+                                 filePattern="${logDataBakDir}/battle_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--活动记录-->
+        <RollingRandomAccessFile name="activity_log" immediateFlush="true"
+                                 fileName="${logDataDir}/activity_log.log"
+                                 filePattern="${logDataBakDir}/activity_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--许愿池-->
+        <RollingRandomAccessFile name="act_hope_log" immediateFlush="true"
+                                 fileName="${logDataDir}/act_hope_log.log"
+                                 filePattern="${logDataBakDir}/act_hope_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--世界宝箱-->
+        <RollingRandomAccessFile name="world_box_log" immediateFlush="true"
+                                 fileName="${logDataDir}/world_box_log.log"
+                                 filePattern="${logDataBakDir}/world_box_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--个性签名-->
+        <RollingRandomAccessFile name="personal_signature_log" immediateFlush="true"
+                                 fileName="${logDataDir}/personal_signature_log.log"
+                                 filePattern="${logDataBakDir}/personal_signature_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--母巢增益购买-->
+        <RollingRandomAccessFile name="broodWar_buyBuff_log" immediateFlush="true"
+          fileName="${logDataDir}/broodWar_buyBuff_log.log"
+          filePattern="${logDataBakDir}/broodWar_buyBuff_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--母巢实体战斗次数-->
+        <RollingRandomAccessFile name="broodWar_entity_battle_count_log" immediateFlush="true"
+          fileName="${logDataDir}/broodWar_entity_battle_count_log.log"
+          filePattern="${logDataBakDir}/broodWar_entity_battle_count_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--体力补领功能的埋点-->
+        <RollingRandomAccessFile name="get_act_power_rq_log" immediateFlush="true"
+          fileName="${logDataDir}/get_act_power_rq_log.log"
+          filePattern="${logDataBakDir}/get_act_power_rq_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+        <!--无尽塔防-->
+        <RollingRandomAccessFile name="endless_td_log" immediateFlush="true"
+          fileName="${logDataDir}/endless_td_log.log"
+          filePattern="${logDataBakDir}/endless_td_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+        <!--无尽塔防异常数据-->
+        <RollingRandomAccessFile name="endless_td_error_log" immediateFlush="true"
+          fileName="${logDataDir}/endless_td_error_log.log"
+          filePattern="${logDataBakDir}/endless_td_error_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--材料置换-->
+        <RollingRandomAccessFile name="material_substitution_log" immediateFlush="true"
+          fileName="${logDataDir}/material_substitution_log.log"
+          filePattern="${logDataBakDir}/material_substitution_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--邮件-->
+        <RollingRandomAccessFile name="mail_log" immediateFlush="true"
+                                 fileName="${logDataDir}/mail_log.log"
+                                 filePattern="${logDataBakDir}/mail_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--招募-->
+        <RollingRandomAccessFile name="seek_log" immediateFlush="true"
+                                 fileName="${logDataDir}/seek_log.log"
+                                 filePattern="${logDataBakDir}/seek_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--兵书获得-->
+        <RollingRandomAccessFile name="war_book_log" immediateFlush="true"
+                                 fileName="${logDataDir}/war_book_log.log"
+                                 filePattern="${logDataBakDir}/war_book_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--兵书穿戴-->
+        <RollingRandomAccessFile name="wear_book_log" immediateFlush="true"
+                                 fileName="${logDataDir}/wear_book_log.log"
+                                 filePattern="${logDataBakDir}/wear_book_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--合服前活动记录-->
+        <RollingRandomAccessFile name="record_reissue_awards_log" immediateFlush="true"
+                                 fileName="${logDataDir}/record_reissue_awards_log.log"
+                                 filePattern="${logDataBakDir}/record_reissue_awards_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--勋章获得-->
+        <RollingRandomAccessFile name="omament_log" immediateFlush="true"
+                                 fileName="${logDataDir}/omament_log.log"
+                                 filePattern="${logDataBakDir}/omament_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+
+        <!--阵营选票-->
+        <RollingRandomAccessFile name="glover_log" immediateFlush="true"
+                                 fileName="${logDataDir}/glover_log.log"
+                                 filePattern="${logDataBakDir}/glover_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
+    </appenders>
+
+    <Loggers>
+        <logger name="role_login" level="INFO" additivity="false">
+            <appender-ref ref="role_login"/>
+        </logger>
+        <logger name="role_create" level="INFO" additivity="false">
+            <appender-ref ref="role_create"/>
+        </logger>
+        <logger name="role_exp" level="INFO" additivity="false">
+            <appender-ref ref="role_exp"/>
+        </logger>
+        <logger name="hero_exp" level="INFO" additivity="false">
+            <appender-ref ref="hero_exp"/>
+        </logger>
+        <logger name="hero_advance" level="INFO" additivity="false">
+            <appender-ref ref="hero_advance"/>
+        </logger>
+        <logger name="hero_wash" level="INFO" additivity="false">
+            <appender-ref ref="hero_wash"/>
+        </logger>
+        <logger name="hero_divine" level="INFO" additivity="false">
+            <appender-ref ref="hero_divine"/>
+        </logger>
+        <logger name="role_title" level="INFO" additivity="false">
+            <appender-ref ref="role_title"/>
+        </logger>
+        <logger name="role_resource" level="INFO" additivity="false">
+            <appender-ref ref="role_resource"/>
+        </logger>
+        <logger name="equip_wash" level="INFO" additivity="false">
+            <appender-ref ref="equip_wash"/>
+        </logger>
+        <logger name="vip_exp" level="INFO" additivity="false">
+            <appender-ref ref="vip_exp"/>
+        </logger>
+        <logger name="role_guide" level="INFO" additivity="false">
+            <appender-ref ref="role_guide"/>
+        </logger>
+        <logger name="role_misson" level="INFO" additivity="false">
+            <appender-ref ref="role_misson"/>
+        </logger>
+        <logger name="role_task" level="INFO" additivity="false">
+            <appender-ref ref="role_task"/>
+        </logger>
+        <logger name="role_iron_log" level="INFO" additivity="false">
+            <appender-ref ref="role_iron_log"/>
+        </logger>
+        <logger name="chat_log" level="INFO" additivity="false">
+            <appender-ref ref="chat_log"/>
+        </logger>
+        <logger name="role_copper_log" level="INFO" additivity="false">
+            <appender-ref ref="role_copper_log"/>
+        </logger>
+        <logger name="role_oil_log" level="INFO" additivity="false">
+            <appender-ref ref="role_oil_log"/>
+        </logger>
+        <logger name="role_stone_log" level="INFO" additivity="false">
+            <appender-ref ref="role_stone_log"/>
+        </logger>
+        <logger name="role_gold_log" level="INFO" additivity="false">
+            <appender-ref ref="role_gold_log"/>
+        </logger>
+        <logger name="equip_decompound_log" level="INFO" additivity="false">
+            <appender-ref ref="equip_decompound_log"/>
+        </logger>
+        <logger name="kill_equip_log" level="INFO" additivity="false">
+            <appender-ref ref="kill_equip_log"/>
+        </logger>
+        <logger name="role_item_log" level="INFO" additivity="false">
+            <appender-ref ref="role_item_log"/>
+        </logger>
+        <logger name="td_log" level="INFO" additivity="false">
+            <appender-ref ref="td_log"/>
+        </logger>
+        <logger name="beauty_item_log" level="INFO" additivity="false">
+            <appender-ref ref="beauty_item_log"/>
+        </logger>
+        <logger name="login_log" level="INFO" additivity="false">
+            <appender-ref ref="login_log"/>
+        </logger>
+        <logger name="energy_log" level="INFO" additivity="false">
+            <appender-ref ref="energy_log"/>
+        </logger>
+        <logger name="hatchery_log" level="INFO" additivity="false">
+            <appender-ref ref="hatchery_log"/>
+        </logger>
+        <logger name="battle_log" level="INFO" additivity="false">
+            <appender-ref ref="battle_log"/>
+        </logger>
+        <logger name="activity_log" level="INFO" additivity="false">
+            <appender-ref ref="activity_log"/>
+        </logger>
+        <logger name="act_hope_log" level="INFO" additivity="false">
+            <appender-ref ref="act_hope_log"/>
+        </logger>
+
+        <logger name="world_box_log" level="INFO" additivity="false">
+            <appender-ref ref="world_box_log"/>
+        </logger>
+        <logger name="personal_signature_log" level="INFO" additivity="false">
+            <appender-ref ref="personal_signature_log"/>
+        </logger>
+        <logger name="broodWar_buyBuff_log" level="INFO" additivity="false">
+            <appender-ref ref="broodWar_buyBuff_log"/>
+        </logger>
+        <logger name="broodWar_entity_battle_count_log" level="INFO" additivity="false">
+            <appender-ref ref="broodWar_entity_battle_count_log"/>
+        </logger>
+        <logger name="get_act_power_rq_log" level="INFO" additivity="false">
+            <appender-ref ref="get_act_power_rq_log"/>
+        </logger>
+        <logger name="endless_td_log" level="INFO" additivity="false">
+            <appender-ref ref="endless_td_log"/>
+        </logger>
+        <logger name="endless_td_error_log" level="INFO" additivity="false">
+            <appender-ref ref="endless_td_error_log"/>
+        </logger>
+        <logger name="material_substitution_log" level="INFO" additivity="false">
+            <appender-ref ref="material_substitution_log"/>
+        </logger>
+        <logger name="mail_log" level="INFO" additivity="false">
+            <appender-ref ref="mail_log"/>
+        </logger>
+        <logger name="seek_log" level="INFO" additivity="false">
+            <appender-ref ref="seek_log"/>
+        </logger>
+        <logger name="war_book_log" level="INFO" additivity="false">
+            <appender-ref ref="war_book_log"/>
+        </logger>
+        <logger name="wear_book_log" level="INFO" additivity="false">
+            <appender-ref ref="wear_book_log"/>
+        </logger>
+        <logger name="record_reissue_awards_log" level="INFO" additivity="false">
+            <appender-ref ref="record_reissue_awards_log"/>
+        </logger>
+        <logger name="omament_log" level="INFO" additivity="false">
+            <appender-ref ref="omament_log"/>
+        </logger>
+        <logger name="glover_log" level="INFO" additivity="false">
+            <appender-ref ref="glover_log"/>
+        </logger>
+
+        <logger name="io.netty" level="ERROR" additivity="false"/>
+        <logger name="org.springframework" level="ERROR" additivity="false"/>
+        <logger name="org.mybatis" level="ERROR" additivity="false"/>
+        <logger name="org.apache" level="ERROR" additivity="false"/>
+        <logger name="com.zaxxer" level="ERROR" additivity="false"/>
+        <logger name="com.game.dao" level="ERROR"/>
+        <logger name="org.eclipse" level="ERROR"/>
+
+        <logger name="profile" level="INFO" additivity="false">
+            <appender-ref ref="profile"/>
+            <appender-ref ref="Console"/>
+        </logger>
+
+        <logger name="CHANNEL" level="INFO" additivity="false">
+            <appender-ref ref="CHANNEL"/>
+            <appender-ref ref="Console"/>
+        </logger>
+
+        <logger name="game" level="INFO" additivity="false">
+            <appender-ref ref="game"/>
+            <appender-ref ref="profile"/>
+            <appender-ref ref="Console"/>
+        </logger>
+
+        <logger name="pay" level="INFO" additivity="false">
+            <appender-ref ref="pay"/>
+        </logger>
+
+        <logger name="save" level="INFO" additivity="false">
+            <appender-ref ref="save"/>
+        </logger>
+
+        <logger name="ini_configure" level="INFO" additivity="false">
+            <appender-ref ref="ini_configure"/>
+        </logger>
+
+        <logger name="debug" level="DEBUG" additivity="false">
+            <appender-ref ref="debug"/>
+        </logger>
+
+        <logger name="error" level="INFO" additivity="false">
+            <appender-ref ref="error"/>
+            <appender-ref ref="Console"/>
+        </logger>
+    </Loggers>
+</configuration>

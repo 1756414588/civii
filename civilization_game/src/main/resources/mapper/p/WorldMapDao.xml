@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.WorldMapDao">
+
+    <select id="selectWolrdMap" parameterType="Integer" resultType="com.game.domain.p.WorldMap">
+        select * from p_world_map where mapId=#{mapId}
+    </select>
+
+    <update id="insertWorldMap" parameterType="com.game.domain.p.WorldMap">
+        insert into p_world_map(
+        mapId, mapData, lastSaveTime, maxKey, quickWarData, farWarData, countryWarData, bigMonsterWarData,zergWarData)
+        value
+        (#{mapId}, #{mapData}, #{lastSaveTime}, #{maxKey}, #{quickWarData}, #{farWarData},
+        #{countryWarData},#{bigMonsterWarData},#{zergWarData});
+    </update>
+
+    <update id="updateWorldMap" parameterType="com.game.domain.p.WorldMap">
+        update p_world_map set
+        mapData=#{mapData}, lastSaveTime= #{lastSaveTime}, maxKey=#{maxKey}, quickWarData=#{quickWarData}, farWarData=#{farWarData},
+        countryWarData=#{countryWarData}, bigMonsterWarData=#{bigMonsterWarData},zergWarData=#{zergWarData} where mapId =#{mapId}
+    </update>
+
+    <select id="selectWorldMapList" resultType="com.game.domain.p.WorldMap">
+        select * from p_world_map
+    </select>
+
+</mapper>

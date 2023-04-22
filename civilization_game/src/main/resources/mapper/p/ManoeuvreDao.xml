@@ -1,0 +1,34 @@
+<?xml version ="1.0" encoding ="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.p.ManoeuvreDao">
+
+  <select id="selectTopList" resultType="com.game.domain.p.Manoeuvre">
+		select * from p_manoeuvre order by keyId desc
+	</select>
+
+  <update id="updateManoeuvre" parameterType="com.game.domain.p.Manoeuvre">
+        update p_manoeuvre
+        set
+        `status` = #{status},
+        `stage` = #{stage},
+        `winer` = #{winer},
+        `roundOne` = #{roundOne},
+        `roundTwo` = #{roundTwo},
+        `roundThree` = #{roundThree},
+        `apply` = #{apply},
+        `fights` = #{fights},
+        `roundInfo` = #{roundInfo},
+        `rank` = #{rank}
+        where keyId  = #{keyId}
+	</update>
+
+  <insert id="insertManoeuvre" parameterType="com.game.domain.p.Manoeuvre"
+    useGeneratedKeys="true" keyProperty="keyId">
+        insert into p_manoeuvre(startTime,status,stage,winer,roundOne,roundTwo,roundThree,apply,fights,roundInfo,rank)
+        values(#{startTime},#{status},#{stage},#{winer},#{roundOne},#{roundTwo},#{roundThree},#{apply},#{fights},#{roundInfo},#{rank})
+	</insert>
+
+
+</mapper>
