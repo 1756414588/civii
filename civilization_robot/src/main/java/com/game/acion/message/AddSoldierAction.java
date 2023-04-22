@@ -3,11 +3,10 @@ package com.game.acion.message;
 import com.game.acion.EventAction;
 import com.game.acion.MessageAction;
 import com.game.acion.MessageEvent;
-import com.game.acion.events.AddGoldEvent;
 import com.game.acion.events.AddSoldierNumberEvent;
 import com.game.constant.GameError;
-import com.game.domain.Record;
 import com.game.domain.Robot;
+import com.game.domain.p.RobotData;
 import com.game.domain.p.RobotMessage;
 import com.game.packet.Packet;
 import com.game.pb.BasePb.Base;
@@ -16,7 +15,7 @@ import com.game.util.BasePbHelper;
 import com.game.util.LogHelper;
 
 /**
- *
+ * @Author 陈奎
  * @Description 英雄补兵
  * @Date 2022/9/15 18:04
  **/
@@ -43,8 +42,8 @@ public class AddSoldierAction extends MessageAction {
 
 		// 已完成则直接通过
 		if (base.getCode() == GameError.OK.getCode()) {
-			Record record = robot.getRecord();
-			record.setState(record.getState() + 1);
+			RobotData record = robot.getData();
+			record.setGuildState(record.getGuildState() + 1);
 			return;
 		}
 

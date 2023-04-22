@@ -15,8 +15,7 @@ import lombok.Setter;
  * <p>
  * 新快SDK的配置信息
  **/
-@Getter
-@Setter
+
 public class KuaiYouConfig extends BaseChanelConfig {
     private String appKey;
     //登录url
@@ -42,5 +41,29 @@ public class KuaiYouConfig extends BaseChanelConfig {
         this.is_review = sChannelConfig.getIs_review();
 		this.parent_type = sChannelConfig.getParent_type();
 		this.teamNum = sChannelConfig.getTeamNum();
+    }
+
+    public String getAppKey() {
+        return appKey;
+    }
+
+    public void setAppKey(String appKey) {
+        this.appKey = appKey;
+    }
+
+    public String getLoginUrl() {
+        return loginUrl;
+    }
+
+    public void setLoginUrl(String loginUrl) {
+        this.loginUrl = loginUrl;
+    }
+
+    public String getPay_config() {
+        return pay_config;
+    }
+
+    public void setPay_config(String pay_config) {
+        this.pay_config = pay_config;
     }
 }

@@ -600,7 +600,7 @@ public class GmToolService {
 			}
 
 			// 10天未登录,则不发放邮件
-			if (TimeHelper.passDay(loginDate.getTime()) >= 10) {
+			if (TimeHelper.equation(loginDate.getTime(),System.currentTimeMillis()) >= 10) {
 				continue;
 			}
 

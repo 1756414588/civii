@@ -229,7 +229,8 @@
         mergeServerStatus,
         isSeven,
         buyBookShopRefreshTime,
-        tdMoney
+        tdMoney,
+        commandLevel
 		    )values(
 		    #{lordId},
         #{nick},
@@ -373,7 +374,8 @@
         #{mergeServerStatus},
         #{isSeven},
         #{buyBookShopRefreshTime},
-        #{tdMoney}
+        #{tdMoney},
+        #{commandLevel}
 		);
 	</update>
 </mapper>

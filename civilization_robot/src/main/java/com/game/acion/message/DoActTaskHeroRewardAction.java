@@ -1,12 +1,10 @@
 package com.game.acion.message;
 
-import com.game.acion.EventAction;
 import com.game.acion.MessageAction;
 import com.game.acion.MessageEvent;
-import com.game.acion.events.AddGoldEvent;
 import com.game.constant.GameError;
-import com.game.domain.Record;
 import com.game.domain.Robot;
+import com.game.domain.p.RobotData;
 import com.game.domain.p.RobotMessage;
 import com.game.packet.Packet;
 import com.game.pb.ActivityPb.DoActTaskHeroRewardRq;
@@ -15,7 +13,7 @@ import com.game.util.BasePbHelper;
 import com.game.util.LogHelper;
 
 /**
- *
+ * @Author 陈奎
  * @Description 活动奖励领取 活动111无畏尖兵
  * @Date 2022/9/15 18:04
  **/
@@ -42,8 +40,8 @@ public class DoActTaskHeroRewardAction extends MessageAction {
 
 		// 已完成则直接通过
 		if (base.getCode() == GameError.OK.getCode() || base.getCode() == GameError.ACTIVITY_NOT_OPEN.getCode()) {
-			Record record = robot.getRecord();
-			record.setState(record.getState() + 1);
+			RobotData robotData = robot.getData();
+			robotData.setGuildState(robotData.getGuildState() + 1);
 			return;
 		}
 	}

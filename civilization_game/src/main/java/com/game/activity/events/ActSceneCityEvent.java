@@ -6,26 +6,27 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 
 /**
  * 攻城掠地
  *
- *
+ * @author 陈奎
  */
+@Component
 public class ActSceneCityEvent extends BaseActivityEvent {
 
-	private static ActSceneCityEvent inst = new ActSceneCityEvent();
-
-	public static ActSceneCityEvent getInst() {
-		return inst;
-	}
+	//private static ActSceneCityEvent inst = new ActSceneCityEvent();
+	//
+	//public static ActSceneCityEvent getInst() {
+	//	return inst;
+	//}
 
 
 	@Override
@@ -38,7 +39,6 @@ public class ActSceneCityEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 
 		ActRecord actRecord = actor.getActRecord();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> awardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
 
 		Map<Integer, Integer> received = actRecord.getReceived();

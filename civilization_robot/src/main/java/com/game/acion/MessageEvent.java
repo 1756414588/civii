@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * @Author 陈奎
  * @Description 消息事件
  * @Date 2022/9/14 19:25
  **/
@@ -40,7 +40,7 @@ public class MessageEvent extends TimerEvent {
 	}
 
 	public Packet createPacket() {
-		Base.Builder builder = BasePbHelper.createBase(action.getRobotMessage().getContent()).toBuilder();
+		Base.Builder builder = BasePbHelper.createBase(action.getMessage()).toBuilder();
 		builder.setParam(eventId);
 		return PacketCreator.create(builder.build());
 	}

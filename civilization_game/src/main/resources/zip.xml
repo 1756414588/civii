@@ -28,6 +28,10 @@
             <unpack>false</unpack>
             <scope>runtime</scope>
             <outputDirectory>/lib</outputDirectory>
+            <excludes>
+                <exclude>*:civilization_game:*</exclude>
+            </excludes>
         </dependencySet>
+
     </dependencySets>
 </assembly>  

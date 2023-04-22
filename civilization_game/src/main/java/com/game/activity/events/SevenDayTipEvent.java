@@ -6,7 +6,6 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
@@ -15,32 +14,31 @@ import com.game.manager.HeroManager;
 import com.game.manager.KillEquipManager;
 import com.game.manager.MissionManager;
 import com.game.manager.WorldManager;
-import com.game.util.DateHelper;
 import com.game.spring.SpringUtil;
+import com.game.util.DateHelper;
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.Iterator;
 
 /**
  * 七日狂欢领取奖励之后,红点消失还是提示
  */
+@Component
 public class SevenDayTipEvent extends BaseActivityEvent {
-
-	private static SevenDayTipEvent inst = new SevenDayTipEvent();
-
-	public static SevenDayTipEvent getInst() {
-		return inst;
-	}
 
 	@Override
 	public void listen() {
 		listenEvent(EventEnum.GET_ACTIVITY_AWARD_TIP, ActivityConst.ACT_SEVEN, this::process);
 	}
 
+	//@Autowired
+	//StaticActivityMgr staticActivityMgr;
+
 	@Override
 	public void process(EventEnum eventEnum, IActivityActor actor) {
 		Player player = actor.getPlayer();
 		ActivityBase activityBase = actor.getActivityBase();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		Iterator<StaticActSeven> it = staticActivityMgr.getSevens().values().iterator();
 		Date createDate = player.account.getCreateDate();
 		int state = DateHelper.dayiy(createDate, new Date());

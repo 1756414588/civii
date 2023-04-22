@@ -48,8 +48,6 @@ import com.game.pb.RolePb.RefreshDataRq;
 import com.game.pb.RolePb.RefreshDataRs;
 import com.game.pb.RolePb.RoleReloginRq;
 import com.game.pb.RolePb.RoleReloginRs;
-import com.game.season.SeasonManager;
-import com.game.season.talent.entity.EffectType;
 import com.game.server.GameServer;
 import com.game.server.ICommand;
 import com.game.server.exec.LoginExecutor;
@@ -67,7 +65,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -132,84 +129,85 @@ public class PlayerService {
 
 	@Autowired
 	XinkuaiManager xinkuaiManager;
-
+	@Autowired
+	ActivityEventManager activityEventManager;
 	@Value("${accountServerUrl}")
 	String accountServerUrl;
 
 
 	// 定时保存玩家数据
-	public void saveTimerLogic() {
-		long s = System.currentTimeMillis();
-		List<Long> list = Lists.newArrayList(playerManager.getLoginCache().keySet());
-		Iterator<Long> it = list.iterator();
-		while (it.hasNext()) {
-			long roleId = it.next();
-			Player player = playerManager.getPlayer(roleId);
-			if (player != null) {
-				playerManager.updateRole(new Role(player));
-				//离线玩家移除
-				if (!player.isLogin) {
-					it.remove();
-					//从队列中移除
-					playerManager.getLoginCache().remove(roleId);
-				}
-			} else {
-				LogHelper.CONFIG_LOGGER.info("save player error player is null ->[{}]", roleId);
-			}
-		}
-	}
+	//public void saveTimerLogic() {
+	//	long s = System.currentTimeMillis();
+	//	List<Long> list = Lists.newArrayList(playerManager.getLoginCache().keySet());
+	//	Iterator<Long> it = list.iterator();
+	//	while (it.hasNext()) {
+	//		long roleId = it.next();
+	//		Player player = playerManager.getPlayer(roleId);
+	//		if (player != null) {
+	//			playerManager.updateRole(new Role(player));
+	//			//离线玩家移除
+	//			if (!player.isLogin) {
+	//				it.remove();
+	//				//从队列中移除
+	//				playerManager.getLoginCache().remove(roleId);
+	//			}
+	//		} else {
+	//			LogHelper.CONFIG_LOGGER.info("save player error player is null ->[{}]", roleId);
+	//		}
+	//	}
+	//}
 
-	public void cleanExpirePlayer() {
-		long now = System.currentTimeMillis();
-		long cleanAccountBegin = TimeHelper.getTimeOfDay(PlayerManager.CLEAN_ACCOUNT_BEGIN);
-		long cleanAccountEnd = TimeHelper.getTimeOfDay(PlayerManager.CLEAN_ACCOUNT_END);
-		//清理账号配置规则
-		List<List<Integer>> cleanAccount = staticLimitMgr.getCleanAccount();
-		//到了清理时间阶段
-		if (null != cleanAccount && now <= cleanAccountEnd && now >= cleanAccountBegin) {
-			List<Player> cleanList = playerManager.getPlayers().values().parallelStream().filter(player -> {
-				return isClean(cleanAccount, player);
-			}).collect(Collectors.toList());
-			//有用户满足要求 移除
-			if (cleanList.size() > 0) {
-				cleanList.forEach(player -> {
-					playerManager.cleanPlayer(player);
-				});
-			}
-		}
-	}
+	//public void cleanExpirePlayer() {
+	//	long now = System.currentTimeMillis();
+	//	long cleanAccountBegin = TimeHelper.getTimeOfDay(PlayerManager.CLEAN_ACCOUNT_BEGIN);
+	//	long cleanAccountEnd = TimeHelper.getTimeOfDay(PlayerManager.CLEAN_ACCOUNT_END);
+	//	//清理账号配置规则
+	//	List<List<Integer>> cleanAccount = staticLimitMgr.getCleanAccount();
+	//	//到了清理时间阶段
+	//	if (null != cleanAccount && now <= cleanAccountEnd && now >= cleanAccountBegin) {
+	//		List<Player> cleanList = playerManager.getPlayers().values().parallelStream().filter(player -> {
+	//			return isClean(cleanAccount, player);
+	//		}).collect(Collectors.toList());
+	//		//有用户满足要求 移除
+	//		if (cleanList.size() > 0) {
+	//			cleanList.forEach(player -> {
+	//				playerManager.cleanPlayer(player);
+	//			});
+	//		}
+	//	}
+	//}
 
-	/**
-	 * 根据规则判定改账号是否清理
-	 *
-	 * @param cleanAccount
-	 * @param player
-	 * @return
-	 */
-	private boolean isClean(List<List<Integer>> cleanAccount, Player player) {
-		Lord lord = player.getLord();
-		Account account = player.account;
-		if (lord == null || account == null) {
-			return false;
-		}
-		for (List<Integer> clean : cleanAccount) {
-			if (clean.size() >= 3) {
-				int vip = lord.getVip();// VIP等级
-				int commandLv = player.getBuildingLv(BuildingType.COMMAND);// 主城等级
-				Date loginDate = account.getLoginDate();// 登录日期
-				if (loginDate == null) {
-					break;
-				}
-				//上次登录时间距离当前时间的小时
-				int dacey = TimeHelper.getDifferHours(loginDate.getTime(), System.currentTimeMillis());
-				//清理账号条件设置(addtion配置解释:主城等级(等于),离线时长(大于等于),vip等级(小于)]
-				if (vip < clean.get(2) && commandLv == clean.get(0) && dacey >= clean.get(1)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+	///**
+	// * 根据规则判定改账号是否清理
+	// *
+	// * @param cleanAccount
+	// * @param player
+	// * @return
+	// */
+	//private boolean isClean(List<List<Integer>> cleanAccount, Player player) {
+	//	Lord lord = player.getLord();
+	//	Account account = player.account;
+	//	if (lord == null || account == null) {
+	//		return false;
+	//	}
+	//	for (List<Integer> clean : cleanAccount) {
+	//		if (clean.size() >= 3) {
+	//			int vip = lord.getVip();// VIP等级
+	//			int commandLv = player.getBuildingLv(BuildingType.COMMAND);// 主城等级
+	//			Date loginDate = account.getLoginDate();// 登录日期
+	//			if (loginDate == null) {
+	//				break;
+	//			}
+	//			//上次登录时间距离当前时间的小时
+	//			int dacey = TimeHelper.getDifferHours(loginDate.getTime(), System.currentTimeMillis());
+	//			//清理账号条件设置(addtion配置解释:主城等级(等于),离线时长(大于等于),vip等级(小于)]
+	//			if (vip < clean.get(2) && commandLv == clean.get(0) && dacey >= clean.get(1)) {
+	//				return true;
+	//			}
+	//		}
+	//	}
+	//	return false;
+	//}
 
 
 	// 玩家创建角色-逻辑
@@ -225,7 +223,10 @@ public class PlayerService {
 				return;
 			}
 
-			Account account = playerManager.accountKeyCache.get(accountKey);
+			Account account = playerManager.getAccountByAccountKey(accountKey);
+			if(account == null){
+				return;
+			}
 			// 玩家已经创建
 			if (account != null && account.getCreated() == 1 && account.getLordId() != 0) {
 				builder.setState(3);
@@ -295,6 +296,12 @@ public class PlayerService {
 				SpringUtil.getBean(EventManager.class).create_role(player);
 				SpringUtil.getBean(EventManager.class).record_userInfo_once(player, EventName.create_role);
 				tdManager.openBouns(player);
+
+				// 测试账号
+				if (account.isTestAccount()) {
+					PlayerTestManager playerTestManager = SpringUtil.getBean(PlayerTestManager.class);
+					playerTestManager.createTestPlayer(player);
+				}
 
 				/**
 				 *	给账号服发送角色信息
@@ -415,8 +422,6 @@ public class PlayerService {
 			playerManager.recoverWashHeroTimes(player, now);
 		}
 	}
-	@Autowired
-	SeasonManager seasonManager;
 
 	// 玩家购买体力值
 	public void buyEnergyRq(RolePb.BuyEnergyRq req, ClientHandler handler) {
@@ -459,10 +464,6 @@ public class PlayerService {
 		}
 
 		int costGold = 0;
-		int energy = 100;
-
-		int buf = seasonManager.getBuf(player, EffectType.EFFECT_TYPE28);
-		energy += buf;
 		// 首次免费
 		if (buyTimes > 1) {
 			int needGold = staticEnergyPrice.getPrice();
@@ -473,10 +474,9 @@ public class PlayerService {
 			}
 			costGold = needGold;
 			playerManager.subAward(player, AwardType.GOLD, 1, needGold, Reason.BUY_ENERGY);
-			energy = 100;
 		}
 
-		lordManager.addEnergy(lord, energy, Reason.BUY_ENERGY);
+		lordManager.addEnergy(lord, 100, Reason.BUY_ENERGY);
 		lord.setBuyEnergy(lord.getBuyEnergy() + 1);
 		RolePb.BuyEnergyRs.Builder builder = RolePb.BuyEnergyRs.newBuilder();
 		builder.setGold(player.getGold());
@@ -485,11 +485,15 @@ public class PlayerService {
 		builder.setEnergyBuy(player.getBuyEnergy());
 
 		handler.sendMsgToPlayer(RolePb.BuyEnergyRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(EventEnum.BUY_ENERGY, player, 1, 0);
+		activityEventManager.activityTip(EventEnum.BUY_ENERGY, player, 1, 0);
 //        activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.BUY_ENERGY, 1);
 		dailyTaskManager.record(DailyTaskId.BUY_ENERGY, player, 1);
 		eventManager.buyEnergy(player, Lists.newArrayList(lord.getBuyEnergy(), costGold));
+		achievementService.addAndUpdate(player, AchiType.AT_15, 1);
 	}
+
+	@Autowired
+	AchievementService achievementService;
 
 	// 　换头像
 	public void setPortrait(RolePb.SetPortraitRq req, ClientHandler handler) {
@@ -1039,4 +1043,5 @@ public class PlayerService {
 //		String s = HeartBeatHelper.decodeHeartBeatData("cd51e9c41a19843f9d58a9478106b154", rq.getInput());
 //		ChannelHandlerContext ctx = clientHandler.getCtx();
 	}
+
 }

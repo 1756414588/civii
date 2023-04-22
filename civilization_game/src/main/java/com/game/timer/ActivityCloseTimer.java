@@ -3,6 +3,7 @@ package com.game.timer;
 import com.game.activity.ActivityEventManager;
 import com.game.activity.actor.TimeDisappearActor;
 import com.game.activity.define.EventEnum;
+import com.game.spring.SpringUtil;
 import com.game.util.TimeHelper;
 
 /**
@@ -17,6 +18,8 @@ public class ActivityCloseTimer extends TimerEvent {
 	@Override
 	public void action() {
 		long now = System.currentTimeMillis();
-		ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new TimeDisappearActor(now));
+		ActivityEventManager activityEventManager = SpringUtil.getBean(ActivityEventManager.class);
+		activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new TimeDisappearActor(now));
+
 	}
 }

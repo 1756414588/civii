@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticPeople;
 import com.game.domain.s.StaticWorkShop;
 import com.game.domain.s.StaticWorkShopBuy;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@LoadData(name = "商店")
 public class StaticWorkShopMgr extends BaseDataMgr {
 	@Autowired
 	private StaticDataDao staticDataDao;
@@ -23,13 +25,17 @@ public class StaticWorkShopMgr extends BaseDataMgr {
 
     private static final int MAX_LEVEL = 150;
 
-    @Override
-	public void init() throws Exception{
+	@Override
+	public void load() throws Exception {
 		workShopMap = staticDataDao.selectWorkShopMap();
 		workShopBuyMap = staticDataDao.selectWorkShopBuyMap();
-        staticPeopleMap = staticDataDao.selectPeopleMap();
-        qualityMap.clear();
+		staticPeopleMap = staticDataDao.selectPeopleMap();
+		qualityMap.clear();
 		makeQualityMap();
+	}
+
+	@Override
+	public void init() throws Exception{
 	}
 
 	public Map<Integer, StaticWorkShop> getWorkShopMap() {

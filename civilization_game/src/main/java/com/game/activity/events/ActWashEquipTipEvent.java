@@ -6,11 +6,11 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActEquipUpdate;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,13 +18,14 @@ import java.util.Optional;
 /**
  * 装备精研 1.活动期间装备精研达到指定次数，可领取装备精研次数; 2.每天完成任意充值还能领取额外精研次数; 3.累积充值天数越多，额外获得的改造次数越多 4.购买每日特惠礼包不计入累积天数
  */
+@Component
 public class ActWashEquipTipEvent extends BaseActivityEvent {
 
-	private static ActWashEquipTipEvent inst = new ActWashEquipTipEvent();
-
-	public static ActWashEquipTipEvent getInst() {
-		return inst;
-	}
+	//private static ActWashEquipTipEvent inst = new ActWashEquipTipEvent();
+	//
+	//public static ActWashEquipTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -37,7 +38,6 @@ public class ActWashEquipTipEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActEquipUpdate> staticActEquipUpdateList = staticActivityMgr.getStaticActEquipUpdateList();
 		if (null == staticActEquipUpdateList || staticActEquipUpdateList.size() == 0) {
 			return;
@@ -89,7 +89,6 @@ public class ActWashEquipTipEvent extends BaseActivityEvent {
 
 	public boolean isHadReward(ActRecord actRecord, int status, int payCount) {
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActEquipUpdate> staticActEquipUpdateList = staticActivityMgr.getStaticActEquipUpdateList();
 
 		Map<Integer, Integer> received = actRecord.getReceived();

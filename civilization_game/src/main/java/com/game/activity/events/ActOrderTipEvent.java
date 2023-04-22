@@ -6,23 +6,25 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 /**
  * 材料生产
  */
+@Component
 public class ActOrderTipEvent extends BaseActivityEvent {
 
-	private static ActOrderTipEvent inst = new ActOrderTipEvent();
 
-	public static ActOrderTipEvent getInst() {
-		return inst;
-	}
+	//private static ActOrderTipEvent inst = new ActOrderTipEvent();
+	//
+	//public static ActOrderTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -36,7 +38,6 @@ public class ActOrderTipEvent extends BaseActivityEvent {
 		if (activityBase.getStep() != ActivityConst.ACTIVITY_BEGIN) {
 			return;
 		}
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> list = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		if (list.isEmpty()) {
 			return;

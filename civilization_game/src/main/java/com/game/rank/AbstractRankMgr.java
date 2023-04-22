@@ -107,8 +107,8 @@ public abstract class AbstractRankMgr<T extends RankInfo> implements IRankingMgr
         }
         lock.lock();
         try {
-            int size = 0;
-            if (size > 0 && size < 2) {
+            int size = rankList.size();
+            if (size == 1) {
                 rankList.get(0).setRanking(0);
                 return;
             }

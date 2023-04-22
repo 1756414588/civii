@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticMeetingSoldier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.List;
  * @description
  */
 @Component
+@LoadData(name = "议会厅兵力")
 public class StaticMeetingSoldierMgr extends BaseDataMgr {
 
     @Autowired
@@ -22,9 +24,14 @@ public class StaticMeetingSoldierMgr extends BaseDataMgr {
     private List<StaticMeetingSoldier> staticMeetingSoldiers;
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         staticMeetingSoldiers = staticDataDao.selectMeetingSoldier();
         staticMeetingSoldiers.sort(Comparator.comparing(StaticMeetingSoldier::getSoldier));
+    }
+
+    @Override
+    public void init() throws Exception{
+
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.game.constant;
 
 /**
- *
+ * @author 陈奎
  * @version 1.0
  * @filename
  * @time 2017-8-18 上午1:35:11

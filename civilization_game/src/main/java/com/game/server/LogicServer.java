@@ -3,7 +3,6 @@ package com.game.server;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.flame.ActFlameWarTimer;
 import com.game.message.handler.DealType;
-import com.game.season.SeasonTimer;
 import com.game.server.thread.ServerThread;
 import com.game.timer.ActivityCloseTimer;
 import com.game.timer.ActManoeuvreTimer;
@@ -61,7 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * @Author 陈奎
  * @Description 逻辑服务
  * @Date 2022/9/9 11:30
  **/
@@ -166,7 +165,6 @@ public class LogicServer implements Runnable {
 		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new ZergTimer());
 		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new ActManoeuvreTimer());
 		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new ActFlameWarTimer());
-		threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new SeasonTimer());
 
 		threadPool.get(DealType.TIMER_LOGIC.getCode()).addTimerEvent(new ActivityCloseTimer());
 		threadPool.get(DealType.TIMER_LOGIC.getCode()).addTimerEvent(new ActivityTipTimer());

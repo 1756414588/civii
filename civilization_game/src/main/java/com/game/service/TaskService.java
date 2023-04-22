@@ -1,58 +1,30 @@
 package com.game.service;
 
-import com.game.constant.AwardType;
-import com.game.constant.GameError;
-import com.game.constant.LordPropertyType;
-import com.game.constant.Reason;
-import com.game.constant.ResourceType;
-import com.game.constant.TaskType;
+import com.game.constant.*;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticPropMgr;
-import com.game.domain.Player;
+import com.game.dataMgr.StaticTaskMgr;
 import com.game.domain.Award;
-import com.game.domain.p.Building;
-import com.game.domain.p.Equip;
-import com.game.domain.p.Hero;
-import com.game.domain.p.HeroEquip;
-import com.game.domain.p.LevelAward;
-import com.game.domain.p.Lord;
-import com.game.domain.p.Task;
-import com.game.domain.p.WorkQue;
-import com.game.domain.p.WsWorkQue;
+import com.game.domain.Player;
+import com.game.domain.p.*;
 import com.game.domain.s.StaticProp;
 import com.game.domain.s.StaticTask;
 import com.game.log.LogUser;
-import com.game.log.constant.CopperOperateType;
-import com.game.log.constant.IronOperateType;
-import com.game.log.constant.OilOperateType;
-import com.game.log.constant.ResOperateType;
-import com.game.log.constant.StoneOperateType;
+import com.game.log.constant.*;
 import com.game.log.consumer.EventManager;
 import com.game.log.domain.RoleResourceChangeLog;
 import com.game.log.domain.RoleResourceLog;
-import com.game.log.domain.RoleTaskLog;
-import com.game.manager.BuildingManager;
-import com.game.manager.HeroManager;
-import com.game.manager.JourneyManager;
-import com.game.manager.LordManager;
-import com.game.manager.PlayerManager;
-import com.game.manager.ServerManager;
-import com.game.manager.TaskManager;
+import com.game.manager.*;
 import com.game.message.handler.ClientHandler;
 import com.game.pb.CommonPb;
 import com.game.pb.TaskPb;
 import com.game.pb.TaskPb.GetTaskRs;
 import com.game.spring.SpringUtil;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 public class TaskService {
@@ -74,6 +46,13 @@ public class TaskService {
     private StaticPropMgr staticPropMgr;
     @Autowired
     private LordManager lordManager;
+    @Autowired
+    private WorldManager worldManager;
+    @Autowired
+    LogUser logUser;
+    @Autowired
+    EventManager eventManager;
+
     // 获取所有的任务信息
     public void getTaskRq(ClientHandler handler) {
         Player player = playerManager.getPlayer(handler.getRoleId());
@@ -81,44 +60,43 @@ public class TaskService {
             handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
             return;
         }
+        Map<Integer, Task> taskMap = player.getTaskMap();
+        int curMainTask = player.getLord().getCurMainTask();
+        List<StaticTask> taskList = staticTaskMgr.getTaskList(curMainTask);
+        if (taskList != null) {
+            taskList.forEach(x -> {
+                if (!taskMap.containsKey(x.getTaskId())) {
+                    taskManager.addTask(x.getTaskId(), taskMap);
+                }
+            });
+        }
 
         GetTaskRs.Builder builder = GetTaskRs.newBuilder();
-        Map<Integer, Task> taskMap = player.getTaskMap();
-        List<StaticTask> lineTasks = taskManager.getLineTask();
-        for (Map.Entry<Integer, Task> elem : taskMap.entrySet()) {
-            if (elem == null) {
-                continue;
-            }
-
-            Task task = elem.getValue();
-            if (task == null) {
-                continue;
-            }
-
+        Iterator<Task> iterator = taskMap.values().iterator();
+        while (iterator.hasNext()) {
+            Task task = iterator.next();
             StaticTask staticTask = taskManager.getStaticTask(task.getTaskId());
             if (staticTask == null) {
                 continue;
             }
-
-            if (task.getStatus() == 2) {
-                continue;
+            if (task.getStatus() != 2) {
+                task.setMaxProcess(taskManager.getMaxProcess(task.getTaskId()));
+                taskManager.checkTask(task, player);
+                if (task.isCondOk()) {
+                    List<Integer> triggers = new ArrayList<Integer>();
+                    triggers.add(task.getTaskId());
+                    //taskManager.checkSubTask(TaskType.DONE_ANY_SUBTASK, player, triggers);
+                    taskManager.recordFinished(task, player);
+                }
+                taskManager.checkTaskConfig(task);
             }
-            task.setMaxProcess(taskManager.getMaxProcess(task.getTaskId()));
-            taskManager.checkTask(task, player);
-            if (task.isCondOk()) {
-                List<Integer> triggers = new ArrayList<Integer>();
-                triggers.add(task.getTaskId());
-                taskManager.checkSubTask(TaskType.DONE_ANY_SUBTASK, player, triggers);
-                taskManager.recordFinished(task, player);
-            }
-
-            taskManager.checkTaskConfig(task);
-
             builder.addTask(taskManager.wrapTask(task));
         }
+
+        List<StaticTask> lineTasks = taskManager.getLineTask();
         for (StaticTask e : lineTasks) {
             if (!taskMap.containsKey(e.getTaskId())) {
-                if (player.getFinishedTask().contains(e.getTaskId())) {    //已完成
+                if (player.getFinishedTask().contains(e.getTaskId())) { // 已完成
                     Task task = new Task();
                     task.setTaskId(e.getTaskId());
                     task.setProcess(1);
@@ -134,6 +112,9 @@ public class TaskService {
     }
 
 
+    @Autowired
+    StaticTaskMgr staticTaskMgr;
+
     // 领取奖励, 并触发后续的任务
     public void taskAwardRq(TaskPb.TaskAwardRq req, ClientHandler handler) {
         Player player = playerManager.getPlayer(handler.getRoleId());
@@ -143,11 +124,11 @@ public class TaskService {
         }
 
         int taskId = req.getTaskId();
-        if (!taskManager.isConfigOK(taskId)) {
+        StaticTask staticTask = taskManager.getStaticTask(taskId);
+        if (staticTask == null) {
             handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);
             return;
         }
-
 
 
         Map<Integer, Task> taskMap = player.getTaskMap();
@@ -170,6 +151,23 @@ public class TaskService {
             handler.sendErrorMsgToPlayer(GameError.TASK_AWARD_CAN_NOT_TAKE);
             return;
         }
+
+        if (staticTask.getType() == 1) {
+            List<StaticTask> allChapTask = staticTaskMgr.getAllChapTask(staticTask.getTaskId());
+            for (StaticTask staticTask1 : allChapTask) {
+                Task task1 = taskMap.get(staticTask1.getTaskId());
+                if (task1 == null) {
+                    handler.sendErrorMsgToPlayer(GameError.TASK_AWARD_CAN_NOT_TAKE);
+                    return;
+                }
+                if (task1.getStatus() != 2) {
+                    handler.sendErrorMsgToPlayer(GameError.TASK_AWARD_CAN_NOT_TAKE);
+                    return;
+                }
+
+            }
+        }
+
 
         List<List<Long>> awardList = taskManager.getAwardList(taskId);
         if (playerManager.isEquipError(awardList, player)) {
@@ -209,7 +207,6 @@ public class TaskService {
             /**
              * 任务建立获得的资源产出日志
              */
-            LogUser logUser = SpringUtil.getBean(LogUser.class);
             if (type == AwardType.RESOURCE) {
                 logUser.roleResourceLog(new RoleResourceLog(player.getLord().getLordId(),
                         player.account.getCreateDate(),
@@ -254,11 +251,6 @@ public class TaskService {
             }
         }
 
-        StaticTask staticTask = taskManager.getStaticTask(taskId);
-        if (staticTask == null) {
-            handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);
-            return;
-        }
 
         int type = AwardType.LORD_PROPERTY;
         int id = LordPropertyType.EXP;
@@ -266,9 +258,8 @@ public class TaskService {
         Award award = new Award(0, type, id, count);
         if (count > 0) {
             taskAward.addAward(award.wrapPb());
-            //playerManager.addAward(player, award, Reason.TASK_AWARD);
             LevelAward levelAward = lordManager.addExp(player, staticTask.getExp(), Reason.TASK_AWARD);
-            if(levelAward!=null){
+            if (levelAward != null) {
                 taskAward.setLevelAward(levelAward.wrapPb());
             }
         }
@@ -278,54 +269,63 @@ public class TaskService {
             finishedTask.add(taskId);
         }
 
-        // taskAward.addTask(taskManager.wrapTask(task));
-        // open task
-        // 获得开启的任务
-        Set<Integer> taskSet = taskManager.getMutiTriggerTask(taskId, player);
-        if (taskSet.isEmpty()) {
-            taskSet = taskManager.getOpenTask(taskId, player);
-        }
-
-        // 检查下一个新手引导
-        Lord lord = player.getLord();
-        if (taskSet != null) {
-            for (Integer openTask : taskSet) {
-                Task addTask = taskManager.addTask(openTask, taskMap);
-                SpringUtil.getBean(EventManager.class).mission_start(player, taskId, staticTask.getTypeChild(), "");
-                addTask.setMaxProcess(taskManager.getMaxProcess(addTask.getTaskId()));
-                taskManager.checkTask(addTask, player);  // 检查任务是否完成
-                if (addTask != null) {
-                    taskAward.addTask(taskManager.wrapTask(addTask));
-                }
-
-                if (addTask != null && addTask.isCondOk()) {
-                    // 检查完成任意两项支线任务的任务
-                    List<Integer> triggers = new ArrayList<Integer>();
-                    triggers.add(addTask.getTaskId());
-                    taskManager.checkSubTask(TaskType.DONE_ANY_SUBTASK, player, triggers);  // 检查支线任务是否完成
-                    taskManager.recordFinished(addTask, player);
-                }
-
-                StaticTask openConfig = taskManager.getStaticTask(openTask);
-                // check collect times
-                if (openConfig != null) {
-                    int collectTimes = openConfig.getCollectTimes();
-                    if (collectTimes > 0 && lord != null) {
-                        int currentCollectTimes = lord.getCollectTimes();
-                        currentCollectTimes += collectTimes;
-
-                        lord.setCollectTimes(currentCollectTimes);
-                        taskAward.setCollectTimes(lord.getCollectTimes());
-                        int collectInterval = staticLimitMgr.getCollectInterval();
-                        taskAward.setCollectEndTime(lord.getCollectEndTime() + collectInterval);
+        Set<Integer> taskSet = new HashSet<>();
+        if (staticTask.getType() == 1) {
+            int nextTask = staticTask.getNext();
+            StaticTask staticTask1 = taskManager.getStaticTask(nextTask);
+            if (staticTask1 != null) {
+                taskSet.add(staticTask1.getTaskId());
+                player.getLord().setCurMainTask(staticTask1.getTaskId());
+                List<StaticTask> taskList = staticTaskMgr.getTaskList(staticTask1.getTaskId());
+                if (taskList != null) {
+                    for (StaticTask staticTask2 : taskList) {
+                        taskSet.add(staticTask2.getTaskId());
                     }
+                }
+            }
+        } else if (staticTask.getType() == 2) {
+            List<StaticTask> devNextTask = staticTaskMgr.getDevNextTask(staticTask.getTaskId());
+            if (devNextTask != null) {
+                for (StaticTask staticTask1 : devNextTask) {
+                    taskSet.add(staticTask1.getTaskId());
                 }
             }
         }
 
+        // 检查下一个新手引导
+        Lord lord = player.getLord();
+        for (Integer openTask : taskSet) {
+            Task addTask = taskManager.addTask(openTask, taskMap);
+            eventManager.mission_start(player, taskId, staticTask.getTypeChild(), "");
+            addTask.setMaxProcess(taskManager.getMaxProcess(addTask.getTaskId()));
+            taskManager.checkTask(addTask, player);  // 检查任务是否完成
+            if (addTask != null) {
+                taskAward.addTask(taskManager.wrapTask(addTask));
+            }
+            if (addTask != null && addTask.isCondOk()) {
+                // 检查完成任意两项支线任务的任务
+                List<Integer> triggers = new ArrayList<Integer>();
+                triggers.add(addTask.getTaskId());
+                //taskManager.checkSubTask(TaskType.DONE_ANY_SUBTASK, player, triggers);  // 检查支线任务是否完成
+                taskManager.recordFinished(addTask, player);
+            }
+
+            StaticTask openConfig = taskManager.getStaticTask(openTask);
+            if (openConfig != null) {
+                int collectTimes = openConfig.getCollectTimes();
+                if (collectTimes > 0 && lord != null) {
+                    int currentCollectTimes = lord.getCollectTimes();
+                    currentCollectTimes += collectTimes;
+
+                    lord.setCollectTimes(currentCollectTimes);
+                    taskAward.setCollectTimes(lord.getCollectTimes());
+                    int collectInterval = staticLimitMgr.getCollectInterval();
+                    taskAward.setCollectEndTime(lord.getCollectEndTime() + collectInterval);
+                }
+            }
+            worldManager.flushTaskMonster1(player, addTask.getTaskId());
+        }
         player.setAutoBuildTimes(player.getAutoBuildTimes() + staticTask.getAutoBuildTimes());
-
-
         if (lord != null) {
             int nextState = staticTask.getNewState();
             if (nextState != 0) {
@@ -337,48 +337,30 @@ public class TaskService {
             }
             taskAward.setOnBuild(lord.getOnBuild());
         }
-
-
         taskAward.setAutoBuildTimes(player.getAutoBuildTimes());
         taskAward.setComplate(taskManager.getComplateTask(player));
         handler.sendMsgToPlayer(TaskPb.TaskAwardRs.ext, taskAward.build());
-
-        SpringUtil.getBean(EventManager.class).mission_complete(player, taskId, staticTask.getType(), staticTask.getTypeChild(), staticTask.getTaskName(), awardList);
-
-        //taskManager.synBuildings(player, staticTask.getOpenBuildingId());
-        //TODO 根据任务开启
+        eventManager.mission_complete(player, taskId, staticTask.getType(), staticTask.getTypeChild(), staticTask.getTaskName(), awardList);
         buildingManager.synBuildingsByTask(player, req.getTaskId());
         // 删除任务
-        player.removeTask(task);
-        //开启建造队列
-//        activityManager.openBuildGift(player, task);
-
-        /**
-         * 玩家任务日志埋点
-         */
         if (staticTask.getType() == 1) {
-            //记录玩家当前进行中的主线任务
-            staticTask.getMulTriggerId().forEach(e -> {
-                StaticTask next = taskManager.getStaticTask(e);
-                if (next != null) {
-                    //主线任务
-                    if (next.getType() == 1) {
-                        player.getLord().setCurMainTask(e);
-                    }
-                }
-            });
+            player.removeTask(task);
 
-            LogUser logUser = SpringUtil.getBean(LogUser.class);
-            logUser.roleTaskLog(new RoleTaskLog(player.getLord().getLordId(), serverManager.getServerId(), player.account.getChannel(), taskId));
+            List<StaticTask> allChapTask = staticTaskMgr.getAllChapTask(staticTask.getTaskId());
+            for (StaticTask staticTask1 : allChapTask) {
+                Task task1 = taskMap.get(staticTask1.getTaskId());
+                player.removeTask(task1);
+            }
+        } else {
+            taskManager.updateMainTask(player, task);
         }
-
         try {
             // 特殊处理类型为8和13, 49的任务
             for (Integer openTaskId : taskSet) {
                 int typeChild = taskManager.getTypeChild(openTaskId);
                 if (typeChild == TaskType.AWARD_EQUIP || typeChild == TaskType.START_MAKE_EQUIP || typeChild == TaskType.MAKE_SECOND_EQUIP) {
-                    Task openTask = taskManager.createTask(openTaskId);
-                    List<List<Integer>> config = taskManager.getParam(openTask.getTaskId());
+                    //Task openTask = taskManager.createTask(openTaskId);
+                    List<List<Integer>> config = taskManager.getParam(openTaskId);
                     if (config == null || config.size() != 1) {
                         continue;
                     }
@@ -420,57 +402,58 @@ public class TaskService {
                         }
                     }
 
-					if (typeChild != TaskType.MAKE_SECOND_EQUIP && num > 0) {
-						taskManager.doTask(typeChild, player, config.get(0));
-					} else if (num > 1) {
-						taskManager.doTask(typeChild, player, config.get(0));
-					}
-				} else if (typeChild == TaskType.REAUTY_SGAME) {
-					// 特殊处理美女小游戏提前完成,直接生效
-					long firstPlaySGameTime = player.getLord().getFirstPlaySGameTime();
-					if (firstPlaySGameTime != 0) {
-						taskManager.doTask(TaskType.REAUTY_SGAME, player);
-					}
-				} else if (typeChild == TaskType.MAKE_PROP) {
-					// 判断材料工厂打造队列是否已经生产对应的物品
-					Task openTask = taskManager.createTask(openTaskId);
-					List<List<Integer>> config = taskManager.getParam(openTask.getTaskId());
-					if (config == null || config.size() != 1) {
-						continue;
-					}
-					Integer color = config.get(0).get(0);
-					int num = 0;
-					Building building = player.buildings;
-					if (building == null || building.getWorkShop() == null || building.getWorkShop().getWorkQues() == null) {
-						continue;
-					}
-					Map<Integer, WsWorkQue> wsWorkQue = building.getWorkShop().getWorkQues();
-					Set<Map.Entry<Integer, WsWorkQue>> entries = wsWorkQue.entrySet();
-					for (Map.Entry<Integer, WsWorkQue> entry : entries) {
-						WsWorkQue value = entry.getValue();
-						if (value == null || value.getAward() == null) {
-							continue;
-						}
-						Award valueAward = value.getAward();
-						int awardId = valueAward.getId();
-						StaticProp staticProp = staticPropMgr.getStaticProp(awardId);
-						if (null != staticProp && staticProp.getColor() == color) {
-							num++;
-						}
-					}
-					if (num > 0) {
-						taskManager.doTask(typeChild, player, config.get(0));
-					}
-				} else if (typeChild == TaskType.DONE_JOURNEY) {
-					CommonPb.Award stableAwards = SpringUtil.getBean(JourneyManager.class).getStableAwards(player.getLord().getLastJourney());
-					if (stableAwards != null) {
-						List<Integer> list = Lists.newArrayList(player.getLord().getLastJourney());
-						taskManager.doTask(TaskType.DONE_JOURNEY, player, list);
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+                    if (typeChild != TaskType.MAKE_SECOND_EQUIP && num > 0) {
+                        taskManager.doTask(typeChild, player, config.get(0));
+                    } else if (num > 1) {
+                        taskManager.doTask(typeChild, player, config.get(0));
+                    }
+                } else if (typeChild == TaskType.REAUTY_SGAME) {
+                    // 特殊处理美女小游戏提前完成,直接生效
+                    long firstPlaySGameTime = player.getLord().getFirstPlaySGameTime();
+                    if (firstPlaySGameTime != 0) {
+                        taskManager.doTask(TaskType.REAUTY_SGAME, player);
+                    }
+                } else if (typeChild == TaskType.MAKE_PROP) {
+                    // 判断材料工厂打造队列是否已经生产对应的物品
+                    //Task openTask = taskManager.createTask(openTaskId);
+                    List<List<Integer>> config = taskManager.getParam(openTaskId);
+                    if (config == null || config.size() != 1) {
+                        continue;
+                    }
+                    Integer color = config.get(0).get(0);
+                    int num = 0;
+                    Building building = player.buildings;
+                    if (building == null || building.getWorkShop() == null || building.getWorkShop().getWorkQues() == null) {
+                        continue;
+                    }
+                    Map<Integer, WsWorkQue> wsWorkQue = building.getWorkShop().getWorkQues();
+                    Set<Map.Entry<Integer, WsWorkQue>> entries = wsWorkQue.entrySet();
+                    for (Map.Entry<Integer, WsWorkQue> entry : entries) {
+                        WsWorkQue value = entry.getValue();
+                        if (value == null || value.getAward() == null) {
+                            continue;
+                        }
+                        Award valueAward = value.getAward();
+                        int awardId = valueAward.getId();
+                        StaticProp staticProp = staticPropMgr.getStaticProp(awardId);
+                        if (null != staticProp && staticProp.getColor() == color) {
+                            num++;
+                        }
+                    }
+                    if (num > 0) {
+                        taskManager.doTask(typeChild, player, config.get(0));
+                    }
+                } else if (typeChild == TaskType.DONE_JOURNEY) {
+                    CommonPb.Award stableAwards = SpringUtil.getBean(JourneyManager.class).getStableAwards(player.getLord().getLastJourney());
+                    if (stableAwards != null) {
+                        List<Integer> list = Lists.newArrayList(player.getLord().getLastJourney());
+                        taskManager.doTask(TaskType.DONE_JOURNEY, player, list);
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

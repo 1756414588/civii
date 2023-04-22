@@ -35,11 +35,15 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Fight(warName = "闪电战", warType = {WarType.ATTACK_QUICK}, marthes = {MarchType.AttackCityQuick, MarchType.QUICK_ASSIST})
 @Component
 public class QuickWarProcess extends FightProcess {
+
+    @Autowired
+    ActivityEventManager activityEventManager;
 
     @Override
     public void init(int[] warTypes, int[] marches) {
@@ -288,7 +292,7 @@ public class QuickWarProcess extends FightProcess {
 
             // 删除防守者是自己的战斗
             worldManager.callDefecneOtherMarchReturn(target, warInfo.getWarId(), MarchReason.QuickPlayerFly);
-            worldManager.handPlayerLost(target, robeAward);
+            //worldManager.handPlayerLost(target, robeAward);
             countryManager.doCountryTask(player, CountryTaskType.PVP_CITY_WIN, 1);
 
             battleMailManager.handleSendQuickWar(attacker, defencer, player, target, robeAward, gotAward, heroAddExp, warInfo, attackRec, defenceRec, allSoldierRec);
@@ -313,7 +317,7 @@ public class QuickWarProcess extends FightProcess {
             }
 
             int sortId = 14000 + target.getCommandLv();
-            ActivityEventManager.getInst().activityTip(EventEnum.CITY_WAR_WIN, player, 1, 0);
+            activityEventManager.activityTip(EventEnum.CITY_WAR_WIN, player, 1, 0);
 
             activityManager.updActSeven(player, ActivityConst.TYPE_ADD, sortId, 0, 1);
             activityManager.updActSeven(player, ActivityConst.TYPE_ADD, 15000, 0, 1);
@@ -322,6 +326,8 @@ public class QuickWarProcess extends FightProcess {
             worldBoxManager.calcuPoints(WorldBoxTask.CITY_FIGHT, player, 1);
 
             activityManager.updActPerson(player, ActivityConst.ACT_SQUA, 1, NineCellConst.CELL_2);
+
+            achievementService.addAndUpdate(player,AchiType.AT_28,1);
         } else { // 防守方胜利
             // 直接回城
             marchManager.handleMarchReturn(march, MarchReason.QuickAttackFailed);
@@ -331,7 +337,10 @@ public class QuickWarProcess extends FightProcess {
         if (mapInfo.getMapId() == MapId.FIRE_MAP) {
             flameWarService.calKill(player, attacker);
             flameWarService.calKill(target, defencer);
+
         }
+        achievementService.addAndUpdate(player,AchiType.AT_31,attacker.getKillNum());
+        achievementService.addAndUpdate(target,AchiType.AT_31,defencer.getKillNum());
         // 通知所有在线玩家进攻方的行军变更
         worldManager.synMarch(mapInfo.getMapId(), march);
 
@@ -430,6 +439,7 @@ public class QuickWarProcess extends FightProcess {
 
         if (soilder > 0) {
             activityManager.updActPerson(player, ActivityConst.ACT_SOILDER_RANK, soilder, 0);
+            achievementService.addAndUpdate(player,AchiType.AT_25,soilder);
         }
     }
 

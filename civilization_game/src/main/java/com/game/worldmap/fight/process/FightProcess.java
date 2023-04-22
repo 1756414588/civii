@@ -27,6 +27,7 @@ import com.game.manager.WarManager;
 import com.game.manager.WorldBoxManager;
 import com.game.manager.WorldManager;
 import com.game.pb.WorldPb;
+import com.game.service.AchievementService;
 import com.game.service.ActivityService;
 import com.game.util.LogHelper;
 import com.game.worldmap.MapInfo;
@@ -101,7 +102,8 @@ public abstract class FightProcess implements IFightProcess {
 	protected TaskManager taskManager;
 	@Autowired
 	FlameWarService flameWarService;
-
+	@Autowired
+	AchievementService achievementService;
 
 	@Override
 	public void process(MapInfo mapInfo, IWar war) {
@@ -216,14 +218,16 @@ public abstract class FightProcess implements IFightProcess {
 				double techAdd = techManager.getHonorAdd(battleEntity.getLordId());
 				int lastHonor = battleMailManager.getHonor(battleEntity, warType);
 				int honor = (int) ((double) lastHonor * (1.0f + techAdd));
-				playerManager.addAward(player, AwardType.LORD_PROPERTY, LordPropertyType.HONOR, honor,
-					Reason.ATTACK_CITY);
-
+				playerManager.addAward(player, AwardType.LORD_PROPERTY, LordPropertyType.HONOR, honor, Reason.ATTACK_CITY);
 				soilder += battleEntity.getMaxSoldierNum() - battleEntity.getCurSoldierNum();
+				if(warType==WarType.ATTACK_COUNTRY || warType==WarType.ATTACK_FAR){
+					achievementService.addAndUpdate(player,AchiType.AT_31,battleEntity.getKillNum());
+				}
 			}
 
 			if (soilder > 0) {
 				activityManager.updActPerson(player, ActivityConst.ACT_SOILDER_RANK, soilder, 0);
+				achievementService.addAndUpdate(player,AchiType.AT_25,soilder);
 			}
 		}
 	}

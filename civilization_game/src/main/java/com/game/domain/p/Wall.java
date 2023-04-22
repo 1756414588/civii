@@ -6,20 +6,19 @@ import com.game.pb.DataPb;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 // 城墙
 public class Wall implements Cloneable {
     private BuildingBase base = new BuildingBase();
     // 驻防武将
-    private List<Integer> defenceHero = new ArrayList<Integer>();
+    //private List<Integer> defenceHero = new ArrayList<Integer>();
     private long endTime;
     // 驻防军
-    private Map<Integer, WallDefender> wallDefenders = new HashMap<Integer, WallDefender>();
+    private Map<Integer, WallDefender> wallDefenders = new ConcurrentHashMap<>();
     // 友军
-    private HashMap<Integer, WallFriend> wallFriends = new HashMap<Integer, WallFriend>();
+    private Map<Integer, WallFriend> wallFriends = new ConcurrentHashMap<Integer, WallFriend>();
 
 
     public BuildingBase getBase() {
@@ -59,9 +58,9 @@ public class Wall implements Cloneable {
     public DataPb.Wall.Builder wrapPb() {
         DataPb.Wall.Builder builder = DataPb.Wall.newBuilder();
         builder.setWall(writeData());
-        if (defenceHero.size() > 0) {
-            builder.addAllHeroId(defenceHero);
-        }
+        //if (defenceHero.size() > 0) {
+        //    builder.addAllHeroId(defenceHero);
+        //}
         builder.setEndTime(endTime);
         for (WallDefender defender : getWallDefenders().values()) {
             if (defender == null) {
@@ -84,8 +83,8 @@ public class Wall implements Cloneable {
 
     public void unwrapPb(DataPb.Wall builder) {
         base.readData(builder.getWall());
-        defenceHero.clear();
-        defenceHero.addAll(builder.getHeroIdList());
+        //defenceHero.clear();
+        //defenceHero.addAll(builder.getHeroIdList());
 
         // 城防军
         for (DataPb.WallDefenderData defender : builder.getDefenderList()) {
@@ -110,17 +109,17 @@ public class Wall implements Cloneable {
 
     }
 
-    public List<Integer> getDefenceHero() {
-        return defenceHero;
-    }
-
-    public List<Integer> getDefenceDisHero() {
-        return this.defenceHero.stream().distinct().collect(Collectors.toList());
-    }
-
-    public void setDefenceHero(List<Integer> defenceHero) {
-        this.defenceHero = defenceHero;
-    }
+    //public List<Integer> getDefenceHero() {
+    //    return defenceHero;
+    //}
+    //
+    //public List<Integer> getDefenceDisHero() {
+    //    return this.defenceHero.stream().distinct().collect(Collectors.toList());
+    //}
+    //
+    //public void setDefenceHero(List<Integer> defenceHero) {
+    //    this.defenceHero = defenceHero;
+    //}
 
     public long getEndTime() {
         return endTime;
@@ -185,7 +184,7 @@ public class Wall implements Cloneable {
         this.wallDefenders = wallDefenders;
     }
 
-    public HashMap<Integer, WallFriend> getWallFriends() {
+    public Map<Integer, WallFriend> getWallFriends() {
         return wallFriends;
     }
 
@@ -229,10 +228,10 @@ public class Wall implements Cloneable {
             wall.setBase(this.base.clone());
 
             ArrayList<Integer> list = new ArrayList<>();
-            this.defenceHero.forEach(integer -> {
-                list.add(integer);
-            });
-            wall.setDefenceHero(list);
+            //this.defenceHero.forEach(integer -> {
+            //    list.add(integer);
+            //});
+            //wall.setDefenceHero(list);
 
             Map<Integer, WallDefender> map = new HashMap<Integer, WallDefender>();
             this.wallDefenders.forEach((key, value) -> {

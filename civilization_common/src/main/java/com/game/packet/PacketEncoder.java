@@ -1,12 +1,13 @@
 package com.game.packet;
 
+import com.game.util.LogHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
- *
+ * @Author 陈奎
  * @Description 服务器通信包编码器
  * @Date 2022/9/9 11:30
  **/

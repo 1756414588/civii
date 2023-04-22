@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticPersonality;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,24 +18,31 @@ import java.util.stream.Collectors;
  * @description
  */
 @Component
+@LoadData(name = "个人相关")
 public class StaticPersonalityMgr extends BaseDataMgr {
-    @Autowired
-    private StaticDataDao dataDao;
 
-    @Getter
-    private Map<Integer, StaticPersonality> dataMap = new ConcurrentHashMap<>();
+	@Autowired
+	private StaticDataDao dataDao;
 
-    @Override
-    public void init() throws Exception {
-        dataMap = dataDao.loadStaticPersonality();
-    }
+	@Getter
+	private Map<Integer, StaticPersonality> dataMap = new ConcurrentHashMap<>();
 
-    public List<StaticPersonality> getByType(int type) {
-        List<StaticPersonality> list = dataMap.values().stream().filter(e -> e.getType() == type).collect(Collectors.toList());
-        return list;
-    }
+	@Override
+	public void load() throws Exception {
+		dataMap = dataDao.loadStaticPersonality();
+	}
 
-    public StaticPersonality get(int id) {
-        return dataMap.get(id);
-    }
+	@Override
+	public void init() throws Exception {
+
+	}
+
+	public List<StaticPersonality> getByType(int type) {
+		List<StaticPersonality> list = dataMap.values().stream().filter(e -> e.getType() == type).collect(Collectors.toList());
+		return list;
+	}
+
+	public StaticPersonality get(int id) {
+		return dataMap.get(id);
+	}
 }

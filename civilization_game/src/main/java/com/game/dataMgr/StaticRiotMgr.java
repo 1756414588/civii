@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticRiotAward;
 import com.game.domain.s.StaticRiotMonster;
 import com.game.domain.s.StaticRoitItemShop;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
+@LoadData(name = "虫族暴乱")
 public class StaticRiotMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -27,12 +29,17 @@ public class StaticRiotMgr extends BaseDataMgr {
     private List<StaticRiotAward> riotAwardList = new ArrayList<StaticRiotAward>();
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         roitMonsterMap = staticDataDao.selectRoitMonster();
         roitItemShopMap = staticDataDao.selectItemShop();
         roitScoreShopMap = staticDataDao.selectRoitScoreShop();
         roitWaveMap = staticDataDao.selectRoitWave();
         setRiotAwardList(staticDataDao.selectRiotAward());
+    }
+
+    @Override
+    public void init() throws Exception{
+
     }
 
     public StaticRiotMonster getRoitMonster(int keyId) {

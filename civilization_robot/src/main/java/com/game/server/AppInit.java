@@ -39,7 +39,11 @@ public class AppInit {
 
 			// 数据加载
 			loadList.forEach(e -> {
-				e.getRight().load();
+				try{
+					e.getRight().load();
+				}catch (Exception ex){
+					ex.printStackTrace();
+				}
 			});
 
 			// 按顺序初始化

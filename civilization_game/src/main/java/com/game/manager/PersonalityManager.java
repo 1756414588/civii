@@ -1,10 +1,7 @@
 package com.game.manager;
 
-import com.game.constant.ActivityConst;
-import com.game.constant.GameError;
 import com.game.dataMgr.StaticPersonalityMgr;
 import com.game.domain.Player;
-import com.game.domain.p.ActRecord;
 import com.game.domain.p.Frame;
 import com.game.domain.s.StaticPersonality;
 import com.game.enumerate.FrameState;
@@ -51,12 +48,12 @@ public class PersonalityManager {
 				} else {
 					e.getLord().setChatIndex(0);
 				}
-				init(e);
+				initPlayer(e);
 			});
 		});
 	}
 
-	public void init(Player player) {
+	public void initPlayer(Player player) {
 		staticPersonalityMgr.getDataMap().values().forEach(e -> {
 			Frame frame = player.getFrameMap().get(e.getId());
 			if (frame == null) {
@@ -173,7 +170,7 @@ public class PersonalityManager {
 			}
 		}
 		if (isReset) {
-			init(player);
+			initPlayer(player);
 		}
 	}
 

@@ -9,10 +9,8 @@ import com.game.service.WorldService;
 public class MapMoveHandler extends ClientHandler {
     @Override
     public void action() {
-        GameServer.getInstance().mainLogicServer.addCommand(() -> {
-            WorldService service = getService(WorldService.class);
-            WorldPb.MapMoveRq req = msg.getExtension(WorldPb.MapMoveRq.ext);
-            service.mapMoveRq(req, this);
-        }, DealType.MAIN);
+        WorldService service = getService(WorldService.class);
+        WorldPb.MapMoveRq req = msg.getExtension(WorldPb.MapMoveRq.ext);
+        service.mapMoveRq(req, this);
     }
 }

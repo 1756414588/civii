@@ -9,18 +9,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Property implements Cloneable {
-    private int attack; 		// 攻击
-    private int defence; 		// 防御
-    private int soldierNum; 	// 总兵力
-    private int maxSoldier; 	// 当前最大兵力: 只是用来计算战斗实体的实际血量
-    private int strongAttack; 	// 强攻
-    private int strongDefence; 	// 强防
-    private int attackCity; 	// 攻城
-    private int defenceCity; 	// 守城
-    private int hit; 			// 命中,千分比
-    private int miss; 			// 闪避,千分比
-    private int criti; 			// 暴击,千分比
-    private int tenacity; 		// 抗暴击,千分比
+    private int attack;         //攻击
+    private int defence;        //防御
+    private int soldierNum;     //总兵力
+    private int maxSoldier;     //当前最大兵力: 只是用来计算战斗实体的实际血量
+    private int strongAttack;   //强攻
+    private int strongDefence;  //强防
+    private int attackCity;   //攻城
+    private int defenceCity;   //守城
+    private int percentageOfForceAdition;   //美女兵力加成百分比
 
     public Property() {
 
@@ -84,10 +81,6 @@ public class Property implements Cloneable {
         attackCity += param.getAttackCity();
         defenceCity += param.getDefenceCity();
 
-        hit += param.getHit();
-        miss += param.getMiss();
-        criti += param.getCriti();
-        tenacity += param.getTenacity();
     }
 
     public void sub(Property param) {
@@ -111,9 +104,11 @@ public class Property implements Cloneable {
         defence += property.getDefence();
     }
 
+
     public void addSoldier(Property property) {
         soldierNum += property.getSoldierNum();
     }
+
 
     public DataPb.PropertyData.Builder writeData() {
         DataPb.PropertyData.Builder builder = DataPb.PropertyData.newBuilder();
@@ -129,13 +124,22 @@ public class Property implements Cloneable {
         soldierNum = build.getSoldierNum();
     }
 
+
     public boolean isInit() {
         return attack == 0 && defence == 0 && soldierNum == 0;
     }
 
     @Override
     public String toString() {
-        return "攻击:" + attack + ",防御:" + defence + ",总兵力:" + soldierNum + ",最大兵力:" + maxSoldier + ",强攻:" + strongAttack + ",强防:" + strongDefence + ",攻城:" + attackCity + ",守城:" + defenceCity;
+        return "攻击:" + attack +
+                ",防御:" + defence +
+                ",总兵力:" + soldierNum +
+                ",最大兵力:" + maxSoldier +
+                ",强攻:" + strongAttack +
+                ",强防:" + strongDefence +
+                ",攻城:" + attackCity +
+                ",守城:" + defenceCity
+                ;
     }
 
     public void addAttackValue(int value) {
@@ -159,6 +163,7 @@ public class Property implements Cloneable {
         soldierNum += value;
     }
 
+
     public boolean isZero() {
         return attack == 0 || defence == 0 || soldierNum == 0;
     }
@@ -172,15 +177,6 @@ public class Property implements Cloneable {
         strongDefence = data.getStrongDefence();
         attackCity = data.getAttackCity();
         defenceCity = data.getDefenceCity();
-
-        this.hit = data.getHit();
-        this.miss = data.getMiss();
-        this.criti = data.getCriti();
-        this.tenacity = data.getTenacity();
-    }
-
-    public void addAttackCity(int val) {
-        this.attackCity += val;
     }
 
     public void addValue(int attrId, int value) {
@@ -206,18 +202,6 @@ public class Property implements Cloneable {
             case PropertyType.DEFENCE_CITY:
                 this.defenceCity += value;
                 break;
-            case PropertyType.CRITI:
-                this.criti += value;
-                break;
-            case PropertyType.MISS:
-                this.miss += value;
-                break;
-            case PropertyType.HIT:
-                this.hit += value;
-                break;
-            case PropertyType.TENACITY:
-                this.tenacity += value;
-                break;
             default:
                 break;
         }
@@ -235,3 +219,4 @@ public class Property implements Cloneable {
     }
 
 }
+

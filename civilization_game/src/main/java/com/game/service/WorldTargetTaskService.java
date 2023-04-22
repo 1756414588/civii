@@ -270,14 +270,16 @@ public class WorldTargetTaskService {
                 logger.error("world sendRankAward country->[{}],rank->[{}],process->[{}],points->[{}]", taskProcess.getCountryId(), i, taskProcess.getPoints(), taskProcess.getPoints());
             }
             logger.error("world sendRankAward--end--");
-            for (Player player : playerManager.getPlayers().values()) {
-                if (player.getLevel() < staticWorldNewTarget.getLimitLevel()) {
-                    continue;
+            if (campRanking != null && !campRanking.isEmpty()) {
+                for (Player player : playerManager.getPlayers().values()) {
+                    if (player.getLevel() < staticWorldNewTarget.getLimitLevel()) {
+                        continue;
+                    }
+                    int rank = rankMap.get(player.getCountry());
+                    int gold = campRanking.get(rank);
+                    Award award = new Award(AwardType.GOLD, 0, gold);
+                    playerManager.sendAttachMail(player, Arrays.asList(award), MailId.WORLD_TARGET_MAIL_AWARD, staticWorldNewTarget.getTitle());
                 }
-                int rank = rankMap.get(player.getCountry());
-                int gold = campRanking.get(rank);
-                Award award = new Award(AwardType.GOLD, 0, gold);
-                playerManager.sendAttachMail(player, Arrays.asList(award), MailId.WORLD_TARGET_MAIL_AWARD, staticWorldNewTarget.getTitle());
             }
         }
         //此处发放伤害排名奖励

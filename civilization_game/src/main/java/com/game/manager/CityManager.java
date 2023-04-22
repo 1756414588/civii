@@ -1,5 +1,6 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.activity.ActivityEventManager;
 import com.game.activity.define.EventEnum;
 import com.game.constant.ActivityConst;
@@ -16,6 +17,7 @@ import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticMonsterMgr;
 import com.game.dataMgr.StaticSuperResMgr;
 import com.game.dataMgr.StaticWorldMgr;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.Award;
 import com.game.domain.p.City;
@@ -57,7 +59,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CityManager {
+@LoadData(name = "据点管理", type = Loading.LOAD_USER_DB, initSeq = 1700)
+public class CityManager extends BaseManager {
 
 	@Autowired
 	private CityDao cityDao;
@@ -94,6 +97,8 @@ public class CityManager {
 
 	@Autowired
 	private CityService cityService;
+	@Autowired
+	ActivityEventManager activityEventManager;
 
 	private ConcurrentHashMap<Integer, City> cityMap = new ConcurrentHashMap<Integer, City>();
 
@@ -107,9 +112,16 @@ public class CityManager {
 
 	private boolean isSquareLevelFull = true;
 	private ConcurrentHashMap<Integer, HashSet<Long>> warAttenders = new ConcurrentHashMap<Integer, HashSet<Long>>(); // 里面的hashset最好用同步的
+	private List<City> cityList = null;
 
-	public void init() {
-		loadCity();
+	@Override
+	public void load() throws Exception {
+		cityList = cityDao.selectCityList();
+	}
+
+	@Override
+	public void init() throws Exception {
+		initCity();
 	}
 
 	public City insertCity(int cityId) {
@@ -118,92 +130,85 @@ public class CityManager {
 		city.setCountry(0);
 		city.setLordId(0);
 		city.setEndTime(System.currentTimeMillis());
-		try {
-			cityDao.insertCity(city);
-		} catch (Exception ex) {
-			LogHelper.ERROR_LOGGER.error("insert city = " + ex);
-		}
+		cityDao.insertCity(city);
 		return city;
 	}
 
-	public void loadCity() {
-		try {
-            LogHelper.GAME_LOGGER.info("【城池.加载】");
-			List<City> cities = cityDao.selectCityList();
-			Map<Integer, StaticWorldCity> citys = staticWorldMgr.getCityMap();
-			for (StaticWorldCity city : citys.values()) {
+	public void initCity() {
+		Map<Integer, StaticWorldCity> citys = staticWorldMgr.getCityMap();
+		for (StaticWorldCity city : citys.values()) {
+			if (city == null) {
+				LogHelper.CONFIG_LOGGER.info("city is null!!!!");
+				continue;
+			}
+			if (city.getType() == CityType.SQUARE_FORTRESS) {
+				this.squareFortress.add(city.getCityId());
+			} else if (city.getType() == CityType.FAMOUS_CITY) {
+				this.famousCity.add(city.getCityId());
+			} else if (city.getType() == CityType.WORLD_FORTRESS) {
+				this.worldFortress = city.getCityId();
+			}
+			if (cityList == null || cityList.isEmpty()) {
+				City city1 = insertCity(city.getCityId());
+				if (city1 != null) {
+					city1.setCityType(city.getType());
+					handleCityMonster(city1);
+					StaticWorldCity staticWorldCity = staticWorldMgr.getCity(city.getCityId());
+					if (staticWorldCity != null && city1.getCityLv() == 0 && !squareFortress.contains(city.getCityId())) {
+						city1.setCityLv(staticWorldCity.getLevel());
+					} else {
+						city1.setCityLv(city1.getCityLv());
+					}
+
+					city1.setPos(new Pos(staticWorldCity.getX(), staticWorldCity.getY()));
+					city1.setMapId(staticWorldCity.getMapId());
+					cityMap.put(city.getCityId(), city1);
+				}
+			}
+		}
+		allCenterCity.addAll(famousCity);
+		allCenterCity.addAll(squareFortress);
+		long now = System.currentTimeMillis();
+		if (cityList != null && !cityList.isEmpty()) {
+			for (City city : cityList) {
 				if (city == null) {
-					LogHelper.CONFIG_LOGGER.info("city is null!!!!");
 					continue;
 				}
-				if (city.getType() == CityType.SQUARE_FORTRESS) {
-					this.squareFortress.add(city.getCityId());
-				} else if (city.getType() == CityType.FAMOUS_CITY) {
-					this.famousCity.add(city.getCityId());
-				} else if (city.getType() == CityType.WORLD_FORTRESS) {
-					this.worldFortress = city.getCityId();
+				cityMap.put(city.getCityId(), city);
+				StaticWorldCity staticWorldCity = staticWorldMgr.getCity(city.getCityId());
+				if (staticWorldCity == null) {
+					LogHelper.CONFIG_LOGGER.info("static world city is null!");
+					continue;
 				}
-				if (cities == null || cities.isEmpty()) {
-					City city1 = insertCity(city.getCityId());
-					if (city1 != null) {
-						city1.setCityType(city.getType());
-						handleCityMonster(city1);
-						StaticWorldCity staticWorldCity = staticWorldMgr.getCity(city.getCityId());
-						if (staticWorldCity != null && city1.getCityLv() == 0 && !squareFortress.contains(city.getCityId())) {
-							city1.setCityLv(staticWorldCity.getLevel());
-						} else {
-							city1.setCityLv(city1.getCityLv());
-						}
-						cityMap.put(city.getCityId(), city1);
-					}
+				if (city.getLastSaveTime() == 0) {
+					city.setLastSaveTime(now);
 				}
-			}
-			allCenterCity.addAll(famousCity);
-			allCenterCity.addAll(squareFortress);
-			long now = System.currentTimeMillis();
-			if (cities != null && !cities.isEmpty()) {
-				for (City city : cities) {
-					if (city == null) {
-						continue;
-					}
-					cityMap.put(city.getCityId(), city);
-					StaticWorldCity staticWorldCity = staticWorldMgr.getCity(city.getCityId());
-					if (staticWorldCity == null) {
-						LogHelper.CONFIG_LOGGER.info("static world city is null!");
-						continue;
-					}
-					if (city.getLastSaveTime() == 0) {
-						city.setLastSaveTime(now);
-					}
-					if (city.getCityLv() == 0 && !squareFortress.contains(city.getCityId())) {
-						city.setCityLv(staticWorldCity.getLevel());
-					} else {
-						city.setCityLv(city.getCityLv());
-					}
-					city.setExp(city.getExp());
-					if (city.getCountry() == 0) {
-						city.setEndTime(0);
-					}
-					byte[] electionData = city.getElectionData();
-					if (electionData != null) {
-						dserElection(city.getCityId(), electionData);
-					}
-					byte[] warAttendData = city.getWarAttender();
-					if (warAttendData != null) {
-						dserWarAttender(city.getCityId(), warAttendData);
-					}
-					city.setCityType(staticWorldCity.getType());
-					handleCityMonster(city);
+				if (city.getCityLv() == 0 && !squareFortress.contains(city.getCityId())) {
+					city.setCityLv(staticWorldCity.getLevel());
+				} else {
+					city.setCityLv(city.getCityLv());
+				}
+				city.setExp(city.getExp());
+				if (city.getCountry() == 0) {
+					city.setEndTime(0);
+				}
+				byte[] electionData = city.getElectionData();
+				if (electionData != null) {
+					dserElection(city.getCityId(), electionData);
+				}
+				byte[] warAttendData = city.getWarAttender();
+				if (warAttendData != null) {
+					dserWarAttender(city.getCityId(), warAttendData);
+				}
+				city.setCityType(staticWorldCity.getType());
+				handleCityMonster(city);
 
-					if (squareFortress.contains(city.getCityId()) && city.getFlush() == 1) {
-						flush(city);
-					}
-					city.setPos(new Pos(staticWorldCity.getX(), staticWorldCity.getY()));
-					city.setMapId(staticWorldCity.getMapId());
+				if (squareFortress.contains(city.getCityId()) && city.getFlush() == 1) {
+					flush(city);
 				}
+				city.setPos(new Pos(staticWorldCity.getX(), staticWorldCity.getY()));
+				city.setMapId(staticWorldCity.getMapId());
 			}
-		} catch (Exception ex) {
-			LogHelper.ERROR_LOGGER.error(ex.getMessage(), ex);
 		}
 	}
 
@@ -237,7 +242,7 @@ public class CityManager {
 			return;
 		}
 		list.forEach(player -> {
-			ActivityEventManager.getInst().activityTip(EventEnum.CAPTURE_CITY, player, staticWorldCity.getType(), 1);
+			activityEventManager.activityTip(EventEnum.CAPTURE_CITY, player, staticWorldCity.getType(), 1);
 		});
 	}
 

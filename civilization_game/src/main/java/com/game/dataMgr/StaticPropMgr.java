@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import com.game.domain.s.StaticProp;
 import com.game.domain.s.StaticVipBuy;
 
 @Component
+@LoadData(name = "道具")
 public class StaticPropMgr extends BaseDataMgr {
 
 	@Autowired
@@ -32,7 +34,7 @@ public class StaticPropMgr extends BaseDataMgr {
 	private List<StaticVipBuy> discountList = new ArrayList<StaticVipBuy>();
 
 	@Override
-	public void init() throws Exception {
+	public void load() throws Exception {
 		setPropMap(staticDataDao.selectProp());
 		vipShops.clear();
 		shops.clear();
@@ -48,6 +50,10 @@ public class StaticPropMgr extends BaseDataMgr {
 			}
 		}
 		iniShop();
+	}
+
+	@Override
+	public void init() throws Exception {
 	}
 
 	public void iniShop() {

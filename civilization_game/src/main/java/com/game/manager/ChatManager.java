@@ -1,5 +1,6 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.chat.domain.Chat;
 import com.game.chat.domain.ManChat;
 import com.game.chat.domain.ManShare;
@@ -9,6 +10,7 @@ import com.game.constant.CountryConst;
 import com.game.dao.p.ServerChatDao;
 import com.game.dataMgr.StaticChatMgr;
 import com.game.dataMgr.StaticWorldMgr;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.WorldData;
 import com.game.domain.p.ChatShow;
@@ -35,7 +37,8 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Component
-public class ChatManager {
+@LoadData(name = "聊天管理", type = Loading.LOAD_USER_DB)
+public class ChatManager extends BaseManager {
 
 	static final int MAX_CHAT_COUNT = 40;// (每个阵营保存40条)
 	static final int MAX_WORLD_COUNT = 6;// 全服聊天
@@ -60,6 +63,7 @@ public class ChatManager {
 	@Autowired
 	private StaticWorldMgr staticWorldMgr;
 
+	// 公告
 	private ConcurrentLinkedDeque<CommonPb.Chat> world = new ConcurrentLinkedDeque<CommonPb.Chat>();
 
 	@Getter
@@ -71,10 +75,13 @@ public class ChatManager {
 	// vip相关
 	private ConcurrentLinkedDeque<CommonPb.Chat> vipChat = new ConcurrentLinkedDeque<CommonPb.Chat>();
 
+	// 全服聊天
+	private ConcurrentLinkedDeque<CommonPb.Chat> gameChats = new ConcurrentLinkedDeque<CommonPb.Chat>();
+
 	private List<com.game.domain.p.Chat> ServerChats = new ArrayList<com.game.domain.p.Chat>();
 
-	@PostConstruct
-	public void init() {
+	@Override
+	public void init() throws Exception {
 		ServerChats = serverChatDao.selectAllServerChats();
 		ServerChats.forEach(chat -> {
 			com.game.pb.CommonPb.Chat decChat = com.game.domain.p.Chat.decChat(chat);
@@ -92,6 +99,9 @@ public class ChatManager {
 					int mapId = worldManager.getMapId(chat.getX(), chat.getY());
 					mapChat.computeIfAbsent(mapId, x -> new ConcurrentLinkedDeque()).add(decChat);
 					break;
+				case com.game.domain.p.Chat.GAME_CHAT:
+					gameChats.add(decChat);
+					break;
 				default:
 					break;
 			}
@@ -99,7 +109,7 @@ public class ChatManager {
 	}
 
 	public CommonPb.Chat addWorldChat(Chat chat) {
-		CommonPb.Chat b = chat.ser(1, 0);
+		CommonPb.Chat b = chat.ser(1, 0, 0);
 		world.add(b);
 		if (world.size() > MAX_WORLD_COUNT) {
 			world.removeFirst();
@@ -109,7 +119,7 @@ public class ChatManager {
 
 	// vip通告
 	public CommonPb.Chat addVipChat(Chat chat) {
-		CommonPb.Chat b = chat.ser(1, 0);
+		CommonPb.Chat b = chat.ser(1, 0, 0);
 		getVipChat().add(b);
 		if (getVipChat().size() > MAX_VIP_COUNT) {
 			getVipChat().removeFirst();
@@ -118,7 +128,7 @@ public class ChatManager {
 	}
 
 	public synchronized CommonPb.Chat addCountryChat(int country, int officerId, Chat chat) {
-		CommonPb.Chat b = chat.ser(0, officerId);
+		CommonPb.Chat b = chat.ser(0, officerId, country);
 		ConcurrentLinkedDeque<CommonPb.Chat> countryChat = countrys.computeIfAbsent(country, x -> new ConcurrentLinkedDeque<>());
 		countryChat.add(b);
 		if (countryChat.size() > MAX_CHAT_COUNT) {
@@ -128,7 +138,7 @@ public class ChatManager {
 	}
 
 	public synchronized CommonPb.Chat addCountryChat(int country, int officerId, Chat chat, long playerId) {
-		CommonPb.Chat b = chat.ser(0, officerId);
+		CommonPb.Chat b = chat.ser(0, officerId, country);
 		ConcurrentLinkedDeque<CommonPb.Chat> countryChat = countrys.computeIfAbsent(country, x -> new ConcurrentLinkedDeque<>());
 		if (playerId == 0) {
 			countryChat.add(b);
@@ -147,11 +157,20 @@ public class ChatManager {
 				officeId = SpringUtil.getBean(CountryManager.class).getOfficeId(manShare.getPlayer());
 			}
 		}
-		CommonPb.Chat b = chat.ser(0, officeId);
+		CommonPb.Chat b = chat.ser(0, officeId, 0);
 		ConcurrentLinkedDeque<CommonPb.Chat> chatList = this.mapChat.computeIfAbsent(mapId, x -> new ConcurrentLinkedDeque<>());
 		chatList.add(b);
 		if (chatList.size() > MAX_MAP_COUNT && !chatList.isEmpty()) {
 			chatList.removeFirst();
+		}
+		return b;
+	}
+
+	public CommonPb.Chat addGameChat(int country, int officerId, Chat chat) {
+		CommonPb.Chat b = chat.ser(0, officerId, 0);
+		gameChats.add(b);
+		if (gameChats.size() > MAX_MAP_COUNT && !gameChats.isEmpty()) {
+			gameChats.removeFirst();
 		}
 		return b;
 	}
@@ -191,14 +210,14 @@ public class ChatManager {
 	}
 
 	public ConcurrentLinkedDeque<CommonPb.Chat> getCountryChat(int country) {
-		if(countrys.containsKey(country)) {
+		if (countrys.containsKey(country)) {
 			return countrys.get(country);
 		}
 		return null;
 	}
 
 	public ConcurrentLinkedDeque<CommonPb.Chat> getMapChat(int mapId) {
-		if(mapChat.containsKey(mapId)) {
+		if (mapChat.containsKey(mapId)) {
 			return mapChat.get(mapId);
 		}
 		return null;
@@ -273,6 +292,33 @@ public class ChatManager {
 
 		playerManager.getOnlinePlayer().forEach(next -> {
 			if (next.isLogin && next.getCountry() == countryId && next.getLevel() >= staticChat.getLimitLevel()) {
+				GameServer.getInstance().sendMsgToPlayer(next, msg);
+			}
+		});
+	}
+
+	/**
+	 * 发送全服聊天
+	 *
+	 * @param countryId
+	 * @param chatId
+	 * @param params
+	 */
+	public void sendGameChat(int countryId, int chatId, String... params) {
+		StaticChat staticChat = staticChatMgr.getChat(chatId);
+		if (staticChat == null || staticChat.getType() == 0) {
+			return;
+		}
+		SystemChat systemChat = createSysChat(chatId, params);
+		CommonPb.Chat b = addGameChat(countryId, 0, systemChat);
+
+		SynChatRq.Builder builder = SynChatRq.newBuilder();
+		builder.setChat(b);
+		Base.Builder msg = PbHelper.createSynBase(SynChatRq.EXT_FIELD_NUMBER, SynChatRq.ext, builder.build());
+
+		// 全服发放
+		playerManager.getOnlinePlayer().forEach(next -> {
+			if (next.isLogin && next.getLevel() >= staticChat.getLimitLevel()) {
 				GameServer.getInstance().sendMsgToPlayer(next, msg);
 			}
 		});
@@ -548,7 +594,7 @@ public class ChatManager {
 			if (next.isLogin) {
 //				ctx = next.ctx;
 //				if (ctx != null) {
-					GameServer.getInstance().sendMsgToPlayer(next, msg);
+				GameServer.getInstance().sendMsgToPlayer(next, msg);
 //				}
 			}
 		}
@@ -565,7 +611,6 @@ public class ChatManager {
 			cbuilder.setChat(c);
 			msg = PbHelper.createSynBase(SynChatRq.EXT_FIELD_NUMBER, SynChatRq.ext, cbuilder.build());
 		}
-
 
 		Iterator<Player> it = playerManager.getOnlinePlayer().iterator();
 		ChannelHandlerContext ctx;

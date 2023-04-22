@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.p.ConfigException;
 import com.game.domain.s.*;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @Getter
 @Component
+@LoadData(name = "钓鱼")
 public class StaticFishMgr extends BaseDataMgr {
 
     @Autowired
@@ -24,8 +26,7 @@ public class StaticFishMgr extends BaseDataMgr {
     private Map<Integer, StaticFishShop> fishShopMap;
 
     @Override
-    public void init() throws Exception {
-
+    public void load() throws Exception {
         fishMap = staticDataDao.loadStaticFish();
         fishBaitMap = staticDataDao.loadStaticFishBait();
         fishHeroGroupMap = staticDataDao.loadStaticFishHeroGroup();
@@ -33,6 +34,10 @@ public class StaticFishMgr extends BaseDataMgr {
         fishShopMap = staticDataDao.loadStaticFishShop();
 
         this.check();
+    }
+
+    @Override
+    public void init() throws Exception {
     }
 
     public void check() throws ConfigException {

@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -76,10 +75,6 @@ public class Team {
 	 * 圣域争霸战报
 	 */
 	private List<Report> reports = new ArrayList<>();
-
-	private Map<Integer, Integer> column = new HashMap<>();
-	private int line;
-	private List<Integer> lineInfo = new ArrayList<>();
 
 	public Team() {
 
@@ -294,22 +289,6 @@ public class Team {
 		this.cityId = data.getCityId();
 		this.marchId = data.getMarchId();
 		this.mulitKill = data.getMulitKill();
-	}
-
-	public void addLine() {
-		this.line += 1;
-	}
-
-	// 是否5-8排 收到1点攻击
-	public boolean isEffectLine() {
-		int i = line + 1;
-		if (i == 5 || i == 6 || i == 7 || i == 8) {
-			if (!lineInfo.contains(i)) {
-				lineInfo.add(i);
-				return true;
-			}
-		}
-		return false;
 	}
 
 

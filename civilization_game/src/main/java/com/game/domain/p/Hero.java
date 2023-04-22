@@ -13,6 +13,7 @@ import com.game.util.LogHelper;
 import com.game.util.TimeHelper;
 
 public class Hero implements Cloneable {
+
 	private int heroId; // 英雄Id
 	private int heroLv; // 英雄等级
 	private long exp; // 英雄经验
@@ -22,19 +23,14 @@ public class Hero implements Cloneable {
 	private Property totalProp; // 总属性
 	private int advanceProcess; // 突破值
 	private int advanceTime; // 突破时间,存放当天几号
-	private int tryAdvanceTimes; // 尝试突破的次数
+	private int tryAdvanceTimes;    // 尝试突破的次数
 	private Property specialProp;
-	private int activate; // 英雄是否激活[只对国家名将有效],0表示已激活 3表示未激活
-	private int loyalty; // 忠诚度
+	private int activate;  //英雄是否激活[只对国家名将有效],0表示已激活 3表示未激活
+	private int loyalty;   //忠诚度
 	private ArrayList<HeroBook> heroBooks; // 兵书
-	private int diviNum; // 晋升次数
-	private int talentLevel;// 天赋技能
+	private int diviNum; //晋升次数
+	private int talentLevel;//天赋技能
 	// 二级属性,攻城、守城、闪避 - 战斗时进行计算
-	private int type;// 0.普通英雄 1赛季英雄
-	private int skillId;
-	//private int skillType;
-	//private int skillLevel;
-	private int profId;
 
 	public Hero() {
 		qualifyProp = new Property();
@@ -44,19 +40,15 @@ public class Hero implements Cloneable {
 		heroBooks = new ArrayList<HeroBook>();
 	}
 
-	// public Hero(int heroId) {
-	//
-	// }
-
 	private void cloneEquip(ArrayList<HeroEquip> heroEquips) {
 		if (heroEquips == null) {
-			LogHelper.ERROR_LOGGER.trace("Equip:HeroEquip == null");
+			LogHelper.CONFIG_LOGGER.trace("Equip:HeroEquip is null");
 			return;
 		}
 
 		for (HeroEquip item : heroEquips) {
 			if (item == null) {
-				LogHelper.ERROR_LOGGER.trace("cloneEquip:item == null");
+				LogHelper.CONFIG_LOGGER.trace("cloneEquip:item == null");
 				continue;
 			}
 			this.addHeroEquip(item.cloneInfo());
@@ -65,13 +57,13 @@ public class Hero implements Cloneable {
 
 	private void cloneBook(ArrayList<HeroBook> heroBooks) {
 		if (heroBooks == null) {
-			LogHelper.ERROR_LOGGER.trace("WarBook:HeroBooks == null");
+			LogHelper.CONFIG_LOGGER.trace("WarBook:HeroBooks == null");
 			return;
 		}
 
 		for (HeroBook item : heroBooks) {
 			if (item == null) {
-				LogHelper.ERROR_LOGGER.trace("cloneBook:item == null");
+				LogHelper.CONFIG_LOGGER.trace("cloneBook:item == null");
 				continue;
 			}
 			this.addHerobook(item.cloneInfo());
@@ -153,7 +145,7 @@ public class Hero implements Cloneable {
 			builder.addHeroEquip(item.wrapPb());
 		}
 
-		// book
+		//book
 		for (HeroBook item : heroBooks) {
 			if (item == null) {
 				continue;
@@ -178,10 +170,6 @@ public class Hero implements Cloneable {
 		builder.setLoyalty(loyalty);
 		builder.setDiviNum(this.diviNum);
 		builder.setTelnetLv(this.talentLevel);
-		builder.setType(this.type);
-		builder.setSkillId(this.skillId);
-		//builder.setSkillLevel(this.skillLevel);
-		builder.setProfId(this.profId);
 		return builder;
 	}
 
@@ -227,15 +215,8 @@ public class Hero implements Cloneable {
 		property.setAttack(staticHero.getBaseAttack());
 		property.setDefence(staticHero.getBaseDefence());
 		property.setSoldierNum(staticHero.getBaseSoldierCount());
-
 		totalProp = property;
 
-		this.type = staticHero.getCompseason();
-		this.skillId = staticHero.getCompseasonSkill();
-		//this.skillType = staticHero.getSkillType();
-		//this.skillLevel = 0;
-
-		this.profId = 101;
 	}
 
 	public Property getTotalProp() {
@@ -362,13 +343,13 @@ public class Hero implements Cloneable {
 	public void cloneHeroEquip(Hero hero) {
 		ArrayList<HeroEquip> heroEquips = hero.getHeroEquips();
 		if (heroEquips == null) {
-			LogHelper.ERROR_LOGGER.trace("Equip:HeroEquip == null");
+			LogHelper.CONFIG_LOGGER.trace("Equip:HeroEquip == null");
 			return;
 		}
 
 		for (HeroEquip item : heroEquips) {
 			if (item == null) {
-				LogHelper.ERROR_LOGGER.trace("cloneEquip:item == null");
+				LogHelper.CONFIG_LOGGER.trace("cloneEquip:item == null");
 				continue;
 			}
 			this.addHeroEquip(item.cloneInfo());
@@ -378,13 +359,13 @@ public class Hero implements Cloneable {
 	public void cloneHeroBook(Hero hero) {
 		ArrayList<HeroBook> heroBooks = hero.getHeroBooks();
 		if (heroBooks == null) {
-			LogHelper.ERROR_LOGGER.trace("Book:HeroBook == null");
+			LogHelper.CONFIG_LOGGER.trace("Book:HeroBook == null");
 			return;
 		}
 
 		for (HeroBook item : heroBooks) {
 			if (item == null) {
-				LogHelper.ERROR_LOGGER.trace("cloneBook:item == null");
+				LogHelper.CONFIG_LOGGER.trace("cloneBook:item == null");
 				continue;
 			}
 			this.addHerobook(item.cloneInfo());
@@ -404,7 +385,7 @@ public class Hero implements Cloneable {
 			return totalProp.getSoldierNum();
 		}
 
-		LogHelper.ERROR_LOGGER.error("totalProp is null!");
+		LogHelper.CONFIG_LOGGER.error("totalProp is null!");
 
 		return 0;
 	}
@@ -435,6 +416,7 @@ public class Hero implements Cloneable {
 	public void setTryAdvanceTimes(int tryAdvanceTimes) {
 		this.tryAdvanceTimes = tryAdvanceTimes;
 	}
+
 
 	public DataPb.HeroData.Builder writeData() {
 		DataPb.HeroData.Builder builder = DataPb.HeroData.newBuilder();
@@ -475,11 +457,6 @@ public class Hero implements Cloneable {
 		builder.setLoyalty(loyalty);
 		builder.setDiviNum(this.diviNum);
 		builder.setTelnetLv(this.talentLevel);
-
-		builder.setType(this.type);
-		builder.setSkillId(this.skillId);
-		//builder.setSkillLevel(this.skillLevel);
-		builder.setProfId(this.profId);
 		return builder;
 	}
 
@@ -537,15 +514,11 @@ public class Hero implements Cloneable {
 			if (!specialProp.isInit() && this.diviNum == 0) {
 				this.diviNum = 1;
 			}
+
 		}
 		activate = heroPb.getActivate();
 		loyalty = heroPb.getLoyalty();
 		this.talentLevel = heroPb.getTelnetLv();
-		this.type = heroPb.getType();
-		this.skillId = heroPb.getSkillId();
-		//this.skillLevel = heroPb.getSkillLevel();
-		this.profId = heroPb.getProfId();
-
 	}
 
 	public CommonPb.HeroChange.Builder createHeroChange() {
@@ -690,53 +663,5 @@ public class Hero implements Cloneable {
 
 	public void setTalentLevel(int talentLevel) {
 		this.talentLevel = talentLevel;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
-	}
-
-	// public int getSkillId() {
-	// return skillId;
-	// }
-	//
-	// public void setSkillId(int skillId) {
-	// this.skillId = skillId;
-	// }
-
-	//public int getSkillType() {
-	//	return skillType;
-	//}
-	//
-	//public void setSkillType(int skillType) {
-	//	this.skillType = skillType;
-	//}
-	//
-	//public int getSkillLevel() {
-	//	return skillLevel;
-	//}
-	//
-	//public void setSkillLevel(int skillLevel) {
-	//	this.skillLevel = skillLevel;
-	//}
-
-	public int getProfId() {
-		return profId;
-	}
-
-	public void setProfId(int profId) {
-		this.profId = profId;
-	}
-
-	public int getSkillId() {
-		return skillId;
-	}
-
-	public void setSkillId(int skillId) {
-		this.skillId = skillId;
 	}
 }

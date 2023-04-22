@@ -20,6 +20,8 @@ public class StaticFishLv {
     private int speed;
     private StaticFishLevelSizeBuff size;
 
+    private int maxMultiple;
+
     public void setHit(List<List<Integer>> hit) {
         Map<Integer, StaticFishLevelCritBuff> hitMap = new HashMap<>();
         // 遍历List
@@ -28,6 +30,10 @@ public class StaticFishLv {
             staticFishLevelCritBuff.setMultiple(list.get(0));
             staticFishLevelCritBuff.setProbability(list.get(1));
             hitMap.put(list.get(0), staticFishLevelCritBuff);
+
+            if(list.get(0) >maxMultiple){
+                this.maxMultiple = list.get(0);
+            }
         }
         this.hit = hitMap;
     }

@@ -2,6 +2,7 @@ package com.game.server.thread;
 
 import com.game.server.ITask;
 import com.game.util.LogHelper;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -9,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TaskThead {
 
 	protected LinkedBlockingQueue<ITask> queues = new LinkedBlockingQueue<ITask>();
+//	protected ArrayBlockingQueue<ITask> queues = new ArrayBlockingQueue<ITask>();
 
 	private int id;
 	private String threadName;
@@ -36,15 +38,22 @@ public class TaskThead {
 
 	public boolean add(ITask task) {
 		if (stopWork.compareAndSet(true, true)) {
+			LogHelper.SAVE_LOGGER.info("id:{} threadName:{} 线程已停止", id, threadName);
 			return false;
 		}
 
 		if (!running) {
+			LogHelper.SAVE_LOGGER.info("id:{} threadName:{} 线程已停止", id, threadName);
+			return false;
+		}
+
+		if (queues.remainingCapacity() < 1) {
+			LogHelper.SAVE_LOGGER.info("id:{} threadName:{} 线程队列已满,不可继续消耗消息", id, threadName);
 			return false;
 		}
 
 		try {
-			queues.put(task);// 此处可能会阻塞
+			queues.put(task);
 		} catch (InterruptedException e) {
 			LogHelper.GAME_LOGGER.error(e.getMessage(), e);
 		}

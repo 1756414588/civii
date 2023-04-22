@@ -6,11 +6,11 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,15 +18,16 @@ import java.util.Optional;
 /**
  * 累积充值 本活动,月卡，特价礼包，限时礼包均计入充值额度
  *
- *
+ * @author 陈奎
  */
+@Component
 public class ActGrandTotalTipEvent extends BaseActivityEvent {
-
-	private static ActGrandTotalTipEvent inst = new ActGrandTotalTipEvent();
-
-	public static ActGrandTotalTipEvent getInst() {
-		return inst;
-	}
+	//
+	//private static ActGrandTotalTipEvent inst = new ActGrandTotalTipEvent();
+	//
+	//public static ActGrandTotalTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -39,7 +40,6 @@ public class ActGrandTotalTipEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		int status = (int) actRecord.getStatus(0L);
 		Map<Integer, Integer> received = actRecord.getReceived();
 
@@ -56,7 +56,6 @@ public class ActGrandTotalTipEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		int status = (int) actRecord.getStatus(0L);
 		Map<Integer, Integer> received = actRecord.getReceived();
 

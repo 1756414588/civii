@@ -2,23 +2,7 @@ package com.game.worldmap.fight.process;
 
 import com.game.activity.ActivityEventManager;
 import com.game.activity.define.EventEnum;
-import com.game.constant.ActPassPortTaskType;
-import com.game.constant.ActivityConst;
-import com.game.constant.BattleEntityType;
-import com.game.constant.ChatId;
-import com.game.constant.CityState;
-import com.game.constant.CityType;
-import com.game.constant.CountryConst;
-import com.game.constant.CountryDailyId;
-import com.game.constant.CountryTaskType;
-import com.game.constant.DailyTaskId;
-import com.game.constant.MailId;
-import com.game.constant.MarchReason;
-import com.game.constant.MarchState;
-import com.game.constant.TaskType;
-import com.game.constant.WarState;
-import com.game.constant.WarType;
-import com.game.constant.WorldBoxTask;
+import com.game.constant.*;
 import com.game.dataMgr.StaticFirstBloodMgr;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.define.Fight;
@@ -41,17 +25,12 @@ import com.game.manager.TaskManager;
 import com.game.manager.WorldBoxManager;
 import com.game.pb.DataPb;
 import com.game.pb.SerializePb.SerCountryWar;
-import com.game.season.SeasonService;
-import com.game.season.seven.entity.SevenType;
+import com.game.service.AchievementService;
 import com.game.service.SuperResService;
 import com.game.service.WorldTargetTaskService;
 import com.game.util.LogHelper;
 import com.game.util.TimeHelper;
-import com.game.worldmap.MapInfo;
-import com.game.worldmap.March;
-import com.game.worldmap.MarchType;
-import com.game.worldmap.Pos;
-import com.game.worldmap.WarInfo;
+import com.game.worldmap.*;
 import com.game.worldmap.fight.IWar;
 import com.game.worldmap.fight.war.CountryCityWarInfo;
 import com.google.common.collect.HashBasedTable;
@@ -87,7 +66,8 @@ public class CountryWarProcess extends FightProcess {
 	private ChatManager chatManager;
 	@Autowired
 	private TaskManager taskManager;
-
+	@Autowired
+	ActivityEventManager activityEventManager;
 
 	@Override
 	public void init(int[] warTypes, int[] marches) {
@@ -171,6 +151,8 @@ public class CountryWarProcess extends FightProcess {
 		warInfo.setEnd(true);
 	}
 
+	@Autowired
+	AchievementService achievementService;
 
 	public void doCountryWar(MapInfo mapInfo, WarInfo warInfo) {
 		Team attacker = null;
@@ -191,7 +173,6 @@ public class CountryWarProcess extends FightProcess {
 		attacker.setCountry(warInfo.getAttackerCountry());
 		// 守城军先上,在上守城的玩家
 		int cityId = (int) warInfo.getDefencerId();
-		StaticWorldCity city = staticWorldMgr.getCity(cityId);
 		Team cityTeam = battleMgr.initCityTeam(cityId);
 		Team defencer = battleMgr.initDefenceWarTeam(warInfo, false);
 		defencer.setCountry(warInfo.getDefencerCountry());
@@ -258,57 +239,78 @@ public class CountryWarProcess extends FightProcess {
 					}
 					set.add(attackers.getLord().getLordId());
 					list.add(attackers);
+					if(staticWorldCity.getMapId() == MapId.CENTER_MAP_ID){
+						achievementService.addAndUpdate(attackers,AchiType.AT_19,1);
+					}
 				}
 				Map<Integer, StaticFirstBloodAward> awardMap = staticFirstBloodMgr.getStaticFirstBloodAwardMap();
 
-				if (staticWorldCity != null && !mapInfo.getCityFirstBlood().containsKey(staticWorldCity.getType())) {
-					mapInfo.setFirstBlood(staticWorldCity.getType(), player, list, mapInfo.getMapId());
-					if (awardMap != null && awardMap.get(staticWorldCity.getType()) != null) {
-						List<List<Integer>> lists = awardMap.get(staticWorldCity.getType()).getAward();
-						ArrayList<Award> awards = new ArrayList<>();
-						for (List<Integer> i : lists) {
-							awards.add(new Award(i.get(0), i.get(1), i.get(2)));
-						}
-						playerManager.sendAttachMail(player, awards, MailId.ACT_FIRST_BLOOD_AWARD, String.valueOf(mapInfo.getMapId()),
-							String.valueOf(staticWorldCity.getType()));
-						for (Player p : list) {
-							if (player.roleId.equals(p.roleId)) {
-								continue;
-							}
-							playerManager.sendAttachMail(p, awards, MailId.ACT_FIRST_BLOOD_AWARD, String.valueOf(mapInfo.getMapId()),
-								String.valueOf(staticWorldCity.getType()));
-						}
-					}
-				}
-				for (Player p : list) {
-					ActivityEventManager.getInst().activityTip(EventEnum.COUNTRY_WAR, p, 1, 1);
-					worldBoxManager.calcuPoints(WorldBoxTask.COUNTRY_FIGHT, p, 1);
-					seasonService.addSevenScore(SevenType.WAR, 1, player, city.getType());
-				}
-				cityManager.handlerActHeroTask(cityId, list);
-				set.clear();
-			}
-			superResService.changeSuperState(cityId);
-		} else {
-			Player player = playerManager.getPlayer(warInfo.getAttackerId());
-			if (player != null) {
-				List<Player> list = new ArrayList<>();
-				Iterator<March> it = warInfo.getAttackMarches().iterator();
-				Set<Long> set = new HashSet<>();
-				while (it.hasNext()) {
-					March march = it.next();
-					Player attackers = playerManager.getPlayer(march.getLordId());
-					if (attackers == null || set.contains(attackers.getLord().getLordId())) {
-						continue;
-					}
-					set.add(attackers.getLord().getLordId());
-					list.add(attackers);
-				}
-				for (Player p : list) {
-					ActivityEventManager.getInst().activityTip(EventEnum.COUNTRY_WAR, p, 1, 0);
-				}
-				set.clear();
-			}
+                if (staticWorldCity != null && !mapInfo.getCityFirstBlood().containsKey(staticWorldCity.getType())) {
+                    mapInfo.setFirstBlood(staticWorldCity.getType(), player, list, mapInfo.getMapId());
+                    if (awardMap != null && awardMap.get(staticWorldCity.getType()) != null) {
+                        List<List<Integer>> lists = awardMap.get(staticWorldCity.getType()).getAward();
+                        ArrayList<Award> awards = new ArrayList<>();
+                        for (List<Integer> i : lists) {
+                            awards.add(new Award(i.get(0), i.get(1), i.get(2)));
+                        }
+                        playerManager.sendAttachMail(player, awards, MailId.ACT_FIRST_BLOOD_AWARD, String.valueOf(mapInfo.getMapId()), String.valueOf(staticWorldCity.getType()));
+                        for (Player p : list) {
+                            if (player.roleId.equals(p.roleId)) {
+                                continue;
+                            }
+                            playerManager.sendAttachMail(p, awards, MailId.ACT_FIRST_BLOOD_AWARD, String.valueOf(mapInfo.getMapId()), String.valueOf(staticWorldCity.getType()));
+                        }
+                    }
+                }
+
+                if (staticWorldCity.getMapId() != MapId.CENTER_MAP_ID) {
+                    City city = cityManager.getCity(cityId);
+                    if (city != null && city.getFirstKill() == 0) {
+                        if (awardMap != null && awardMap.get(staticWorldCity.getType()) != null) {
+                            List<List<Integer>> lists = awardMap.get(staticWorldCity.getType()).getAward();
+                            ArrayList<Award> awards = new ArrayList<>();
+                            for (List<Integer> i : lists) {
+                                awards.add(new Award(i.get(0), i.get(1), i.get(2)));
+                            }
+                            playerManager.sendAttachMail(player, awards, MailId.ACT_FIRST_BLOOD_AWARD, String.valueOf(mapInfo.getMapId()), String.valueOf(staticWorldCity.getType()));
+                            for (Player p : list) {
+                                if (player.roleId.equals(p.roleId)) {
+                                    continue;
+                                }
+                                playerManager.sendAttachMail(p, awards, MailId.ACT_FIRST_BLOOD_AWARD, String.valueOf(mapInfo.getMapId()), String.valueOf(staticWorldCity.getType()));
+                            }
+                        }
+                        city.setFirstKill(player.getCountry());
+                    }
+                }
+                for (Player p : list) {
+                    activityEventManager.activityTip(EventEnum.COUNTRY_WAR, p, 1, 1);
+                    worldBoxManager.calcuPoints(WorldBoxTask.COUNTRY_FIGHT, p, 1);
+                }
+                cityManager.handlerActHeroTask(cityId, list);
+                set.clear();
+            }
+            superResService.changeSuperState(cityId);
+        } else {
+            Player player = playerManager.getPlayer(warInfo.getAttackerId());
+            if (player != null) {
+                List<Player> list = new ArrayList<>();
+                Iterator<March> it = warInfo.getAttackMarches().iterator();
+                Set<Long> set = new HashSet<>();
+                while (it.hasNext()) {
+                    March march = it.next();
+                    Player attackers = playerManager.getPlayer(march.getLordId());
+                    if (attackers == null || set.contains(attackers.getLord().getLordId())) {
+                        continue;
+                    }
+                    set.add(attackers.getLord().getLordId());
+                    list.add(attackers);
+                }
+                for (Player p : list) {
+                    activityEventManager.activityTip(EventEnum.COUNTRY_WAR, p, 1, 0);
+                }
+                set.clear();
+            }
 
 			// 发送国战邮件
 			battleMailManager.sendCountryWarReport(warInfo, attacker, cityTeam, cityId, heroAddExp, allSoldierRec, cityOldLordId);
@@ -347,8 +349,6 @@ public class CountryWarProcess extends FightProcess {
 		});
 	}
 
-	@Autowired
-	SeasonService seasonService;
 
 	// 让国战的所有人返程
 	public void ctWarMarchReturn(IWar war, MapInfo mapInfo, int reason) {

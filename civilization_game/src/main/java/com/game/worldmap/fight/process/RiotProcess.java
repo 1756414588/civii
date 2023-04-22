@@ -2,14 +2,7 @@ package com.game.worldmap.fight.process;
 
 import com.game.activity.ActivityEventManager;
 import com.game.activity.define.EventEnum;
-import com.game.constant.ActPassPortTaskType;
-import com.game.constant.BattleEntityType;
-import com.game.constant.MarchReason;
-import com.game.constant.MarchState;
-import com.game.constant.Reason;
-import com.game.constant.RiotBuff;
-import com.game.constant.WarState;
-import com.game.constant.WarType;
+import com.game.constant.*;
 import com.game.define.Fight;
 import com.game.domain.Player;
 import com.game.domain.Award;
@@ -47,6 +40,8 @@ public class RiotProcess extends FightProcess {
 	private EventManager eventManager;
 	@Autowired
 	private RiotManager riotManager;
+	@Autowired
+	ActivityEventManager activityEventManager;
 
 	@Override
 	public void init(int[] warTypes, int[] marches) {
@@ -159,7 +154,7 @@ public class RiotProcess extends FightProcess {
 		}
 
 		player.getSimpleData().setAttackWave(player.getSimpleData().getAttackWave() + 1);
-
+		achievementService.addAndUpdate(player, AchiType.AT_24,player.getSimpleData().getAttackWave());
 		// 防守者经验值
 		HeroAddExp heroAddExp = worldManager.caculateTeamKill(playerTeam, playerTeam.getLordId());
 		worldManager.caculateTeamDefenceKill(playerTeam);
@@ -188,7 +183,7 @@ public class RiotProcess extends FightProcess {
 		});
 		if (playerTeam.isWin()) {
 			//更新通行证任务
-			ActivityEventManager.getInst().activityTip(EventEnum.RIOT_WAR, player, 1, 0);
+			activityEventManager.activityTip(EventEnum.RIOT_WAR, player, 1, 0);
 		}
 	}
 

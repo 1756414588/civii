@@ -25,10 +25,10 @@
             <DefaultRolloverStrategy max="240"/>
         </RollingRandomAccessFile>
 
-
+        <!--消息通道-->
         <RollingRandomAccessFile name="CHANNEL" immediateFlush="true" fileName="logs/channel.log"
           filePattern="bak/channel/%d{yyyy-MM-dd-HH}.log.%i">
-            <PatternLayout pattern="%date{HH:mm:ss.SSS} - %msg%n"/>
+            <PatternLayout pattern="%date{yyyy-MM-dd-HH HH:mm:ss.SSS} - %msg%n"/>
             <Policies>
                 <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
             </Policies>
@@ -921,6 +921,24 @@
             <!--保存日志文件个数-->
             <DefaultRolloverStrategy max="240"/>
         </RollingRandomAccessFile>
+
+        <!--沙盘演武-->
+        <RollingRandomAccessFile name="manoeuvre_log" immediateFlush="true"
+                                 fileName="${logDataDir}/manoeuvre_log.log"
+                                 filePattern="${logDataBakDir}/manoeuvre_log/${logDataName}">
+            <Filters>
+                <!--日志级别与当前一致时记录 与当前不一致时拒绝-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!--日志文件名称格式-->
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!--根据当前filePattern配置，日志文件每60分钟滚动一次-->
+                <CronTriggeringPolicy schedule="5/0 0/0 0/1 * * ? * "/>
+            </Policies>
+            <!--保存日志文件个数-->
+            <DefaultRolloverStrategy max="240"/>
+        </RollingRandomAccessFile>
     </appenders>
 
     <Loggers>
@@ -1063,6 +1081,9 @@
         <logger name="glover_log" level="INFO" additivity="false">
             <appender-ref ref="glover_log"/>
         </logger>
+        <logger name="manoeuvre_log" level="INFO" additivity="false">
+            <appender-ref ref="manoeuvre_log"/>
+        </logger>
 
         <logger name="io.netty" level="ERROR" additivity="false"/>
         <logger name="org.springframework" level="ERROR" additivity="false"/>
@@ -1079,7 +1100,6 @@
 
         <logger name="CHANNEL" level="INFO" additivity="false">
             <appender-ref ref="CHANNEL"/>
-            <appender-ref ref="Console"/>
         </logger>
 
         <logger name="game" level="INFO" additivity="false">

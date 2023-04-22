@@ -1,5 +1,7 @@
 package com.game.manager;
 
+import com.game.Loading;
+import com.game.define.LoadData;
 import com.game.rank.RebelScoreRankMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,13 +12,15 @@ import org.springframework.stereotype.Service;
  * @description
  */
 @Service
-public class NewRankManager {
+@LoadData(name = "叛军排行", type = Loading.LOAD_USER_DB, initSeq = 3000)
+public class NewRankManager extends BaseManager {
 
-    @Autowired
-    private RebelScoreRankMgr rebelScoreRankMgr;
+	@Autowired
+	private RebelScoreRankMgr rebelScoreRankMgr;
 
-    public void init() {
-        rebelScoreRankMgr.init();
-    }
+	@Override
+	public void init() throws Exception {
+		rebelScoreRankMgr.init();
+	}
 
 }

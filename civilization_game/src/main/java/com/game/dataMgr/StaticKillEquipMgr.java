@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import com.game.domain.s.StaticKillEquipRate;
 import com.game.util.LogHelper;
 
 @Component
+@LoadData(name = "装备技能")
 public class StaticKillEquipMgr extends BaseDataMgr {
 
     @Autowired
@@ -32,7 +34,7 @@ public class StaticKillEquipMgr extends BaseDataMgr {
     private Map<Integer, Map<Integer, StaticKillEquipLevel>> killEquipLevelKeymap = new HashMap<Integer, Map<Integer, StaticKillEquipLevel>>();
 
     @Override
-    public void init() throws Exception {
+    public void load() throws Exception {
         setKillEquipMap(staticDataDao.selectStaticKillEquip());
         killEquipLevelMap = staticDataDao.selectStaticKillEquipLevel();
         setKillEquipRateMap(staticDataDao.selectStaticKillEquipRate());
@@ -43,6 +45,11 @@ public class StaticKillEquipMgr extends BaseDataMgr {
         checkCompund();
         checkCritiRate();
         checkProperty();
+    }
+
+    @Override
+    public void init() throws Exception {
+
     }
 
     public void makeKillProp() {

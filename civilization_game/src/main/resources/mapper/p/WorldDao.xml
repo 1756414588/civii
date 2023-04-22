@@ -16,11 +16,11 @@
 		replace into p_world (
 		keyId, bossData, lastSaveTime, targetData, season, seasonEndTime, effect, chatShowData,
 		pvpBattleData, worldTargetData, worldActPlanData, totalMaxOnLineNum, todayMaxOnLineNum, stealCityData,
-		refreshTime, seasonUp, riotLevel, bigMonster,zerg,remark,seasonAct
+		refreshTime, seasonUp, riotLevel, bigMonster,zerg
 		)values(
 		#{keyId}, #{bossData}, #{lastSaveTime}, #{targetData}, #{season}, #{seasonEndTime}, #{effect} ,#{chatShowData}
 		,#{pvpBattleData} ,#{worldTargetData} ,#{worldActPlanData} ,#{totalMaxOnLineNum} ,#{todayMaxOnLineNum},#{stealCityData}
-		, #{refreshTime} , #{seasonUp} , #{riotLevel} , #{bigMonster}, #{zerg}, #{remark}, #{seasonAct}
+		, #{refreshTime} , #{seasonUp} , #{riotLevel} , #{bigMonster}, #{zerg}
 		);
 	</update>
 

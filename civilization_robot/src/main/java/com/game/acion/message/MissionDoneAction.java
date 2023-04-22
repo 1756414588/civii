@@ -3,8 +3,8 @@ package com.game.acion.message;
 import com.game.acion.MessageAction;
 import com.game.acion.MessageEvent;
 import com.game.constant.GameError;
-import com.game.domain.Record;
 import com.game.domain.Robot;
+import com.game.domain.p.RobotData;
 import com.game.domain.p.RobotMessage;
 import com.game.packet.Packet;
 import com.game.pb.BasePb.Base;
@@ -13,7 +13,7 @@ import com.game.util.BasePbHelper;
 import com.game.util.LogHelper;
 
 /**
- *
+ * @Author 陈奎
  * @Description 通关副本
  * @Date 2022/9/14 19:04
  **/
@@ -43,8 +43,13 @@ public class MissionDoneAction extends MessageAction {
 			tryEvent(messageEvent, 600000L);
 			return;
 		}
-		
-		Record record = robot.getRecord();
-		record.setState(record.getState() + 1);
+
+		if (base.getCode() == GameError.OK.getCode()) {
+			RobotData robotData = robot.getData();
+			robotData.setGuildState(robotData.getGuildState() + 1);
+			return;
+		}
+
+
 	}
 }

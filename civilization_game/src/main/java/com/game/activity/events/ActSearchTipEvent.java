@@ -6,23 +6,24 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * 寻宝之路
  */
+@Component
 public class ActSearchTipEvent extends BaseActivityEvent {
-
-	private static ActSearchTipEvent inst = new ActSearchTipEvent();
-
-	public static ActSearchTipEvent getInst() {
-		return inst;
-	}
+	//
+	//private static ActSearchTipEvent inst = new ActSearchTipEvent();
+	//
+	//public static ActSearchTipEvent getInst() {
+	//	return inst;
+	//}
 
 
 	@Override
@@ -34,7 +35,6 @@ public class ActSearchTipEvent extends BaseActivityEvent {
 	@Override
 	public void process(EventEnum activityEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 
 		// 第几天
@@ -69,7 +69,6 @@ public class ActSearchTipEvent extends BaseActivityEvent {
 
 	public void reward(EventEnum eventEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 
 		// 第几天
@@ -111,7 +110,6 @@ public class ActSearchTipEvent extends BaseActivityEvent {
 	 */
 	public void pay(EventEnum eventEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 
 		// 第几天

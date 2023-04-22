@@ -197,8 +197,10 @@ public class SuperResService {
 	 * @param now
 	 */
 	public void resetStateSuperMine(MapInfo mapInfo, SuperResource sm, long now) {
-		worldManager.clearResourcePos(mapInfo, sm.getPos());// 清除地图资源
-		worldManager.synEntityRemove(sm, mapInfo.getMapId(), sm.getPos());// 同步地块信息
+//		worldManager.clearResourcePos(mapInfo, sm.getPos());// 清除地图资源
+//		worldManager.synEntityRemove(sm, mapInfo.getMapId(), sm.getPos());// 同步地块信息
+
+		mapInfo.clearPos(sm.getPos());
 		StaticSuperRes staticSuperRes = staticSuperResMgr.getStaticSuperRes(sm.getResId());
 		returnAllArmy(mapInfo, sm, now);// 撤回所有部队,包括驻防部队
 		sm.setResetState(now, staticSuperRes);
@@ -246,7 +248,10 @@ public class SuperResService {
 			Pos pos = kv.getKey();
 			StaticSuperRes sSm = staticSuperResMgr.getSuperMineRandom();
 			sm.reset(pos, sSm, cityId); // 修改状态
-			worldManager.addSuperResource(mapInfo, pos, sm);// 添加到地图
+			SuperResource superResource = worldManager.addSuperResource(mapInfo, pos, sm);// 添加到地图
+			if (superResource == null) {// 添加失败
+				continue;
+			}
 			list.add(sm);
 		}
 		worldManager.synEntityAddRq(list);
@@ -274,7 +279,7 @@ public class SuperResService {
 				}
 				StaticWorldCity sCity = staticWorldMgr.getCity(c.getCityId());
 				while (cityNeed > 0 && needAdd > 0) {
-					Pos pos = mapInfo.randomCityRangePos(sCity);
+					Pos pos = mapInfo.getRandomCityPos(sCity);
 					if (pos != null && !emptyPosMap.containsKey(pos)) {
 						emptyPosMap.put(pos, c.getCityId());
 						cityNeed--;
@@ -329,8 +334,8 @@ public class SuperResService {
 			long collectedTime = sg.calcCollectedTime(now);
 			int gainRes = (int) Math.floor((collectedTime * 1.0 / TimeHelper.HOUR_MS) * sSm.getSpeed()); // 计算采集数量
 			total = (int) (gainRes * (1.0 + sg.getMarch().getAddFactor() / DevideFactor.PERCENT_NUM));
-			System.err.println("finishCollect============" + (1.0 + sg.getMarch().getAddFactor() / 100));
-			System.err.println("lordId =" + sg.getMarch().getLordId() + "===" + "gainRes=" + gainRes + "===total=" + total);
+			//System.err.println("finishCollect============" + (1.0 + sg.getMarch().getAddFactor() / 100));
+			//System.err.println("lordId =" + sg.getMarch().getLordId() + "===" + "gainRes=" + gainRes + "===total=" + total);
 			sm.addConvertRes(gainRes);// 处理已被采集走的资源（加成不计算在内）
 			List<Award> list = new ArrayList<>();
 			Award award = new Award(AwardType.RESOURCE, sSm.getResType(), total);

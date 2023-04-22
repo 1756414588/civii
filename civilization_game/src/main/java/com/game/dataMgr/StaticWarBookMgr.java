@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.p.ConfigException;
 import com.game.domain.s.*;
 import com.google.common.collect.HashBasedTable;
@@ -16,6 +17,7 @@ import java.util.*;
  * @date 2020/12/8 16:25
  */
 @Component
+@LoadData(name = "兵书")
 public class StaticWarBookMgr extends BaseDataMgr {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -90,7 +92,7 @@ public class StaticWarBookMgr extends BaseDataMgr {
     private StaticDataDao staticDataDao;
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         clearConfig();
 
         initWarBooks();
@@ -101,6 +103,10 @@ public class StaticWarBookMgr extends BaseDataMgr {
         initWarBookBuy();
         initWarBookExchange();
         initWarBookSkillType();
+    }
+
+    @Override
+    public void init() throws Exception{
     }
 
     /**

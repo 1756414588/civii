@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import com.game.domain.s.StaticBuyEqupSlot;
 import com.game.domain.s.StaticEquip;
 
 @Component
+@LoadData(name = "装备")
 public class StaticEquipDataMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -22,10 +24,13 @@ public class StaticEquipDataMgr extends BaseDataMgr {
 
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         equipMap = staticDataDao.selectEquipMap();
         buyEquipSlotMap = staticDataDao.selectBuyEquipSlot();
+    }
 
+    @Override
+    public void init() throws Exception{
     }
 
     public int maxBuyEquipSlotTimes() {

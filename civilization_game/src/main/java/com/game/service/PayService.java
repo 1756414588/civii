@@ -104,6 +104,8 @@ public class PayService {
 	private DailyTaskManager dailyTaskManager;
 	@Autowired
 	private SurpriseGiftManager surpriseGiftManager;
+	@Autowired
+	ActivityEventManager activityEventManager;
 
 	public Boolean payBack(PayOrder payOrder) {
 		Boolean flag = false;
@@ -124,7 +126,7 @@ public class PayService {
 			activityService.checkActLuxuryGift(player);
 			if (flag) {
 				dailyTaskManager.record(DailyTaskId.RECHARGE, player, payOrder.getRealAmount());
-				ActivityEventManager.getInst().activityTip(EventEnum.PAY, player, 0, 0);// 充值相关所有的红点提示
+				activityEventManager.activityTip(EventEnum.PAY, player, 0, 0);// 充值相关所有的红点提示
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -690,8 +692,9 @@ public class PayService {
 			StaticPay pay = staticVipDataMgr.getPayStaticPay(productId);
 			if (null == pay) {
 				flag = false;
+			}else{
+				payAmount = pay.getMoney();
 			}
-			payAmount = pay.getMoney();
 		} else if (productType == RECHAR_2) {
 			StaticActPayGift payGift = staticActivityMgr.getPayGift(productId);
 			if (null == payGift) {
@@ -811,10 +814,11 @@ public class PayService {
 			StaticActPayMoney payMoney = staticActivityMgr.getPayMoney(productId);
 			if (null == payMoney) {
 				flag = false;
-			}
-			if (player.getLevel() < payMoney.getLevelDisplay()) {
-				handler.sendErrorMsgToPlayer(GameError.LORD_LV_NOT_ENOUGH);
-				return;
+			}else {
+				if (player.getLevel() < payMoney.getLevelDisplay()) {
+					handler.sendErrorMsgToPlayer(GameError.LORD_LV_NOT_ENOUGH);
+					return;
+				}
 			}
 			if (flag) {
 				ActRecord actRecord = activityManager.getActivityInfo(player, ActivityConst.ACT_SPECIAL_GIFT);
@@ -839,15 +843,18 @@ public class PayService {
 			StaticActPayGift payGift = staticActivityMgr.getPayGift(productId);
 			if (null == payGift) {
 				flag = false;
+			}else{
+				payAmount = payGift.getMoney();
 			}
-			payAmount = payGift.getMoney();
+
 		} else if (productType == RECHAR_10) {
 			realProductType = 4;
 			StaticResourceGift staticResourceGift = staticActivityMgr.getStaticResourceGift(productId);
 			if (null == staticResourceGift) {
 				flag = false;
+			}else{
+				payAmount = staticResourceGift.getMoney();
 			}
-			payAmount = staticResourceGift.getMoney();
 		} else if (productType == RECHAR_11) {
 			// 活动结束不让买
 			ActivityBase activityBase = activityManager.getActivityBase(ActivityConst.ACT_SPRING_FESTIVAL_GIFT);
@@ -859,7 +866,9 @@ public class PayService {
 			if (null == springGift) {
 				flag = false;
 			}
-			payAmount = springGift.getMoney();
+			if(flag){
+				payAmount = springGift.getMoney();
+			}
 		}
 
 		if (!flag) {

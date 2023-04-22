@@ -56,7 +56,7 @@ public class ManShare extends Chat {
 	}
 
 	@Override
-	public CommonPb.Chat ser(int style, int officerId) {
+	public CommonPb.Chat ser(int style, int officerId, int targetCountry) {
 		CommonPb.Chat.Builder builder = CommonPb.Chat.newBuilder();
 		Lord lord = player.getLord();
 		builder.setStyle(this.style);
@@ -66,7 +66,7 @@ public class ManShare extends Chat {
 		builder.setTitle(player.getTitle());
 		builder.setLevel(player.getLevel());
 		if (lord.getNick() != null) {
-            builder.setName(lord.getNick());
+			builder.setName(lord.getNick());
         }
 		builder.setPortrait(lord.getPortrait());
 		builder.setX(lord.getPosX());

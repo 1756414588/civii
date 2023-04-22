@@ -15,7 +15,9 @@ import com.game.manager.*;
 import com.game.message.handler.ClientHandler;
 import com.game.pb.CommonPb;
 import com.game.pb.WorldPb;
+import com.game.server.thread.ServerThread;
 import com.game.spring.SpringUtil;
+import com.game.timer.AutoTimer;
 import com.game.util.*;
 import com.game.worldmap.WorldLogic;
 import com.google.common.collect.Lists;
@@ -63,7 +65,8 @@ public class AutoService {
     private WorldBoxManager worldBoxManager;
     @Autowired
     private DailyTaskManager dailyTaskManager;
-
+    @Autowired
+    ActivityEventManager activityEventManager;
     /**
      * 自动清剿队列
      * 玩家ID 放入时间
@@ -125,8 +128,8 @@ public class AutoService {
                 boolean hasReward = autoLossSoldiers(player);
                 if (hasReward) {
                     // 给玩家发下奖励
-                    Optional<StaticWorldMonster> op = staticWorldMgr.getWorldMonsterMap().values().stream().filter(e -> e.getType() == 1 && e.getLevel() == lv).findFirst();
-                    StaticWorldMonster staticMonster = op.get();
+                    StaticWorldMonster staticMonster = staticWorldMgr.getWorldMonsterMap().values().stream().filter(e -> e.getType() == 1 && e.getLevel() == lv).findFirst().orElse(null);
+                    //StaticWorldMonster staticMonster = op.get();
                     if (staticMonster != null) {
                         List<Award> list = autoKillReward(player, staticMonster);
                         addReward(player, list);
@@ -171,7 +174,7 @@ public class AutoService {
         //TODO jyb世界目标击杀叛军
         worldTargetTaskService.doKillMosnster(player);
         //TODO 击杀虫子事件影响的活动
-		ActivityEventManager.getInst().activityTip(EventEnum.KILL_MONSTER, player, 1, monster.getLevel());
+        activityEventManager.activityTip(EventEnum.KILL_MONSTER, player, 1, monster.getLevel());
         //TODO 通行证
 //        activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.DONE_FREE_MONSTER, 1);
         //虫族加速活动
@@ -187,27 +190,60 @@ public class AutoService {
         ));
     }
 
+    //java.lang.IllegalStateException: null
+    //at java.util.ArrayList$Itr.remove(ArrayList.java:872) ~[?:1.8.0_211]
+    //at com.game.service.AutoService.addReward(AutoService.java:204) ~[civilization_game-1.0-SNAPSHOT.jar:?]
+    //at com.game.service.AutoService.autoKill(AutoService.java:132) ~[civilization_game-1.0-SNAPSHOT.jar:?]
+    //at com.game.timer.AutoTimer.action(AutoTimer.java:15) ~[civilization_game-1.0-SNAPSHOT.jar:?]
+    //at com.game.server.thread.ServerThread.run(ServerThread.java:78) [civilization_common-1.0-SNAPSHOT.jar:?]
+
+
     /**
      * 奖励合并
      *
      * @param player
      * @param list
      */
+    //private void addReward(Player player, List<Award> list) {
+    //    if (player.getSimpleData().getAutoRewards().size() > 0) {
+    //        Iterator<Award> it = list.iterator();
+    //        while (it.hasNext()) {
+    //            Award tmpAward = it.next();
+    //            for (Award award : player.getSimpleData().getAutoRewards()) {
+    //                if (award.getType() == tmpAward.getType() && award.getId() == tmpAward.getId()) {
+    //                    award.setCount(award.getCount() + tmpAward.getCount());
+    //                    it.remove();
+    //                }
+    //            }
+    //        }
+    //    }
+    //    if (list.size() > 0) {
+    //        player.getSimpleData().getAutoRewards().addAll(list);
+    //    }
+    //}
     private void addReward(Player player, List<Award> list) {
+        List<Award> awardList = new ArrayList<>();
         if (player.getSimpleData().getAutoRewards().size() > 0) {
             Iterator<Award> it = list.iterator();
             while (it.hasNext()) {
+                boolean flag = false;
                 Award tmpAward = it.next();
                 for (Award award : player.getSimpleData().getAutoRewards()) {
                     if (award.getType() == tmpAward.getType() && award.getId() == tmpAward.getId()) {
                         award.setCount(award.getCount() + tmpAward.getCount());
-                        it.remove();
+                        flag = true;
+                        break;
                     }
                 }
+                if (!flag) {
+                    awardList.add(tmpAward);
+                }
             }
+        } else {
+            awardList.addAll(list);
         }
-        if (list.size() > 0) {
-            player.getSimpleData().getAutoRewards().addAll(list);
+        if (awardList.size() > 0) {
+            player.getSimpleData().getAutoRewards().addAll(awardList);
         }
     }
 

@@ -1,6 +1,8 @@
 package com.game.network;
 
 import com.game.packet.Packet;
+import com.game.pb.BasePb.Base;
+import com.game.util.BasePbHelper;
 import com.game.util.LogHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,6 +16,7 @@ public class RobotEncoder extends MessageToByteEncoder<Packet> {
 		byteBuf.writeShort(msg.length);
 		byteBuf.writeBytes(msg);
 
-//		LogHelper.CHANNEL_LOGGER.info("RobotEncoder roleId:{} send:{}", ChannelUtil.getRoleId(ctx), packet.getCmd());
+		Base base = BasePbHelper.createBase(msg);
+		LogHelper.PACKET_LOGGER.info("RobotEncoder roleId:{} cmd:{} eventId:{}", ChannelUtil.getRoleId(ctx), packet.getCmd(), base.getParam());
 	}
 }

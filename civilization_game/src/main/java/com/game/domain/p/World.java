@@ -73,8 +73,6 @@ public class World {
 	private byte[] zerg;
     private byte[] remark;
 
-    private byte[] seasonAct;
-
     public World() {
     }
 
@@ -99,6 +97,5 @@ public class World {
         bigMonster = data.getBigMonster();
 		zerg = data.serZergData();
         remark = data.cityRemarkDb();
-        seasonAct = data.seasonActDb();
     }
 }

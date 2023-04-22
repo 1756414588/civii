@@ -9,13 +9,13 @@ import com.game.constant.ActPassPortTaskType;
 import com.game.constant.ActivityConst;
 import com.game.constant.Quality;
 import com.game.constant.ResourceType;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActPassPortTask;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticPassPortAward;
 import com.game.domain.s.StaticPassPortTask;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,13 +27,14 @@ import java.util.Set;
  * @author zcp
  * @date 2021/9/6 16:35
  */
+@Component
 public class ActPassPortTipEvent extends BaseActivityEvent {
 
-	private static ActPassPortTipEvent inst = new ActPassPortTipEvent();
-
-	public static ActPassPortTipEvent getInst() {
-		return inst;
-	}
+	//private static ActPassPortTipEvent inst = new ActPassPortTipEvent();
+	//
+	//public static ActPassPortTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -68,7 +69,6 @@ public class ActPassPortTipEvent extends BaseActivityEvent {
 	}
 
 	private boolean checkFlag(int taskType, IActivityActor actor) {
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		ActRecord actRecord = actor.getActRecord();
 		Map<Integer, ActPassPortTask> tasks = actRecord.getTasks();
 
@@ -432,7 +432,6 @@ public class ActPassPortTipEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticPassPortAward> passPortList = staticActivityMgr.getPassPortList(actRecord.getAwardId());
 
 		int beforeScore = actRecord.getRecord(0);

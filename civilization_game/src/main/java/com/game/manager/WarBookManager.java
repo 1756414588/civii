@@ -9,6 +9,7 @@ import com.game.domain.s.*;
 import com.game.log.LogUser;
 import com.game.log.domain.WarBookLog;
 import com.game.pb.CommonPb;
+import com.game.service.AchievementService;
 import com.game.util.LogHelper;
 import com.game.util.PbHelper;
 import com.game.util.TimeHelper;
@@ -60,29 +61,33 @@ public class WarBookManager {
 	 * @param warBookId
 	 * @return
 	 */
-	public WarBook addWarBookById(Player player, int warBookId, int reason) {
-		WarBook book = new WarBook();
-		Map<Integer, WarBook> warBookMap = player.getWarBooks();
-		book.setKeyId(player.maxKey());
-		book.setBookId(warBookId);
-		StaticWarBook warBookConfigById = staticWarBookMgr.getWarBookConfigById(warBookId);
-		if (warBookConfigById == null) {
-			logger.error("no WarBook config, bookId = " + warBookId + ", reason = " + reason);
-			return book;
-		}
-		initBookPropAndSkill(book, warBookConfigById);
-		warBookMap.put(book.getKeyId(), book);
-		logUser.war_book_log(WarBookLog.builder()
-			.lordId(player.roleId)
-			.level(player.getLevel())
-			.nick(player.getNick())
-			.vip(player.getVip())
-			.reason(reason)
-			.bookName(warBookConfigById.getName())
-			.cost(0)
-			.build());
-		return book;
-	}
+	//public WarBook addWarBookById(Player player, int warBookId, int reason) {
+	//	WarBook book = new WarBook();
+	//	Map<Integer, WarBook> warBookMap = player.getWarBooks();
+	//	book.setKeyId(player.maxKey());
+	//	book.setBookId(warBookId);
+	//	StaticWarBook warBookConfigById = staticWarBookMgr.getWarBookConfigById(warBookId);
+	//	if (warBookConfigById == null) {
+	//		logger.error("no WarBook config, bookId = " + warBookId + ", reason = " + reason);
+	//		return book;
+	//	}
+	//	initBookPropAndSkill(book, warBookConfigById);
+	//	warBookMap.put(book.getKeyId(), book);
+	//	logUser.war_book_log(WarBookLog.builder()
+	//		.lordId(player.roleId)
+	//		.level(player.getLevel())
+	//		.nick(player.getNick())
+	//		.vip(player.getVip())
+	//		.reason(reason)
+	//		.bookName(warBookConfigById.getName())
+	//		.cost(0)
+	//		.build());
+	//	return book;
+	//}
+	@Autowired
+	AchievementService achievementService;
+
+
 	public WarBook addWarBookById(Player player, int warBookId, int reason, int awardType, long count) {
 		WarBook book = null;
 		boolean flag = false;
@@ -100,6 +105,9 @@ public class WarBookManager {
 			}
 			initBookPropAndSkill(book, warBookConfigById, awardType);
 			warBookMap.put(book.getKeyId(), book);
+			if(warBookConfigById.getQuality()==5){
+				achievementService.addAndUpdate(player,AchiType.AT_8,1);
+			}
 			int num = 800;
 			int num1 = staticLimitMgr.getNum(SimpleId.MAX_BOOK_NUM);
 			if (num1 > 0) {
@@ -466,10 +474,11 @@ public class WarBookManager {
 	private void createAllSkill(WarBook book, StaticWarBook staticWarBook) {
 //        System.out.println("开始配置总技能");
 		List<List<Integer>> skills = new ArrayList<>(staticWarBook.getSkill());
-		if (null == skills) {
+		if (skills.isEmpty()) {
 			return;
 		}
 		List<Integer> newAllSkill = new ArrayList<>();
+		Random random = new Random();
 		for (List<Integer> skill : skills) {
 			if (null != skill) {
 				Integer skillTypeId = skill.get(0);
@@ -480,7 +489,7 @@ public class WarBookManager {
 							newAllSkill.add(warBookSkillByTypeAndLev.getId());
 						} else {
 							List<Integer> soldierSkillLev1 = staticWarBookMgr.getSoldierSkillLev1();
-							Random random = new Random();
+
 							int index = random.nextInt(soldierSkillLev1.size());
 							Integer skillId = soldierSkillLev1.get(index);
 							StaticWarBookSkill warBookSkillById = staticWarBookMgr.getWarBookSkillById(skillId);
@@ -884,7 +893,7 @@ public class WarBookManager {
 		// 要生成物品的总数量
 		Integer type = warBookShopConfig.get(1);
 		Integer num = warBookShopConfig.get(2);
-
+		Random random = new Random();
 		// 生成非最后一个类型商品
 		Map<Integer, StaticWarBookBuy> warBookBuy = staticWarBookMgr.getWarBookBuy();
 		for (int i = 1; i <= type; i++) {
@@ -904,7 +913,6 @@ public class WarBookManager {
 				int numIndex = WeightRandom.initData(temp);
 				Integer goodsNum = randoms.get(numIndex).get(0);
 				// 4.随机出当前类型物品应该生成的物品的数量
-				Random random = new Random();
 				int nextInt = random.nextInt(staticWarBookShopGoodsByType.size());
 				StaticWarBookShopGoods staticWarBookShopGoods = staticWarBookShopGoodsByType.get(nextInt);
 				List<Integer> award = staticWarBookShopGoods.getAward();
@@ -947,8 +955,8 @@ public class WarBookManager {
 						}
 
 						for (int j = 0; j < goodsNum - staticWarBookShopGoodsByType.size(); j++) {
-							Random randomOther = new Random();
-							int randomOtherIndex = randomOther.nextInt(staticWarBookShopGoodsByType.size());
+
+							int randomOtherIndex = random.nextInt(staticWarBookShopGoodsByType.size());
 							StaticWarBookShopGoods goods = staticWarBookShopGoodsByType.get(randomOtherIndex);
 
 							item.setAward(PbHelper.createAward(goods.getAward().get(0), goods.getAward().get(1), goods.getAward().get(2)));
@@ -1043,8 +1051,7 @@ public class WarBookManager {
 						}
 
 						for (int j = 0; j < goodsNum - staticWarBookShopGoodsByType.size(); j++) {
-							Random randomOther = new Random();
-							int randomOtherIndex = randomOther.nextInt(staticWarBookShopGoodsByType.size());
+							int randomOtherIndex = random.nextInt(staticWarBookShopGoodsByType.size());
 							StaticWarBookShopGoods goods = staticWarBookShopGoodsByType.get(randomOtherIndex);
 
 							item.setAward(PbHelper.createAward(goods.getAward().get(0), goods.getAward().get(1), goods.getAward().get(2)));
@@ -1060,8 +1067,8 @@ public class WarBookManager {
 						}
 					} else {
 						for (int j = 0; j < goodsNum; j++) {
-							Random randomOther = new Random();
-							int randomOtherIndex = randomOther.nextInt(staticWarBookShopGoodsByType.size());
+
+							int randomOtherIndex = random.nextInt(staticWarBookShopGoodsByType.size());
 							StaticWarBookShopGoods goods = staticWarBookShopGoodsByType.get(randomOtherIndex);
 
 							item.setAward(PbHelper.createAward(goods.getAward().get(0), goods.getAward().get(1), goods.getAward().get(2)));

@@ -7,14 +7,13 @@ import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
 import com.game.constant.SimpleId;
-import com.game.dataMgr.StaticActivityMgr;
-import com.game.dataMgr.StaticLimitMgr;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.p.Item;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActExchange;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,13 +21,14 @@ import java.util.Map.Entry;
 /**
  * 奖章兑换
  */
+@Component
 public class ActMedalExchangeTipEvent extends BaseActivityEvent {
 
-	private static ActMedalExchangeTipEvent inst = new ActMedalExchangeTipEvent();
-
-	public static ActMedalExchangeTipEvent getInst() {
-		return inst;
-	}
+	//private static ActMedalExchangeTipEvent inst = new ActMedalExchangeTipEvent();
+	//
+	//public static ActMedalExchangeTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -44,7 +44,6 @@ public class ActMedalExchangeTipEvent extends BaseActivityEvent {
 
 		int activityId = activityBase.getActivityId();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		Map<Integer, StaticActExchange> exchangeMap = staticActivityMgr.getActDoubleEggs();
 		if (exchangeMap == null || exchangeMap.isEmpty()) {
 			return;
@@ -76,7 +75,6 @@ public class ActMedalExchangeTipEvent extends BaseActivityEvent {
 
 
 	public int getExchangeId(int activityId) {
-		StaticLimitMgr staticLimitMgr = SpringUtil.getBean(StaticLimitMgr.class);
 		switch (activityId) {
 			case ActivityConst.ACT_MEDAL_EXCHANGE:
 				return staticLimitMgr.getNum(SimpleId.ACT_MEDAL_PROP);

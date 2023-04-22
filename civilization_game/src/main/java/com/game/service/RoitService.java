@@ -18,7 +18,7 @@ import com.game.domain.s.StaticWorldActPlan;
 import com.game.domain.s.StaticWorldMap;
 import com.game.manager.PlayerManager;
 import com.game.manager.RiotManager;
-import com.game.manager.StaticActRoitManager;
+import com.game.dataMgr.StaticActRoitManager;
 import com.game.manager.WorldManager;
 import com.game.util.DateHelper;
 import com.game.util.LogHelper;
@@ -262,9 +262,10 @@ public class RoitService {
 			while (iterator.hasNext()) {
 				Monster monster = iterator.next();
 				if (monster.getEntityType() == EntityType.RIOT_MONSTER) {
-					worldManager.clearMonsterPos(mapInfo, monster.getPos());
-					// 同步野怪
-					worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
+//					worldManager.clearMonsterPos(mapInfo, monster.getPos());
+//					// 同步野怪
+//					worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
+					mapInfo.clearPos(monster.getPos());
 					count++;
 					if (count >= 20) {
 						break isAll;
@@ -391,13 +392,18 @@ public class RoitService {
 				}
 
 				// 没有达到上限，则创建一个野怪
-				Pos monsterPos = worldManager.randPos(player, cellNum);
+				Pos monsterPos = mapInfo.randPos(player, cellNum);
 
-				if (!worldManager.isPosOk(monsterPos, staticWorldMap, mapInfo)) {
+				//if (!worldManager.isPosOk(monsterPos, staticWorldMap, mapInfo)) {
+				//	continue;
+				//}
+				
+				// 创建一个野怪
+				Monster monster = worldManager.addMonster(monsterPos, monsterLv, monsterLv, mapInfo, AddMonsterReason.ADD_PLAYER_MONSTER);
+				if (monster == null) {
 					continue;
 				}
-				// 创建一个野怪
-				worldManager.addMonster(monsterPos, monsterLv, monsterLv, mapInfo, AddMonsterReason.ADD_PLAYER_MONSTER);
+
 //                worldManager.synEntityAddRq(monster, mapInfo.getMapId());
 				leftNum--;
 				break;

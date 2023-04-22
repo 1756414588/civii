@@ -6,6 +6,8 @@ import com.game.packet.PacketCreator;
 import com.game.pb.BasePb.Base;
 import com.game.register.PBFile;
 import com.game.server.GameServer;
+import com.game.server.netserver.MessageFilter;
+import com.game.util.LogHelper;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -63,6 +65,9 @@ abstract public class ClientHandler extends Handler {
 	public void sendMsgToPlayer(Base.Builder builder) {
 		Packet packet = PacketCreator.create(builder.build(), getRoleId(), getChannelId(), getPacket().getSeq(), getPacket().getCmd());
 		getCtx().writeAndFlush(packet);
+		if (!MessageFilter.isFilterPrint(packet.getCmd())) {
+			LogHelper.CHANNEL_LOGGER.info("sendToClient channelId:{} playerId:{} cmd:{}", packet.getChannelId(), packet.getRoleId(), packet.getCmd());
+		}
 	}
 
 

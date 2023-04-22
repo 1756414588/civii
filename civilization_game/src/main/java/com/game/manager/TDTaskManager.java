@@ -1,5 +1,6 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.activity.ActivityEventManager;
 import com.game.activity.actor.TdActor;
 import com.game.activity.define.EventEnum;
@@ -7,6 +8,8 @@ import com.game.constant.ActivityConst;
 import com.game.dao.s.StaticDataDao;
 import com.game.dataMgr.BaseDataMgr;
 import com.game.dataMgr.StaticActivityMgr;
+import com.game.dataMgr.StaticTDTaskMgr;
+import com.game.define.LoadData;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
@@ -37,43 +40,23 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-public class TDTaskManager extends BaseDataMgr {
+@LoadData(name = "塔防任务", type = Loading.LOAD_USER_DB)
+public class TDTaskManager extends BaseManager {
 
-	@Autowired
-	private StaticDataDao staticDataDao;
 	@Autowired
 	private ActivityManager activityManager;
 	@Autowired
 	private StaticActivityMgr staticActivityMgr;
+	@Autowired
+	ActivityEventManager activityEventManager;
+	@Autowired
+	private StaticTDTaskMgr staticTDTaskMgr;
 
-	// 塔防活动任务
-	private Map<Integer, StaticTDSevenTask> staticTDSevenTaskMap = new HashMap<>();
-	private Map<Integer, Map<Integer, StaticTDSevenTask>> tdSevenTaskByType = new HashMap<>();
-	// 塔防活动宝箱奖励
-	private Map<Integer, StaticTDSevenBoxAward> staticTDSevenBoxAwardMap = new HashMap<>();
-	// 类型按顺序排列
-	@Getter
-	private Map<Integer, List<StaticTDSevenTask>> tdSortListMap = new HashMap<>();
+	private Map<Integer, TDTask> tdTaskMap;
+
 
 	@Override
 	public void init() throws Exception {
-		staticTDSevenTaskMap.clear();
-		staticTDSevenBoxAwardMap.clear();
-		tdSevenTaskByType.clear();
-		staticTDSevenTaskMap = staticDataDao.loadStaticTDSevenTaskMap();
-		staticTDSevenTaskMap.values().forEach(e -> {
-			tdSevenTaskByType.computeIfAbsent(e.getTaskType(), x -> new HashMap<>()).put(e.getTaskId(), e);
-
-			//
-			List<StaticTDSevenTask> list = tdSortListMap.get(e.getTaskType());
-			if (list == null) {
-				list = new ArrayList<>();
-				tdSortListMap.put(e.getTaskType(), list);
-			}
-			list.add(e);
-			list.sort(Comparator.comparing(StaticTDSevenTask::getTaskId));
-		});
-		staticTDSevenBoxAwardMap = staticDataDao.loadStaticTDSevenBoxAwardMap();
 		tdTaskMap = new HashMap<>();
 		tdTaskMap.put(ActTDSevenType.tdTaskType_1, this::refreshTask_1);
 		tdTaskMap.put(ActTDSevenType.tdTaskType_2, this::refreshTask_2);
@@ -85,11 +68,7 @@ public class TDTaskManager extends BaseDataMgr {
 		tdTaskMap.put(ActTDSevenType.tdTaskType_8, this::refreshTask_8);
 		tdTaskMap.put(ActTDSevenType.tdTaskType_9, this::refreshTask_9);
 		tdTaskMap.put(ActTDSevenType.tdTaskType_10, this::refreshTask_10);
-
-
 	}
-
-	private Map<Integer, TDTask> tdTaskMap;
 
 	public interface TDTask {
 
@@ -122,13 +101,13 @@ public class TDTaskManager extends BaseDataMgr {
 		actTDSevenType.putData(activityBase, actRecord, activityData, player);
 		actTDSevenType.getTaskTypeList().forEach(e -> {
 			TDTask tdTask = tdTaskMap.get(e);
-			Map<Integer, StaticTDSevenTask> taskMap = tdSevenTaskByType.get(e);
+			Map<Integer, StaticTDSevenTask> taskMap = staticTDTaskMgr.getTdSevenTaskByType().get(e);
 			if (tdTask != null && taskMap != null) {
 				tdTask.refreshTask(actTDSevenType, taskMap);
 			}
 		});
 
-		ActivityEventManager.getInst().activityTip(EventEnum.GET_ACTIVITY_AWARD_TIP, new TdActor(player, actRecord, activityData, activityBase));
+		activityEventManager.activityTip(EventEnum.GET_ACTIVITY_AWARD_TIP, new TdActor(player, actRecord, activityData, activityBase));
 	}
 
 	// 每日参与塔防1次

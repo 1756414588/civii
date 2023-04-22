@@ -8,16 +8,12 @@ import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
-import com.game.domain.p.ActRecord;
-import com.game.domain.p.ActTDSevenType;
-import com.game.domain.p.CampMembersRank;
-import com.game.domain.p.EndlessTDGameInfo;
-import com.game.domain.p.TD;
+import com.game.domain.p.*;
 import com.game.domain.s.StaticTDSevenBoxAward;
 import com.game.domain.s.StaticTDSevenTask;
-import com.game.manager.TDTaskManager;
 import com.game.server.GameServer;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,13 +23,14 @@ import java.util.Map;
  * @ProjectName halo_server
  * @Date 2022/1/27 11:29
  **/
+@Component
 public class ActTDSevenTaskEvent extends BaseActivityEvent {
 
-	private static ActTDSevenTaskEvent inst = new ActTDSevenTaskEvent();
-
-	public static ActTDSevenTaskEvent getInst() {
-		return inst;
-	}
+	//private static ActTDSevenTaskEvent inst = new ActTDSevenTaskEvent();
+	//
+	//public static ActTDSevenTaskEvent getInst() {
+	//	return inst;
+	//}
 
 
 	@Override
@@ -91,8 +88,7 @@ public class ActTDSevenTaskEvent extends BaseActivityEvent {
 			return false;
 		}
 
-		TDTaskManager tdTaskManager = SpringUtil.getBean(TDTaskManager.class);
-		Map<Integer, StaticTDSevenBoxAward> staticTDSevenBoxAwardMap = tdTaskManager.getStaticTDSevenBoxAwardMap();
+		Map<Integer, StaticTDSevenBoxAward> staticTDSevenBoxAwardMap = staticTDTaskMgr.getStaticTDSevenBoxAwardMap();
 		for (StaticTDSevenBoxAward e : staticTDSevenBoxAwardMap.values()) {
 			if (e.getCond() <= awardStatue && !actRecord.getReceived().containsKey(e.getKeyId())) {
 				return true;
@@ -111,8 +107,7 @@ public class ActTDSevenTaskEvent extends BaseActivityEvent {
 	 * @return
 	 */
 	public boolean taskTypeOneAward(Player player, ActRecord actRecord, ActivityData activityData, int taskType) {
-		TDTaskManager tdTaskManager = SpringUtil.getBean(TDTaskManager.class);
-		Map<Integer, StaticTDSevenTask> taskMap = tdTaskManager.getTdSevenTaskByType().get(taskType);
+		Map<Integer, StaticTDSevenTask> taskMap = staticTDTaskMgr.getTdSevenTaskByType().get(taskType);
 
 		for (StaticTDSevenTask e : taskMap.values()) {
 			int currentDay = GameServer.getInstance().currentDay;
@@ -141,8 +136,7 @@ public class ActTDSevenTaskEvent extends BaseActivityEvent {
 	 * @return
 	 */
 	public boolean taskPassTdAward(Player player, ActRecord actRecord, ActivityData activityData, int taskType) {
-		TDTaskManager tdTaskManager = SpringUtil.getBean(TDTaskManager.class);
-		Map<Integer, StaticTDSevenTask> taskMap = tdTaskManager.getTdSevenTaskByType().get(taskType);
+		Map<Integer, StaticTDSevenTask> taskMap = staticTDTaskMgr.getTdSevenTaskByType().get(taskType);
 
 		for (StaticTDSevenTask e : taskMap.values()) {
 			if (actRecord.getReceived().containsKey(e.getTaskId())) {//已领奖
@@ -165,8 +159,7 @@ public class ActTDSevenTaskEvent extends BaseActivityEvent {
 	 * @return
 	 */
 	public boolean taskPassEndTdAward(Player player, ActRecord actRecord, ActivityData activityData, int taskType) {
-		TDTaskManager tdTaskManager = SpringUtil.getBean(TDTaskManager.class);
-		Map<Integer, StaticTDSevenTask> taskMap = tdTaskManager.getTdSevenTaskByType().get(taskType);
+		Map<Integer, StaticTDSevenTask> taskMap = staticTDTaskMgr.getTdSevenTaskByType().get(taskType);
 
 		for (StaticTDSevenTask e : taskMap.values()) {
 			if (actRecord.getReceived().containsKey(e.getTaskId())) {//已领奖
@@ -194,8 +187,7 @@ public class ActTDSevenTaskEvent extends BaseActivityEvent {
 		if (taskType != ActTDSevenType.tdTaskType_3 && taskType != ActTDSevenType.tdTaskType_5) {
 			return true;
 		}
-		TDTaskManager tdTaskManager = SpringUtil.getBean(TDTaskManager.class);
-		List<StaticTDSevenTask> taskList = tdTaskManager.getTdSortListMap().get(taskType);
+		List<StaticTDSevenTask> taskList = staticTDTaskMgr.getTdSortListMap().get(taskType);
 
 		for (StaticTDSevenTask e : taskList) {
 			if (actRecord.getReceived().containsKey(e.getTaskId())) {
@@ -221,8 +213,7 @@ public class ActTDSevenTaskEvent extends BaseActivityEvent {
 	 */
 	public boolean totalState(Player player, ActRecord actRecord, ActivityData activityData, int taskType) {
 		int state = actRecord.getRecordNum(taskType);
-		TDTaskManager tdTaskManager = SpringUtil.getBean(TDTaskManager.class);
-		List<StaticTDSevenTask> taskList = tdTaskManager.getTdSortListMap().get(taskType);
+		List<StaticTDSevenTask> taskList = staticTDTaskMgr.getTdSortListMap().get(taskType);
 		for (StaticTDSevenTask e : taskList) {
 			if (actRecord.getReceived().containsKey(e.getTaskId())) {//已领取
 				continue;
@@ -244,8 +235,7 @@ public class ActTDSevenTaskEvent extends BaseActivityEvent {
 	 * @return
 	 */
 	public boolean serverPass(Player player, ActRecord actRecord, ActivityData activityData, int taskType) {
-		TDTaskManager tdTaskManager = SpringUtil.getBean(TDTaskManager.class);
-		List<StaticTDSevenTask> taskList = tdTaskManager.getTdSortListMap().get(taskType);
+		List<StaticTDSevenTask> taskList = staticTDTaskMgr.getTdSortListMap().get(taskType);
 		for (StaticTDSevenTask e : taskList) {
 			if (actRecord.getReceived().containsKey(e.getTaskId())) {//已领取
 				continue;

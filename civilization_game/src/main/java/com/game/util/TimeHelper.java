@@ -1,12 +1,9 @@
 package com.game.util;
 
 import com.game.constant.WeekEnum;
+
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
@@ -108,11 +105,12 @@ public class TimeHelper {
 		return LocalDateTime.of(LocalDate.now(), LocalTime.MAX).atZone(GMT).toInstant().toEpochMilli();
 	}
 
-	public static int passDay(long time) {
-		LocalDate localDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), GMT).toLocalDate();
-		LocalDate now = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).toLocalDate();
-		return now.getDayOfYear() - localDate.getDayOfYear();
-	}
+	@Deprecated
+	//public static int passDay(long time) {
+	//	LocalDate localDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), GMT).toLocalDate();
+	//	LocalDate now = LocalDateTime.of(LocalDate.now(), LocalTime.MIN).toLocalDate();
+	//	return now.getDayOfYear() - localDate.getDayOfYear();
+	//}
 
 	public static int passNowDay(long zoreTime) {
 		int num = (int) ((System.currentTimeMillis() - zoreTime) / DAY_MS);
@@ -182,6 +180,7 @@ public class TimeHelper {
 		int newL = (int) ((endTime - startTime) / (1000 * 3600 * 24));
 		return newL;
 	}
+
 
 	/*
 	 * 将时间戳转换为时间
@@ -500,24 +499,6 @@ public class TimeHelper {
 		// 秒
 		cal.set(Calendar.SECOND, 0);
 		// logger.info("******时间 *********** {}", getDate(cal.getTime().getTime()));
-		return cal.getTime().getTime();
-	}
-
-
-	public static long getMilTime(long time, int openWeek, int week, int hour,int min,int sec) {
-		// logger.info("******时间 *********** {}", getDate(time));
-		Date date = new Date(time);
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		cal.setFirstDayOfWeek(Calendar.MONDAY);
-		cal.add(Calendar.DATE, openWeek * 7);
-		cal.set(Calendar.DAY_OF_WEEK, WeekEnum.getUsaWeek(week));
-		cal.set(Calendar.HOUR_OF_DAY, hour);
-		// 分
-		cal.set(Calendar.MINUTE, min);
-		// 秒
-		cal.set(Calendar.SECOND, sec);
-		//logger.info("******时间 *********** {}", getDate(cal.getTime().getTime()));
 		return cal.getTime().getTime();
 	}
 }

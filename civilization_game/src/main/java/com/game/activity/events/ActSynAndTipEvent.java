@@ -14,21 +14,22 @@ import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.p.ActivityRecord;
 import com.game.domain.s.ActivityBase;
-import com.game.manager.PlayerManager;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.List;
 
 /**
  * 同时推送synActivity和SynActivityDisappearRq
  */
+@Component
 public class ActSynAndTipEvent extends BaseActivityEvent {
 
-	private static ActSynAndTipEvent inst = new ActSynAndTipEvent();
-
-	public static ActSynAndTipEvent getInst() {
-		return inst;
-	}
+	//private static ActSynAndTipEvent inst = new ActSynAndTipEvent();
+	//
+	//public static ActSynAndTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -50,7 +51,6 @@ public class ActSynAndTipEvent extends BaseActivityEvent {
 		Player player = actor.getPlayer();
 		ActivityBase activityBase = actor.getActivityBase();
 
-		PlayerManager playerManager = SpringUtil.getBean(PlayerManager.class);
 		playerManager.synActivity(player, activityBase.getActivityId());
 
 		actor.setResult(new ActivityEventResult(activityBase, SynEnum.ACT_TIP_DISAPEAR, true));
@@ -68,7 +68,6 @@ public class ActSynAndTipEvent extends BaseActivityEvent {
 		ActRecord actRecord = actor.getActRecord();
 		ActivityBase activityBase = actor.getActivityBase();
 
-		PlayerManager playerManager = SpringUtil.getBean(PlayerManager.class);
 		playerManager.synActivity(player, activityBase.getActivityId());
 
 		actor.setResult(new ActMonthGiftRet(activityBase, actRecord, SynEnum.ACT_TIP_DISAPEAR, true));
@@ -109,7 +108,6 @@ public class ActSynAndTipEvent extends BaseActivityEvent {
 		ActRecord actRecord = actor.getActRecord();
 		ActivityBase activityBase = actor.getActivityBase();
 
-		PlayerManager playerManager = SpringUtil.getBean(PlayerManager.class);
 		playerManager.synActivity(player, activityBase.getActivityId());
 
 		actor.setResult(new ActBuildQueRet(activityBase, actRecord, SynEnum.ACT_TIP_DISAPEAR, true));
@@ -124,7 +122,6 @@ public class ActSynAndTipEvent extends BaseActivityEvent {
 			return;
 		}
 
-		PlayerManager playerManager = SpringUtil.getBean(PlayerManager.class);
 		playerManager.synActivity(player, activityBase.getActivityId());
 
 		actor.setResult(new ActSuripriseGiftRet(activityBase, actRecord, SynEnum.ACT_TIP_DISAPEAR, true));

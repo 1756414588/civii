@@ -114,7 +114,7 @@ public class WarBookService {
             // 兵书不存在
             book = warBooks.get(keyId);
         } else {
-            HashMap<Integer, Hero> heros = player.getHeros();
+           Map<Integer, Hero> heros = player.getHeros();
             Hero hero = heros.get(heroId);
             ArrayList<HeroBook> heroBooks = hero.getHeroBooks();
             if (null != heroBooks) {
@@ -246,7 +246,7 @@ public class WarBookService {
             return;
         }
 
-        HashMap<Integer, Hero> heros = player.getHeros();
+        Map<Integer, Hero> heros = player.getHeros();
         int heroId = req.getHeroId();
         Hero hero = heros.get(heroId);
         if (hero == null) {
@@ -372,7 +372,7 @@ public class WarBookService {
             return;
         }
 
-        HashMap<Integer, Hero> heros = player.getHeros();
+        Map<Integer, Hero> heros = player.getHeros();
         int heroId = req.getHeroId();
         // 有无英雄
         Hero hero = heros.get(heroId);
@@ -471,7 +471,7 @@ public class WarBookService {
             // 兵书不存在
             book = warBooks.get(keyId);
         } else {
-            HashMap<Integer, Hero> heros = player.getHeros();
+            Map<Integer, Hero> heros = player.getHeros();
             hero = heros.get(heroId);
             if (null == hero) {
                 LogHelper.CONFIG_LOGGER.info("hero not exists, id = " + heroId);
@@ -618,7 +618,7 @@ public class WarBookService {
         }
         handler.sendMsgToPlayer(GameError.OK, WarBookPb.GetWarBookExchangeRs.ext, builder.build());
 
-        HashMap<Integer, Hero> heros = player.getHeros();
+       Map<Integer, Hero> heros = player.getHeros();
         Set<Map.Entry<Integer, Hero>> entries = heros.entrySet();
         for (Map.Entry<Integer, Hero> entry : entries) {
             Hero value = entry.getValue();

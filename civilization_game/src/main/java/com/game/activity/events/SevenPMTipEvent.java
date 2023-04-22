@@ -6,14 +6,13 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.manager.ActivityManager;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,13 +21,14 @@ import java.util.Optional;
 /**
  * RankType:1--->活动首日晚7点开始按排名计算奖励，活动结束后未领取奖励将以邮件的方式补发
  */
+@Component
 public class SevenPMTipEvent extends BaseActivityEvent {
 
-	private static SevenPMTipEvent inst = new SevenPMTipEvent();
-
-	public static SevenPMTipEvent getInst() {
-		return inst;
-	}
+	//private static SevenPMTipEvent inst = new SevenPMTipEvent();
+	//
+	//public static SevenPMTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -48,7 +48,6 @@ public class SevenPMTipEvent extends BaseActivityEvent {
 		Player player = actor.getPlayer();
 		ActRecord actRecord = actor.getActRecord();
 
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 		ActivityData activityData = activityManager.getActivity(activityBase);
 		if (activityData == null) {
 			return;
@@ -60,7 +59,6 @@ public class SevenPMTipEvent extends BaseActivityEvent {
 		}
 
 		// 奖励列表
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> awardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
 
 		// 领奖记录

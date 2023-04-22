@@ -6,25 +6,25 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
 import com.game.domain.s.StaticDialAwards;
+import org.springframework.stereotype.Component;
 
-import com.game.spring.SpringUtil;
 import java.util.List;
 
 /**
  * 充值转盘
  */
+@Component
 public class ActRaidersTipEvent extends BaseActivityEvent {
 
-	private static ActRaidersTipEvent inst = new ActRaidersTipEvent();
-
-	public static ActRaidersTipEvent getInst() {
-		return inst;
-	}
+	//private static ActRaidersTipEvent inst = new ActRaidersTipEvent();
+	//
+	//public static ActRaidersTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -38,7 +38,6 @@ public class ActRaidersTipEvent extends BaseActivityEvent {
 		ActRecord actRecord = actor.getActRecord();
 		ActivityBase activityBase = actor.getActivityBase();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 
 		// 免费次数，总次数
 		int free = actRecord.getRecord().size() > 0 ? 0 : 1;
@@ -92,7 +91,6 @@ public class ActRaidersTipEvent extends BaseActivityEvent {
 //		if (actRecord.getCount() == 0 && actRecord.getRecord().size() == 0) {
 //			actRecord.addCount();
 //		}
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 
 		// 这个是总次数
 		int readyCount = actRecord.getCount() + actRecord.getRecord().size();
@@ -139,7 +137,6 @@ public class ActRaidersTipEvent extends BaseActivityEvent {
 //		if (actRecord.getCount() == 0 && actRecord.getRecord().size() == 0) {
 //			actRecord.addCount();
 //		}
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> rewardList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		if (rewardList == null || rewardList.isEmpty()) {
 			return;

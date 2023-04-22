@@ -3,18 +3,14 @@ package com.game.network.robot;
 import com.game.acion.MessageEvent;
 import com.game.acion.login.BeginGameAction;
 import com.game.define.App;
-import com.game.domain.LoginAccount;
 import com.game.domain.Robot;
+import com.game.domain.p.RobotData;
 import com.game.manager.RobotNetManager;
 import com.game.network.ChannelUtil;
 import com.game.network.INetContext;
-import com.game.packet.PacketCreator;
-import com.game.pb.BasePb.Base;
-import com.game.pb.RolePb.UserLoginRq;
 import com.game.network.IPacketHandler;
 import com.game.server.TimerServer;
 import com.game.spring.SpringUtil;
-import com.game.util.BasePbHelper;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,10 +53,10 @@ public class RobotNetContext implements INetContext {
 
 	@Override
 	public void onSucess(ChannelHandlerContext ctx) {
-		LoginAccount account = robot.getLoginAccount();
+		RobotData robotData = robot.getData();
 
 		// 绑定channel和robot关系
-		ChannelUtil.setAccountKey(ctx, account.getKeyId());
+		ChannelUtil.setAccountKey(ctx, robotData.getAccountKey());
 
 		// 机器人连接管理
 		RobotNetManager robotNetManager = SpringUtil.getBean(RobotNetManager.class);

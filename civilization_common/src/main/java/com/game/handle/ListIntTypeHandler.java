@@ -46,13 +46,11 @@ public class ListIntTypeHandler implements TypeHandler<List<Integer>> {
 
 	@Override
 	public void setParameter(PreparedStatement ps, int i, List<Integer> parameter, JdbcType jdbcType) throws SQLException {
-		// TODO Auto-generated method stub
 		ps.setString(i, this.listToString(parameter));
 	}
 
 	@Override
 	public List<Integer> getResult(ResultSet rs, String columnName) throws SQLException {
-		// TODO Auto-generated method stub
 		String columnValue = rs.getString(columnName);
 		return this.getIntegerList(columnValue,columnName);
 	}
@@ -64,7 +62,6 @@ public class ListIntTypeHandler implements TypeHandler<List<Integer>> {
 
 	@Override
 	public List<Integer> getResult(CallableStatement cs, int columnIndex) throws SQLException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

@@ -6,18 +6,15 @@ import com.game.acion.MessageEvent;
 import com.game.acion.events.AddGoldEvent;
 import com.game.acion.events.TechKillCdByGoldEvent;
 import com.game.constant.GameError;
-import com.game.domain.Record;
 import com.game.domain.Robot;
+import com.game.domain.p.RobotData;
 import com.game.domain.p.RobotMessage;
 import com.game.packet.Packet;
-import com.game.packet.PacketCreator;
 import com.game.pb.BasePb.Base;
-import com.game.pb.TechPb.TechKillCdRq;
-import com.game.util.BasePbHelper;
 import com.game.util.LogHelper;
 
 /**
- *
+ * @Author 陈奎
  * @Description 秒科研进度
  * @Date 2022/9/15 18:04
  **/
@@ -39,8 +36,8 @@ public class TechKillCdAction extends MessageAction {
 	public void onResult(MessageEvent messageEvent, Robot robot, Base base) {
 		LogHelper.CHANNEL_LOGGER.info("[消息.返回] accountKey:{} cmd:{} eventId:{} id:{} code:{}", robot.getId(), base.getCommand(), base.getParam(), id, base.getCode());
 		if (base.getCode() == 200 || base.getCode() == GameError.NO_TECH_IS_LEVEL_UPING.getCode()) {
-			Record record = robot.getRecord();
-			record.setState(record.getState() + 1);
+			RobotData robotData = robot.getData();
+			robotData.setGuildState(robotData.getGuildState() + 1);
 			return;
 		}
 

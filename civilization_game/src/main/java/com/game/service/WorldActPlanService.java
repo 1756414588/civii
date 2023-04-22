@@ -488,7 +488,7 @@ public class WorldActPlanService {
 				worldActPlan.setState(WorldActPlanConsts.PREHEAT);
 				syncWorldActivityPlan();
 				if (worldActPlan.getId() == WorldActivityConsts.ACTIVITY_12) {
-					broodWarManager.openBroodWarCheck();
+					broodWarManager.gmOpenBroodWarCheck();
 				}
 			}
 			//检查是否达到开启的时间点

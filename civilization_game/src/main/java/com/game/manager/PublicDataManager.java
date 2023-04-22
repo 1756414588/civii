@@ -1,6 +1,8 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.dao.p.PublicDataDao;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.p.EndlessTDRank;
 import com.game.domain.p.PublicData;
@@ -28,7 +30,9 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-public class PublicDataManager {
+@LoadData(name = "塔防管理", type = Loading.LOAD_USER_DB, initSeq = 3000)
+public class PublicDataManager extends BaseManager {
+
 	@Autowired
 	private PublicDataDao publicDataDao;
 	@Autowired
@@ -36,13 +40,18 @@ public class PublicDataManager {
 
 	private Map<Integer, PublicData> publicDataMap = new ConcurrentHashMap<>();
 
-	public void ini() throws InvalidProtocolBufferException {
+	@Override
+	public void load() throws InvalidProtocolBufferException {
 		PublicData publicData = publicDataDao.queryPublicData(1);
 		if (publicData == null) {
 			publicData = new PublicData(1);
 			publicDataDao.update(publicData);
 		}
 		publicDataMap.put(1, publicData);
+	}
+
+	@Override
+	public void init() throws InvalidProtocolBufferException {
 		dserEndlessTDInfo(getPublicData());
 	}
 

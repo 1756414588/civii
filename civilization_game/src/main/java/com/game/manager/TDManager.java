@@ -7,6 +7,7 @@ import com.game.dao.s.StaticDataDao;
 import com.game.dataMgr.BaseDataMgr;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticPropMgr;
+import com.game.dataMgr.StaticTDMgr;
 import com.game.domain.Player;
 import com.game.domain.Award;
 import com.game.domain.p.EndlessTDGameInfo;
@@ -61,7 +62,7 @@ import java.util.stream.Collectors;
  * @description
  */
 @Component
-public class TDManager extends BaseDataMgr {
+public class TDManager  {
 
 	@Autowired
 	private HeroManager heroManager;
@@ -72,11 +73,8 @@ public class TDManager extends BaseDataMgr {
 	@Autowired
 	private CountryManager ctManger;
 	@Autowired
-	private StaticDataDao staticDataDao;
-	@Autowired
-	private StaticLimitMgr staticLimitMgr;
-	@Autowired
-	private StaticPropMgr staticPropMgr;
+	private StaticTDMgr staticTDMgr;
+
 
 	// 无尽模式玩家周排行
 	@Getter
@@ -84,199 +82,6 @@ public class TDManager extends BaseDataMgr {
 	// 无尽模式玩家历史排行
 	@Getter
 	private Map<Integer, List<EndlessTDRank>> historyEndlessTDRanks = new ConcurrentHashMap<>();
-
-	private Map<Integer, StaticTowerWarMap> towerWarMapMap = new HashMap<>(); // 地图
-	private Map<Integer, StaticTowerWarLevel> towerWarLevelMap = new HashMap<>(); // 关卡
-	private Map<Integer, StaticTowerWarWave> towerWarWaveMap = new HashMap<>(); // 波次
-	private Map<Integer, StaticTowerWarMonster> towerWarMonsterMap = new HashMap<>(); // 敌人
-	private Map<Integer, StaticTowerWarTower> towerWarTowerMap = new HashMap<>(); // 炮塔
-	private Map<Integer, StaticTowerWarBonus> towerWarBonusMap = new HashMap<>(); // 战力加成
-	private Map<Integer, StaticTowerWarBonus> endlessTowerWarBonusMap = new HashMap<>(); // 无尽炮塔战力加成
-	private Map<Integer, StaticEndlessArmory> endlessShopMap = new HashMap<>(); // 兑换商店
-	private Map<Integer, StaticEndlessArmory> endlessArmoryMap = new HashMap<>(); // 军械商店
-	private List<StaticEndlessAward> endlessAwardList = new ArrayList<>(); // 无尽塔防排行奖励
-	private Map<Integer, StaticEndlessBaseinfo> endlessBaseInfoMap = new HashMap<>(); // 无尽塔防基本数据
-	private Map<Integer, StaticEndlessLevel> endlessLevelMap = new HashMap<>(); // 无尽塔防关卡数据
-	private Map<Integer, StaticEndlessItem> endlessItemMap = new HashMap<>(); // 无尽塔道具数据
-	private Map<Integer, StaticEndlessTDDropLimit> endlessTDDropLimitMap = new HashMap<>();// 无尽塔防限制信息
-	private Map<Integer, StaticTowerWarTower> tdEndlessTowerMap = new HashMap<>();// 无尽塔防炮塔信息
-	private Map<Integer, StaticTowerWarMonster> tdEndlessMonsterMap = new HashMap<>();// 无尽塔敌人塔信息
-	private Map<Integer, StaticTowerWarWave> tdEndlessWaveMap = new HashMap<>();// 无尽塔波次
-
-	private Map<Integer, StaticBulletWarLevel> staticBulletWarLevelMap = new HashMap<>();
-
-	@Override
-	public void init() {
-		clearIni();
-		towerWarMapMap = staticDataDao.loadAllStaticTowerWarMap();
-		towerWarLevelMap = staticDataDao.loadAllStaticTowerWarLevel();
-		towerWarWaveMap = staticDataDao.loadStaticTowerWarWave();
-		towerWarBonusMap = staticDataDao.loadStaticTowerWarBonus();
-		staticDataDao.loadAllStaticTowerWarMonster().forEach(e -> {
-			towerWarMonsterMap.put(e.getId(), e);
-		});
-		staticDataDao.loadStaticTowerWarTower().forEach(e -> {
-			towerWarTowerMap.put(e.getId(), e);
-		});
-		endlessTowerWarBonusMap = staticDataDao.loadStaticEndlessBonus();
-		endlessShopMap = staticDataDao.loadStaticEndlessShop();
-		endlessArmoryMap = staticDataDao.loadStaticEndlessArmory();
-		endlessAwardList = staticDataDao.loadStaticEndlessAward();
-		endlessBaseInfoMap = staticDataDao.loadStaticEndlessBaseInfo();
-		endlessLevelMap = staticDataDao.loadStaticEndlessLevel();
-		endlessItemMap = staticDataDao.loadStaticEndlessItem();
-		endlessTDDropLimitMap = staticDataDao.loadEndlessTDDropLimit();
-		tdEndlessTowerMap = staticDataDao.loadEndlessTower();
-		tdEndlessMonsterMap = staticDataDao.loadEndlessMonster();
-		tdEndlessWaveMap = staticDataDao.loadEndlessWave();
-
-		this.staticBulletWarLevelMap = staticDataDao.loadBulletWar();
-
-	}
-
-	public void clearIni() {
-		towerWarMapMap.clear();
-		towerWarLevelMap.clear();
-		towerWarWaveMap.clear();
-		towerWarMonsterMap.clear();
-		towerWarTowerMap.clear();
-		towerWarBonusMap.clear();
-		endlessTowerWarBonusMap.clear();
-		endlessShopMap.clear();
-		endlessArmoryMap.clear();
-		endlessAwardList.clear();
-		endlessBaseInfoMap.clear();
-		endlessLevelMap.clear();
-		endlessItemMap.clear();
-		endlessTDDropLimitMap.clear();
-		tdEndlessTowerMap.clear();
-		tdEndlessMonsterMap.clear();
-		tdEndlessWaveMap.clear();
-	}
-
-	public Map<Integer, StaticTowerWarWave> getTdEndlessWaveMap() {
-		return tdEndlessWaveMap;
-	}
-
-	public StaticTowerWarWave getTdEndlessWave(int id) {
-		return getTdEndlessWaveMap().get(id);
-	}
-
-	public Map<Integer, StaticTowerWarMonster> getTdEndlessMonsterMap() {
-		return tdEndlessMonsterMap;
-	}
-
-	public StaticTowerWarMonster getTdEndlessMonster(int id) {
-		return getTdEndlessMonsterMap().get(id);
-	}
-
-	public Map<Integer, StaticEndlessLevel> getEndlessLevelMap() {
-		return endlessLevelMap;
-	}
-
-	public StaticEndlessLevel getEndlessLevel(int id) {
-		return getEndlessLevelMap().get(id);
-	}
-
-	public void setEndlessLevelMap(Map<Integer, StaticEndlessLevel> endlessLevelMap) {
-		this.endlessLevelMap = endlessLevelMap;
-	}
-
-	public Map<Integer, StaticTowerWarTower> getTdEndlessTower() {
-		return tdEndlessTowerMap;
-	}
-
-	public StaticEndlessTDDropLimit getEndlessTDDropLimit(int id) {
-		return endlessTDDropLimitMap.get(id);
-	}
-
-	public Map<Integer, StaticTowerWarMap> getTowerWarMapMap() {
-		return towerWarMapMap;
-	}
-
-	public Map<Integer, StaticTowerWarLevel> getTowerWarLevelMap() {
-		return towerWarLevelMap;
-	}
-
-	public StaticTowerWarLevel getTowerWarLevel(int levelId) {
-		return this.towerWarLevelMap.get(levelId);
-	}
-
-	public Map<Integer, StaticTowerWarWave> getTowerWarWaveMap() {
-		return towerWarWaveMap;
-	}
-
-	public StaticTowerWarWave getTowerWarWave(int waveId) {
-		return towerWarWaveMap.get(waveId);
-	}
-
-	public Map<Integer, StaticTowerWarMonster> getTowerWarMonsterMap() {
-		return towerWarMonsterMap;
-	}
-
-	public StaticTowerWarMonster getTowerWarMonster(int monsteId) {
-		return towerWarMonsterMap.get(monsteId);
-	}
-
-	public Map<Integer, StaticTowerWarTower> getTowerWarTowerMap() {
-		return towerWarTowerMap;
-	}
-
-	public Map<Integer, StaticTowerWarBonus> getTowerWarBonusMap() {
-		return towerWarBonusMap;
-	}
-
-	public void setTowerWarBonusMap(Map<Integer, StaticTowerWarBonus> towerWarBonusMap) {
-		this.towerWarBonusMap = towerWarBonusMap;
-	}
-
-	public StaticTowerWarBonus getTowerWarBonusMap(Integer id) {
-		return towerWarBonusMap.get(id);
-	}
-
-	public Map<Integer, StaticTowerWarBonus> getEndlessTowerWarBonusMap() {
-		return endlessTowerWarBonusMap;
-	}
-
-	public StaticTowerWarBonus getEndlessTowerWarBonusMap(Integer id) {
-		return endlessTowerWarBonusMap.get(id);
-	}
-
-	public void setEndlessTowerWarBonusMap(Map<Integer, StaticTowerWarBonus> endlessTowerWarBonusMap) {
-		this.endlessTowerWarBonusMap = endlessTowerWarBonusMap;
-	}
-
-	public Map<Integer, StaticEndlessArmory> getEndlessArmoryMap() {
-		return endlessArmoryMap;
-	}
-
-	public StaticEndlessArmory getEndlessArmory(int id) {
-		return endlessArmoryMap.get(id);
-	}
-
-	public Map<Integer, StaticEndlessArmory> getEndlessShopMap() {
-		return endlessShopMap;
-	}
-
-	public StaticEndlessArmory getEndlessShopMap(int id) {
-		return endlessShopMap.get(id);
-	}
-
-	public List<StaticEndlessAward> getEndlessAwardList() {
-		return endlessAwardList;
-	}
-
-	public StaticEndlessBaseinfo getEndlessBaseInfo() {
-		return endlessBaseInfoMap.get(1);
-	}
-
-	public StaticEndlessItem getEndlessItem(int id) {
-		return endlessItemMap.get(id);
-	}
-
-	public Map<Integer, StaticEndlessItem> getEndlessItemMap() {
-		return endlessItemMap;
-	}
 
 	public List<Integer> getBounds(Player player) {
 		// 建筑
@@ -376,7 +181,7 @@ public class TDManager extends BaseDataMgr {
 	}
 
 	private void checkOpenBouns(Player player, int type, int score) {
-		List<StaticTowerWarBonus> list = getTowerWarBonusMap().values().stream().filter(e -> e.getType() == type).collect(Collectors.toList());
+		List<StaticTowerWarBonus> list = staticTDMgr.getTowerWarBonusMap().values().stream().filter(e -> e.getType() == type).collect(Collectors.toList());
 		if (list.size() == 0) {
 			return;
 		}
@@ -392,7 +197,7 @@ public class TDManager extends BaseDataMgr {
 			if (oldBound == null) {
 				player.getTdBouns().put(type, bonus.getId());
 			} else {
-				StaticTowerWarBonus old = getTowerWarBonusMap(oldBound);
+				StaticTowerWarBonus old = staticTDMgr.getTowerWarBonusMap(oldBound);
 				if (old != null) {
 					if (old.getValve() < bonus.getValve()) {
 						player.getTdBouns().put(type, bonus.getId());
@@ -402,7 +207,7 @@ public class TDManager extends BaseDataMgr {
 		}
 
 		// 无尽塔防战力加成更新
-		List<StaticTowerWarBonus> collect1 = getEndlessTowerWarBonusMap().values().stream().filter(e -> e.getType() == type).collect(Collectors.toList());
+		List<StaticTowerWarBonus> collect1 = staticTDMgr.getEndlessTowerWarBonusMap().values().stream().filter(e -> e.getType() == type).collect(Collectors.toList());
 		if (collect1.isEmpty()) {
 			return;
 		}
@@ -419,7 +224,7 @@ public class TDManager extends BaseDataMgr {
 			if (oldBound == null) {
 				endlessTDBonus.put(type, endlessBonus.getId());
 			} else {
-				StaticTowerWarBonus old = getEndlessTowerWarBonusMap(oldBound);
+				StaticTowerWarBonus old = staticTDMgr.getEndlessTowerWarBonusMap(oldBound);
 				if (old != null) {
 					if (old.getValve() < endlessBonus.getValve()) {
 						endlessTDBonus.put(type, endlessBonus.getId());
@@ -433,6 +238,11 @@ public class TDManager extends BaseDataMgr {
 	public synchronized EndlessTDRank getPlayerEndlessTDRank(Player player) {
 		for (EndlessTDRank endlessTDRank : this.weekEndlessTDRanks) {
 			if (endlessTDRank.getLordId() == player.roleId) {
+				int weekMaxFraction = player.getEndlessTDInfo().getWeekMaxFraction();
+				if (weekMaxFraction > endlessTDRank.getWeekMaxFraction()) {
+					//endlessTDRank.setWeekMaxFraction(weekMaxFraction);
+					updateWeekEndlessTDRank(player);
+				}
 				return endlessTDRank;
 			}
 		}
@@ -479,7 +289,7 @@ public class TDManager extends BaseDataMgr {
 				}
 			}
 		}
-		int limit = getEndlessTDDropLimit(TdDropLimitId.RANK_COUNT).getLimit();
+		int limit = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.RANK_COUNT).getLimit();
 		limit = limit == 0 ? 20 : limit;
 		limit = ranks.size() > limit ? limit : ranks.size();
 		this.historyEndlessTDRanks.put(GameServer.getInstance().currentDay, Lists.newArrayList(ranks.subList(0, limit)));
@@ -517,7 +327,7 @@ public class TDManager extends BaseDataMgr {
 		}
 		Map<Integer, Integer> convertShopInfo = getEndlessTDInfo(player).getConvertShopInfo();
 		List<EndlessTDShopGoods> list = new ArrayList<>();
-		getEndlessShopMap().forEach((k, v) -> {
+		staticTDMgr.getEndlessShopMap().forEach((k, v) -> {
 			EndlessTDShopGoods.Builder b = EndlessTDShopGoods.newBuilder();
 			b.setPos(k);
 			List<List<Integer>> prop = v.getProp();
@@ -554,7 +364,7 @@ public class TDManager extends BaseDataMgr {
 		armoryShop.forEach((key, value) -> {
 			EndlessTDShopGoods.Builder b = EndlessTDShopGoods.newBuilder();
 			b.setPos(key);
-			StaticEndlessArmory endlessArmory = getEndlessArmory(key);
+			StaticEndlessArmory endlessArmory = staticTDMgr.getEndlessArmory(key);
 			if (endlessArmory == null) {
 				return;
 			}
@@ -578,7 +388,7 @@ public class TDManager extends BaseDataMgr {
 
 	// 刷新军械商店
 	public void refreshArmoryShop(Player player) {
-		List<Integer> quantity = getEndlessTDDropLimit(TdDropLimitId.ENDLESS_ARMORY_SHOP_QUANTITY).getParam();
+		List<Integer> quantity = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.ENDLESS_ARMORY_SHOP_QUANTITY).getParam();
 		if (quantity == null || quantity.isEmpty()) {
 			return;
 		}
@@ -587,7 +397,7 @@ public class TDManager extends BaseDataMgr {
 		EndlessTDInfo endlessTDInfo = getEndlessTDInfo(player);
 		Map<Integer, Integer> armoryShop = endlessTDInfo.getArmoryShop();
 		armoryShop.clear();
-		ArrayList<StaticEndlessArmory> staticEndlessArmories = Lists.newArrayList(getEndlessArmoryMap().values());
+		ArrayList<StaticEndlessArmory> staticEndlessArmories = Lists.newArrayList(staticTDMgr.getEndlessArmoryMap().values());
 		Collections.shuffle(staticEndlessArmories);
 		for (int i = 0; i < discount; i++) {
 			if (staticEndlessArmories.isEmpty() || armoryShop.size() >= total) {
@@ -609,7 +419,7 @@ public class TDManager extends BaseDataMgr {
 		EndlessTDInfo endlessTDInfo = getEndlessTDInfo(player);
 		Map<Integer, Integer> refreshShopTimes = endlessTDInfo.getRefreshShopTimes();
 		int times = refreshShopTimes.computeIfAbsent(1, x -> 0);
-		List<Integer> param = getEndlessTDDropLimit(TdDropLimitId.ENDLESS_ARMORY_SHOP_PRICE).getParam();
+		List<Integer> param = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.ENDLESS_ARMORY_SHOP_PRICE).getParam();
 		int consume = param.get(0);
 		int increment = param.get(1);
 		return consume + (times * increment);
@@ -625,7 +435,7 @@ public class TDManager extends BaseDataMgr {
 			if (entry.getValue() == 0) {
 				continue;
 			}
-			StaticEndlessArmory endlessArmory = getEndlessArmory(entry.getKey());
+			StaticEndlessArmory endlessArmory = staticTDMgr.getEndlessArmory(entry.getKey());
 			if (endlessArmory != null && armoryShopInfo.computeIfAbsent(entry.getKey(), x -> 0) < endlessArmory.getBuy_time()) {
 				list.add(entry.getValue());
 			}
@@ -649,7 +459,7 @@ public class TDManager extends BaseDataMgr {
 	// 获取排行奖励
 	public List<Award> getRankAwards(int rank) {
 		List<Award> list = new ArrayList<>();
-		getEndlessAwardList().stream().sorted(Comparator.comparing(StaticEndlessAward::getRankdown)).forEach(e -> {
+		staticTDMgr.getEndlessAwardList().stream().sorted(Comparator.comparing(StaticEndlessAward::getRankdown)).forEach(e -> {
 			if (rank >= e.getRankup() && rank <= e.getRankdown()) {
 				e.getAward().forEach(x -> {
 					if (x.size() == 3) {
@@ -663,7 +473,7 @@ public class TDManager extends BaseDataMgr {
 
 	// 设置新关卡的数据
 	public void putGameInfo(Player player) {
-		StaticEndlessBaseinfo endlessBaseInfo = getEndlessBaseInfo();
+		StaticEndlessBaseinfo endlessBaseInfo = staticTDMgr.getEndlessBaseInfo();
 		EndlessTDGameInfo gameInfo = getGameInfo(player);
 		gameInfo.init();
 		// 设置初始波次
@@ -685,7 +495,7 @@ public class TDManager extends BaseDataMgr {
 	public PlayEndlessTDRs.Builder getPlayEndlessTDRs(Player player) {
 		PlayEndlessTDRs.Builder builder = PlayEndlessTDRs.newBuilder();
 		builder.setBase(getBaseBuilder(player));
-		StaticEndlessBaseinfo endlessBaseInfo = getEndlessBaseInfo();
+		StaticEndlessBaseinfo endlessBaseInfo = staticTDMgr.getEndlessBaseInfo();
 		// 可建造防御塔信息,id 等级
 		endlessBaseInfo.getTower_list().forEach(e -> {
 			if (e.size() != 2) {
@@ -747,7 +557,7 @@ public class TDManager extends BaseDataMgr {
 	}
 
 	public EndlessTDGameBase.Builder getBaseBuilder(Player player) {
-		StaticEndlessBaseinfo endlessBaseInfo = getEndlessBaseInfo();
+		StaticEndlessBaseinfo endlessBaseInfo = staticTDMgr.getEndlessBaseInfo();
 		EndlessTDGameInfo gameInfo = getGameInfo(player);
 		Integer addLv = gameInfo.getLevelProps().get(289);
 		addLv = addLv == null ? 0 : addLv;
@@ -767,7 +577,7 @@ public class TDManager extends BaseDataMgr {
 			}
 		}
 		EndlessTDGameBase.Builder builder = gameInfo.wrapPb();
-		StaticEndlessLevel endlessLevel = getEndlessLevel(gameInfo.getLevelId());
+		StaticEndlessLevel endlessLevel = staticTDMgr.getEndlessLevel(gameInfo.getLevelId());
 		gameInfo.getMonsterMap().clear();
 		Map<Integer, Integer> monsterMap = gameInfo.getMonsterMap();
 		if (endlessLevel != null) {
@@ -787,7 +597,7 @@ public class TDManager extends BaseDataMgr {
 					} else {
 						waveInfo.setRoute(route);
 					}
-					StaticTowerWarWave tdEndlessWave = getTdEndlessWave(e);
+					StaticTowerWarWave tdEndlessWave = staticTDMgr.getTdEndlessWave(e);
 					tdEndlessWave.getMonster_list().forEach(x -> {
 						IntDouble.Builder monster = IntDouble.newBuilder();
 						monster.setV1(x.get(1).intValue());
@@ -815,7 +625,7 @@ public class TDManager extends BaseDataMgr {
 			// 怪物信息
 			int wave = gameInfo.getWave();
 			monsterMap.keySet().forEach(e -> {
-				StaticTowerWarMonster monster = getTdEndlessMonster(e);
+				StaticTowerWarMonster monster = staticTDMgr.getTdEndlessMonster(e);
 				if (monster == null) {
 					LogHelper.CONFIG_LOGGER.debug("StaticTowerWarMonster  is  null  monsterId=[{}]", e);
 					return;
@@ -848,13 +658,13 @@ public class TDManager extends BaseDataMgr {
 
 	// 无尽塔防获得道具 type 0:扣除 1:添加
 	public void obtainProp(Player player, int proId, int type) {
-		StaticEndlessItem endlessItem = getEndlessItem(proId);
+		StaticEndlessItem endlessItem = staticTDMgr.getEndlessItem(proId);
 		if (endlessItem == null) {
 			return;
 		}
 		EndlessTDGameInfo gameInfo = getGameInfo(player);
-		List<Integer> limit = getEndlessTDDropLimit(TdDropLimitId.SERVER_LOGIC_LIST).getParam();
-		List<Integer> limitOnce = getEndlessTDDropLimit(TdDropLimitId.ONCE_LEVEL_EFFECT).getParam();
+		List<Integer> limit = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.SERVER_LOGIC_LIST).getParam();
+		List<Integer> limitOnce = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.ONCE_LEVEL_EFFECT).getParam();
 		// 需要后端处理的道具列表
 		if (limit.contains(proId)) {
 			// 被动道具只在当前关卡生效
@@ -925,11 +735,11 @@ public class TDManager extends BaseDataMgr {
 		EndlessTDGameInfo gameInfo = getGameInfo(player);
 		gameInfo.setWave(gameInfo.getWave() + 1);
 		gameInfo.setLevelId(gameInfo.getLevelId() + 1);
-		Map<Integer, StaticEndlessLevel> endlessLevelMap = getEndlessLevelMap();
+		Map<Integer, StaticEndlessLevel> endlessLevelMap = staticTDMgr.getEndlessLevelMap();
 		// 设置真实关卡id
 		int levelTotal = endlessLevelMap.size();
 		if (gameInfo.getWave() > levelTotal) {
-			StaticEndlessBaseinfo endlessBaseInfo = getEndlessBaseInfo();
+			StaticEndlessBaseinfo endlessBaseInfo = staticTDMgr.getEndlessBaseInfo();
 			List<Integer> level_loop = endlessBaseInfo.getLevel_loop();
 			int start = level_loop.get(0);
 			int end = level_loop.get(1);
@@ -982,7 +792,7 @@ public class TDManager extends BaseDataMgr {
 
 	// 检查无尽模式是否开启
 	public boolean checkEndlessTDOpen(Player player) {
-		StaticEndlessBaseinfo endlessBaseInfo = getEndlessBaseInfo();
+		StaticEndlessBaseinfo endlessBaseInfo = staticTDMgr.getEndlessBaseInfo();
 		List<Integer> condition = endlessBaseInfo.getCondition();
 		if (condition == null || condition.size() != 2) {
 			return false;
@@ -1013,14 +823,14 @@ public class TDManager extends BaseDataMgr {
 		}
 		int count = 0;
 		for (Entry<Integer, Integer> entry : gameInfo.getMonsterMap().entrySet()) {
-			StaticTowerWarMonster monster = getTdEndlessMonster(entry.getKey());
+			StaticTowerWarMonster monster = staticTDMgr.getTdEndlessMonster(entry.getKey());
 			if (monster == null || monster.getAward() == 0 || entry.getValue() == 0) {
 				continue;
 			}
 			count += monster.getAward() * entry.getValue();
 		}
 		int current = fraction - oldFraction;
-		StaticEndlessLevel endlessLevel = getEndlessLevel(gameInfo.getLevelId());
+		StaticEndlessLevel endlessLevel = staticTDMgr.getEndlessLevel(gameInfo.getLevelId());
 		long limitTime = Long.valueOf(endlessLevel.getTimeLimit());
 		// 客户端上报的通关时间
 		long actual = gameInfo.getLevelTime().getOrDefault(gameInfo.getWave(), limitTime);
@@ -1048,12 +858,4 @@ public class TDManager extends BaseDataMgr {
 		return true;
 	}
 
-
-	public StaticBulletWarLevel getStaticBulletWarLevel(int level) {
-		return staticBulletWarLevelMap.get(level);
-	}
-
-	public Map<Integer, StaticBulletWarLevel> getAllStaticBulletWarLevel() {
-		return this.staticBulletWarLevelMap;
-	}
 }

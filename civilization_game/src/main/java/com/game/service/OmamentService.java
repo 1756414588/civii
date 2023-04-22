@@ -66,7 +66,8 @@ public class OmamentService {
 	private DailyTaskManager dailyTaskManager;
 	@Autowired
 	private EventManager eventManager;
-
+	@Autowired
+	ActivityEventManager activityEventManager;
 	/**
 	 * 获取配饰背包物品列表
 	 *
@@ -358,7 +359,7 @@ public class OmamentService {
 			omamentManager.removeOmament(player, omamentId);
 		}
 		handler.sendMsgToPlayer(CompoundOmamentRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(EventEnum.COMPOUND_OMAMENT, player, 1, 0);
+		activityEventManager.activityTip(EventEnum.COMPOUND_OMAMENT, player, 1, 0);
 //        activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.OMAMENT_COMPOUND, 1);
 		dailyTaskManager.record(DailyTaskId.COMPOSE, player, 1);
 		eventManager.omamentCompound(player, Lists.newArrayList(omamentType, findOmamentConfig.getComposeId(), findOmamentConfig.getName()));

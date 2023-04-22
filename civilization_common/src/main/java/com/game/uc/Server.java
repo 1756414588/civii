@@ -151,8 +151,6 @@ public class Server {
 
     private boolean gmOpen =false;
 
-    private int mergeNum = 1;
-
     public int getServerId() {
         return serverId;
     }
@@ -430,14 +428,6 @@ public class Server {
 
     public void setRepairEndTime(Date repairEndTime) {
         this.repairEndTime = repairEndTime;
-    }
-
-    public int getMergeNum() {
-        return mergeNum;
-    }
-
-    public void setMergeNum(int mergeNum) {
-        this.mergeNum = mergeNum;
     }
 
     @Override

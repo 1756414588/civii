@@ -6,16 +6,15 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.p.CampMembersRank;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.manager.ActivityManager;
-import com.game.spring.SpringUtil;
 import com.game.util.TimeHelper;
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -23,18 +22,20 @@ import java.util.Optional;
 /**
  * 骨干阵营排行
  */
+@Component
 public class ActCampMembersTipEvent extends BaseActivityEvent {
 
-	private static ActCampMembersTipEvent inst = new ActCampMembersTipEvent();
-
-	public static ActCampMembersTipEvent getInst() {
-		return inst;
-	}
+	//private static ActCampMembersTipEvent inst = new ActCampMembersTipEvent();
+	//
+	//public static ActCampMembersTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
 		listenEvent(EventEnum.GET_ACTIVITY_AWARD_TIP, ActivityConst.ACT_CAMP_MEMBERS, this::process);
 	}
+
 
 	@Override
 	public void process(EventEnum activityEnum, IActivityActor actor) {
@@ -42,8 +43,8 @@ public class ActCampMembersTipEvent extends BaseActivityEvent {
 		Player player = actor.getPlayer();
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
+		//StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
+		//ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 
 		Date rewardTime = TimeHelper.getRewardTime(activityBase.getEndTime());
 		Date now = new Date();

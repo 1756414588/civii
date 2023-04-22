@@ -6,26 +6,26 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.manager.ActivityManager;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 /**
  * 军备促销
  */
+@Component
 public class ActArmsPayTipEvent extends BaseActivityEvent {
-
-	private static ActArmsPayTipEvent inst = new ActArmsPayTipEvent();
-
-	public static ActArmsPayTipEvent getInst() {
-		return inst;
-	}
+	//
+	//private static ActArmsPayTipEvent inst = new ActArmsPayTipEvent();
+	//
+	//public static ActArmsPayTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -39,8 +39,6 @@ public class ActArmsPayTipEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 		Player player = actor.getPlayer();
 
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		ActivityData activityData = activityManager.getActivity(activityBase);
 		int country = player.getLord().getCountry();//玩家阵营
 		long score = activityData.getAddtion(country);//阵营分数
@@ -67,8 +65,7 @@ public class ActArmsPayTipEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 		Player player = actor.getPlayer();
 
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
+
 		ActivityData activityData = activityManager.getActivity(activityBase);
 		int country = player.getLord().getCountry();//玩家阵营
 		long score = activityData.getAddtion(country);//阵营分数

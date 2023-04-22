@@ -1,6 +1,8 @@
 package com.game.timer;
 
+import com.game.constant.WorldActivityConsts;
 import com.game.manager.BattleManager;
+import com.game.manager.WarManager;
 import com.game.spring.SpringUtil;
 import com.game.util.TimeHelper;
 
@@ -17,5 +19,9 @@ public class BattleTimer extends TimerEvent {
 	public void action() {
 		BattleManager battleManager = SpringUtil.getBean(BattleManager.class);
 		battleManager.battleTimer();
+
+		//伏击叛军发放个人奖励
+		WarManager bean = SpringUtil.getBean(WarManager.class);
+		bean.checkWarWorldActPlan();
 	}
 }

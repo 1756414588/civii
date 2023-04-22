@@ -7,18 +7,20 @@ import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
 import com.game.domain.s.ActivityBase;
+import org.springframework.stereotype.Component;
 
 
 /**
  * 部分活动领取奖励后红点直接消失 体力补给 签到
  */
+@Component
 public class AwardThenRemoveTipEvent extends BaseActivityEvent {
 
-	private static AwardThenRemoveTipEvent inst = new AwardThenRemoveTipEvent();
-
-	public static AwardThenRemoveTipEvent getInst() {
-		return inst;
-	}
+	//private static AwardThenRemoveTipEvent inst = new AwardThenRemoveTipEvent();
+	//
+	//public static AwardThenRemoveTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {

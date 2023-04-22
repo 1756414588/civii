@@ -171,7 +171,11 @@ public class KillEquipService {
         handler.sendMsgToPlayer(KillEquipPb.CompundRs.ext, builder.build());
         heroManager.synBattleScoreAndHeroList(player,player.getAllHeroList());
         doMakeKillEquip(player, equipId);
+        achievementService.addAndUpdate(player,AchiType.AT_36,1);
     }
+
+    @Autowired
+    AchievementService achievementService;
 
     // 国器打造
     public void doMakeKillEquip(Player player, int killEquipId) {

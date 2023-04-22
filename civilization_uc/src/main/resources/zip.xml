@@ -1,79 +1,36 @@
 
 <assembly
-	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0">
 	<id></id>
 	<formats>
 		<format>zip</format>
 	</formats>
-	<dependencySets>
-		<dependencySet>
-			<!-- 不使用项目的artifact，第三方jar不要解压，打包进zip文件的lib目录 -->
-			<useProjectArtifact>false</useProjectArtifact>
-			<outputDirectory>lib</outputDirectory>
-			<unpack>false</unpack>
-			<excludes>
-				<exclude>*:maven-archiver:*</exclude>
-				<exclude>*:maven-artifact:*</exclude>
-				<exclude>*:maven-artifact-manager:*</exclude>
-				<exclude>*:maven-assembly-plugin:*</exclude>
-				<exclude>*:maven-core:*</exclude>
-				<exclude>*:maven-error-diagnostics:*</exclude>
-				<exclude>*:maven-model:*</exclude>
-				<exclude>*:maven-monitor:*</exclude>
-				<exclude>*:maven-plugin-api:*</exclude>
-				<exclude>*:maven-plugin-descriptor:*</exclude>
-				<exclude>*:maven-plugin-parameter-documenter:*</exclude>
-				<exclude>*:maven-profile:*</exclude>
-				<exclude>*:maven-project:*</exclude>
-				<exclude>*:maven-reporting-api:*</exclude>
-				<exclude>*:maven-repository-metadata:*</exclude>
-				<exclude>*:maven-settings:*</exclude>
-				<exclude>*:quartz-1.5.2:*</exclude>
-				<exclude>*:halo_common:*</exclude>
-				<exclude>*:halo_game:*</exclude>
-			</excludes>
-		</dependencySet>
-		<dependencySet>
-			<!-- 不使用项目的artifact，第三方jar不要解压，打包进zip文件的lib目录 -->
-			<useProjectArtifact>false</useProjectArtifact>
-			<outputDirectory>framework</outputDirectory>
-			<unpack>false</unpack>
-			<includes>
-				<include>*:halo_common:*</include>
-				<include>*:halo_game:*</include>
-			</includes>
-		</dependencySet>
-	</dependencySets>
+	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
-			<directory>${project.basedir}/src/main/resources</directory>
-			<!-- 过滤 -->
+			<directory>src/main/resources</directory>
 			<outputDirectory>config</outputDirectory>
 			<includes>
-				<include>*.xml</include>
-				<include>*.properties</include>
-			</includes>
-			<excludes>
-				<exclude>zip.xml</exclude>
-			</excludes>
-		</fileSet>
-		<fileSet>
-			<directory>${project.basedir}/src/main/resources</directory>
-			<!-- 过滤 -->
-			<outputDirectory>/</outputDirectory>
-			<includes>
-				<include></include>
-			</includes>
-		</fileSet>
-		<!-- 把项目自己编译出来的jar文件，打包进zip文件的根目录 -->
-		<fileSet>
-			<directory>${project.build.directory}</directory>
-			<outputDirectory>framework</outputDirectory>
-			<includes>
-				<include>*.jar</include>
+				<include>log4j2.xml</include>
 			</includes>
 		</fileSet>
 	</fileSets>
+	<files>
+		<file>
+			<source>target/${project.artifactId}-${project.version}.jar</source>
+			<outputDirectory>.</outputDirectory>
+		</file>
+	</files>
+	<dependencySets>
+		<dependencySet>
+			<unpack>false</unpack>
+			<scope>runtime</scope>
+			<outputDirectory>/lib</outputDirectory>
+			<excludes>
+				<exclude>*:civilization_uc:*</exclude>
+				<exclude>*:fastutil:*</exclude>
+			</excludes>
+		</dependencySet>
+	</dependencySets>
 </assembly>  

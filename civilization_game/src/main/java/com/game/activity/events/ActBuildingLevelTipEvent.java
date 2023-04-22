@@ -7,13 +7,12 @@ import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
 import com.game.constant.BuildingType;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActCommand;
-import com.game.manager.ActivityManager;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,13 +20,14 @@ import java.util.Optional;
 /**
  * 不懂看这个例子 基地升级
  */
+@Component
 public class ActBuildingLevelTipEvent extends BaseActivityEvent {
 
-	private static ActBuildingLevelTipEvent inst = new ActBuildingLevelTipEvent();
-
-	public static ActBuildingLevelTipEvent getInst() {
-		return inst;
-	}
+	//private static ActBuildingLevelTipEvent inst = new ActBuildingLevelTipEvent();
+	//
+	//public static ActBuildingLevelTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -43,7 +43,6 @@ public class ActBuildingLevelTipEvent extends BaseActivityEvent {
 		ActRecord actRecord = actor.getActRecord();
 		int commandLv = player.getCommandLv();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		Map<Integer, StaticActCommand> condMap = staticActivityMgr.getActCommands();
 		if (condMap == null) {
 			return;
@@ -74,8 +73,6 @@ public class ActBuildingLevelTipEvent extends BaseActivityEvent {
 
 		int commandLv = player.getBuildingLv(BuildingType.COMMAND);
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 		ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_LEVEL);
 
 		// 活动未开启
@@ -104,8 +101,6 @@ public class ActBuildingLevelTipEvent extends BaseActivityEvent {
 		Player player = actor.getPlayer();
 
 		int commandLv = player.getBuildingLv(BuildingType.COMMAND);
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 		ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_LEVEL);
 
 		// 活动未开启

@@ -146,7 +146,6 @@ public class WorldTargetTask {
         builder.setTodayHit(worldHitRank != null ? worldHitRank.getHit() : 0);
         int cruIndex = getHitRank(player.roleId) + 1;//自己的位置
         builder.setRank(worldHitRank != null ? cruIndex : 0);
-        logger.error("hitRanks.size()===="+hitRanks.size());
         StaticActWorldBossMgr bean = SpringUtil.getBean(StaticActWorldBossMgr.class);
         List<StaticLairRank> lairRankList = bean.getLairRankList(taskId);
         List<WorldHitRank> newLs = new ArrayList<>();
@@ -174,7 +173,6 @@ public class WorldTargetTask {
             }
         }
         List<WorldHitRank> collect = newLs.stream().distinct().sorted(Comparator.comparingInt(WorldHitRank::getIndex)).collect(Collectors.toList());
-        logger.error("collect.size()===="+collect.size());
         collect.forEach(rank -> {
             WorldPb.WorldRank.Builder builder2 = WorldPb.WorldRank.newBuilder();
             builder2.setCampId(rank.getPlayer().getLord().getCountry());

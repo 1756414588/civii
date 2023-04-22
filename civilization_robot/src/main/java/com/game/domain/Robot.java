@@ -1,6 +1,7 @@
 package com.game.domain;
 
 import com.game.cache.UserCache;
+import com.game.domain.p.RobotData;
 import com.game.network.ICallback;
 import com.game.network.robot.RobotNet;
 import com.game.packet.Packet;
@@ -17,8 +18,9 @@ public class Robot {
 
 	// 角色
 	private Lord lord;
+
 	// 登录服账号
-	private LoginAccount loginAccount;
+	private RobotData data;
 
 	// 机器人连接管理类
 	private RobotNet robotNet;
@@ -40,19 +42,17 @@ public class Robot {
 
 	//
 	private boolean login;
-
-	//
-	private Record record;
+	private int loginAter;
 
 	// 自增
 	private AtomicLong incr = new AtomicLong(1L);
 
-	public Robot(LoginAccount loginAccount) {
-		this.loginAccount = loginAccount;
+	public Robot(RobotData robotData) {
+		this.data = robotData;
 	}
 
 	public int getId() {
-		return loginAccount.getKeyId();
+		return data.getAccountKey();
 	}
 
 	/**
@@ -93,4 +93,23 @@ public class Robot {
 		this.login = login;
 	}
 
+	public long getGuildId() {
+		return data.getGuildId();
+	}
+
+	public int getGuildState() {
+		return data.getGuildState();
+	}
+
+	public int getLoginDate() {
+		return data.getLoginDate();
+	}
+
+	public int getLoginAter() {
+		return loginAter;
+	}
+
+	public void setLoginAter(int loginAter) {
+		this.loginAter = loginAter;
+	}
 }

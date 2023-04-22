@@ -1,11 +1,10 @@
 package com.game.dataMgr;
 
-import com.game.constant.BattleEntityType;
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.p.BattleEntity;
 import com.game.domain.p.BattleProperty;
 import com.game.domain.p.Property;
-import com.game.domain.p.Team;
 import com.game.domain.s.StaticMonster;
 import com.game.domain.s.StaticZergMonster;
 import com.game.domain.s.StaticZergRound;
@@ -24,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
+@LoadData(name = "虫族主宰")
 public class StaticZerglMgr extends BaseDataMgr {
 
     @Autowired
@@ -47,13 +47,18 @@ public class StaticZerglMgr extends BaseDataMgr {
 
 
     @Override
-    public void init() throws Exception {
+    public void load() throws Exception {
         zergMonsters = staticDataDao.loadStaticZergMonster();
         zergRounds = staticDataDao.loadStaticZergRound();
         zergMonsters.forEach(e -> {
             zergMonsterMap.put(e.getType(), e.getWaves(), e);
             zergShowMap.put(e.getShowId(), e);
         });
+    }
+
+    @Override
+    public void init() throws Exception {
+
     }
 
 

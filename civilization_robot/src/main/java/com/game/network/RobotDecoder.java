@@ -4,6 +4,7 @@ import com.game.packet.Packet;
 import com.game.packet.PacketCreator;
 import com.game.pb.BasePb;
 import com.game.register.PBFile;
+import com.game.util.BasePbHelper;
 import com.game.util.LogHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -53,18 +54,14 @@ public class RobotDecoder extends ByteToMessageDecoder {
 			byte[] bytes = new byte[obj.readableBytes()];
 			obj.readBytes(bytes, 0, length);
 
-			BasePb.Base msg = BasePb.Base.parseFrom(bytes, PBFile.registry);
-
-			long channelId = ChannelUtil.getChannelId(ctx) == null ? 0 : ChannelUtil.getChannelId(ctx);
+			// 封装包
 			long roleId = ChannelUtil.getRoleId(ctx) == null ? 0L : ChannelUtil.getRoleId(ctx);
-
-
-			Packet packet = PacketCreator.create(msg.getCommand(), msg.toByteArray(), roleId, channelId);
+			long channelId = ChannelUtil.getChannelId(ctx) == null ? 0 : ChannelUtil.getChannelId(ctx);
+			Packet packet = PacketCreator.create(bytes, roleId, channelId);
 			packet.setLength(state.length);
+
 			out.add(packet);
 			state.length = -1;
-
-			LogHelper.CHANNEL_LOGGER.info("RobotDecoder msg:{}", msg.getCommand());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,10 +1,6 @@
 package com.game.manager;
 
-import com.game.constant.ActSevenConst;
-import com.game.constant.ActivityConst;
-import com.game.constant.BeautyId;
-import com.game.constant.BuildingId;
-import com.game.constant.SimpleId;
+import com.game.constant.*;
 import com.game.dataMgr.StaticActivityMgr;
 import com.game.dataMgr.StaticBeautyMgr;
 import com.game.dataMgr.StaticLimitMgr;
@@ -30,6 +26,7 @@ import com.game.pb.CommonPb;
 import com.game.pb.CommonPb.NewBeautyBase;
 import com.game.pb.CommonPb.NewBeautySkillValues;
 import com.game.pb.CommonPb.NewBeautySkills;
+import com.game.service.AchievementService;
 import com.game.util.LogHelper;
 import com.game.util.PbHelper;
 import com.game.spring.SpringUtil;
@@ -246,8 +243,10 @@ public class BeautyManager {
 		if (beautyId == BeautyId.DiNa) {
 			playerManager.synUnlockingBeautyRs(player, beautyId);
 		}
+		achievementService.addAndUpdate(player, AchiType.AT_52,1);
     }
-
+    @Autowired
+	AchievementService achievementService;
 	/**
 	 * 增加亲密度
 	 *

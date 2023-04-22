@@ -652,3 +652,31 @@ CREATE TABLE `p_manoeuvre`  (
 
 ALTER TABLE `p_lord`
 ADD COLUMN `clothes` int(11) NULL COMMENT '玩家默认服饰' AFTER `skin`;
+
+#p_lord增加指挥部等级
+ALTER TABLE `p_lord`
+ADD COLUMN `commandLevel` int(11) NULL DEFAULT NULL COMMENT '指挥部等级' AFTER `tdMoney`;
+
+
+# 新增沙盘演武积分log数据统计
+CREATE TABLE `manoeuvre_log` (
+     `keyId` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+     `log_date` datetime DEFAULT NULL COMMENT '日期',
+     `role_id` int(11) DEFAULT NULL COMMENT '角色id',
+     `nick` varchar(255) DEFAULT NULL COMMENT '角色名称',
+     `level` int(11) DEFAULT NULL COMMENT '角色等级',
+     `vip_level` int(11) DEFAULT NULL COMMENT 'vip等级',
+     `change_point` int(11) DEFAULT NULL COMMENT '变化的积分',
+     `item_id` int(11) DEFAULT NULL COMMENT '道具id',
+     `item_num` int(11) DEFAULT NULL COMMENT '道具数量',
+     `source` int(11) DEFAULT NULL COMMENT '来源',
+     `type` int(11) DEFAULT NULL COMMENT '1=消耗 2=获得',
+     `point` int(11) DEFAULT NULL COMMENT '剩余积分(变化后)',
+     PRIMARY KEY (`keyId`),
+     KEY `role_id` (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `log_model`.`data_res` (`data_key`, `data_log`) VALUES ('manoeuvre_log', 'manoeuvre_log');
+INSERT INTO `log_model`.`collection_res` (`collection_key`, `collection_log`) VALUES ('manoeuvre_log', 'manoeuvre_log.log');
+ALTER TABLE `p_city`
+ADD COLUMN `firstKill` int(11) NULL DEFAULT 0 COMMENT '首杀国家' AFTER `cityName`;

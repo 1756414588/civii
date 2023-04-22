@@ -1,5 +1,7 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
+import com.game.domain.s.StaticCountry;
 import java.util.*;
 
 import com.game.domain.s.StaticCountryHeroEscape;
@@ -20,13 +22,14 @@ import com.game.domain.s.StaticCountryTitle;
 import com.google.common.collect.HashBasedTable;
 
 /**
- *
+ * @author 陈奎
  * @version 1.0
  * @filename
  * @time 2017-3-13 下午2:10:24
  * @describe 国家体系
  */
 @Component
+@LoadData(name = "国家")
 public class StaticCountryMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -64,8 +67,10 @@ public class StaticCountryMgr extends BaseDataMgr {
     private HashBasedTable<Integer, Integer, Integer> heroGetRate1 = HashBasedTable.create();
     private HashBasedTable<Integer, Integer, Integer> heroGetRate2 = HashBasedTable.create();
 
+    private Map<Integer, StaticCountry> countryMap = new HashMap<>();
+
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         glorys = staticDataDao.selectCountryGlory();
         tasks = staticDataDao.selectCountryTask();
         titles = staticDataDao.selectCountryTitle();
@@ -91,6 +96,11 @@ public class StaticCountryMgr extends BaseDataMgr {
         heroEscapeMap = staticDataDao.selectHeroEscape();
         makeHeroEscapeRate();
         makeGetRate();
+        countryMap = staticDataDao.selectCountryMap();
+    }
+
+    @Override
+    public void init() throws Exception{
     }
 
     public void makeHeroEscapeRate() {
@@ -359,4 +369,11 @@ public class StaticCountryMgr extends BaseDataMgr {
         return monsterHeroMapper.containsKey(monsterId);
     }
 
+    public Map<Integer, StaticCountry> getCountryMap() {
+        return countryMap;
+    }
+
+    public void setCountryMap(Map<Integer, StaticCountry> countryMap) {
+        this.countryMap = countryMap;
+    }
 }

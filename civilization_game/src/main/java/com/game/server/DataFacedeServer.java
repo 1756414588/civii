@@ -1,15 +1,18 @@
 package com.game.server;
 
+import com.game.define.DataFacede;
+import com.game.server.datafacede.SavePlayerServer;
 import com.game.server.thread.SaveServer;
 import com.game.spring.SpringUtil;
+import com.game.util.ClassUtil;
 import com.game.util.LogHelper;
 import com.game.util.TimeHelper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
- *
+ * @Author 陈奎
  * @Description 数据存储服务
  * @Date 2022/9/9 11:30
  **/
@@ -19,19 +22,16 @@ public class DataFacedeServer {
 	private List<SaveServer> serverList = new ArrayList<>();
 
 	public DataFacedeServer() {
-//		Package pack = SavePlayerServer.class.getPackage();
-//		Set<Class<?>> allClasses = ClassUtil.getClasses(pack);
-//
-//		for (Class<?> clazz : allClasses) {
-//			DataFacede dataFacede = clazz.getAnnotation(DataFacede.class);
-//			if (dataFacede != null) {
-//				SaveServer executor = (SaveServer) SpringUtil.getBean(clazz);
-//				serverList.add(executor);
-//			}
-//		}
-		Map<String, SaveServer> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(SaveServer.class);
-		serverList.addAll(beansOfType.values());
-		start();
+		Package pack = SavePlayerServer.class.getPackage();
+		Set<Class<?>> allClasses = ClassUtil.getClasses(pack);
+
+		for (Class<?> clazz : allClasses) {
+			DataFacede dataFacede = clazz.getAnnotation(DataFacede.class);
+			if (dataFacede != null) {
+				SaveServer executor = (SaveServer) SpringUtil.getBean(clazz);
+				serverList.add(executor);
+			}
+		}
 	}
 
 	/**

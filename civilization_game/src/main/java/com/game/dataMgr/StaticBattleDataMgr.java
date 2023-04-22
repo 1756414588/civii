@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import com.game.dao.s.StaticDataDao;
 import com.game.domain.s.StaticBattle;
 
 @Component
+@LoadData(name = "战斗数据")
 public class StaticBattleDataMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -19,11 +21,16 @@ public class StaticBattleDataMgr extends BaseDataMgr {
     private Map<Integer, StaticBattle> staticBattleMap = new HashMap<Integer, StaticBattle>();
 
     @Override
-    public void init() throws Exception {
+    public void load() throws Exception {
         staticBattleMap = staticDataDao.selectStaticBattle();
 
         //配置检测
         check();
+    }
+
+    @Override
+    public void init() throws Exception {
+
 
     }
 

@@ -37,8 +37,9 @@
         <module>civilization_uc</module>
         <module>civilization_recharge</module>
         <module>civilization_gate</module>
-<!--        <module>civilization_war</module>-->
-<!--      <module>civilization_robot</module>-->
+        <module>civilization_war</module>
+        <module>civilization_robot</module>
+        <module>civilization_pb</module>
     </modules>
 
     <distributionManagement>
@@ -76,6 +77,11 @@
                 <artifactId>civilization_robot</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>com.quantum</groupId>
+                <artifactId>civilization_pb</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -95,11 +101,12 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.6</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba</groupId>-->
+<!--            <artifactId>fastjson</artifactId>-->
+<!--            <version>1.2.6</version>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>mchange-commons-java</artifactId>
@@ -200,17 +207,7 @@
             <artifactId>java-sizeof</artifactId>
             <version>0.0.3</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/it.unimi.dsi/fastutil -->
-        <dependency>
-            <groupId>it.unimi.dsi</groupId>
-            <artifactId>fastutil</artifactId>
-            <version>7.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lmax</groupId>
-            <artifactId>disruptor</artifactId>
-            <version>3.3.6</version>
-        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -236,16 +233,16 @@
             <version>3.1.0</version>
             <!-- <scope>provided</scope> -->
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlets</artifactId>
-            <version>9.2.6.v20141205</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>9.2.6.v20141205</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.jetty</groupId>-->
+<!--            <artifactId>jetty-servlets</artifactId>-->
+<!--            <version>9.2.6.v20141205</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.jetty</groupId>-->
+<!--            <artifactId>jetty-servlet</artifactId>-->
+<!--            <version>9.2.6.v20141205</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
@@ -274,20 +271,37 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.3.4</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.httpcomponents</groupId>-->
+<!--            <artifactId>httpclient</artifactId>-->
+<!--            <version>4.3.4</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
             <version>3.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
             <version>4.0.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -303,6 +317,18 @@
             <groupId>cn.thinkingdata</groupId>
             <artifactId>thinkingdatasdk</artifactId>
             <version>1.6.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+
+
+            </exclusions>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-io -->
@@ -313,38 +339,66 @@
         </dependency>
 
         <!--kafka配置-->
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>2.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-            <version>1.3.5.RELEASE</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.kafka</groupId>
-                    <artifactId>kafka-clients</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.kafka</groupId>-->
+<!--            <artifactId>kafka-clients</artifactId>-->
+<!--            <version>2.5.1</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.kafka</groupId>-->
+<!--            <artifactId>spring-kafka</artifactId>-->
+<!--            <version>1.3.5.RELEASE</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.apache.kafka</groupId>-->
+<!--                    <artifactId>kafka-clients</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
         <!--redis-->
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>2.9.1</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>redis.clients</groupId>-->
+<!--            <artifactId>jedis</artifactId>-->
+<!--            <version>2.9.1</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
             <version>1.8.23.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-aop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-tx</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-context</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-core</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-beans</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-context-support</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+
+            </exclusions>
+
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-pool2</artifactId>
-            <version>2.6.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.commons</groupId>-->
+<!--            <artifactId>commons-pool2</artifactId>-->
+<!--            <version>2.6.2</version>-->
+<!--        </dependency>-->
         <!--邮件预警-->
         <dependency>
             <groupId>com.sun.mail</groupId>

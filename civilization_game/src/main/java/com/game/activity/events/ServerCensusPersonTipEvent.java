@@ -6,7 +6,6 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
@@ -14,22 +13,24 @@ import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
 import com.game.manager.ActivityManager;
-import com.game.util.LogHelper;
-
 import com.game.spring.SpringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * 全服累积活动 个人领奖
  */
+@Component
 public class ServerCensusPersonTipEvent extends BaseActivityEvent {
 
-	private static ServerCensusPersonTipEvent inst = new ServerCensusPersonTipEvent();
-
-	public static ServerCensusPersonTipEvent getInst() {
-		return inst;
-	}
+	//private static ServerCensusPersonTipEvent inst = new ServerCensusPersonTipEvent();
+	//
+	//public static ServerCensusPersonTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -38,16 +39,19 @@ public class ServerCensusPersonTipEvent extends BaseActivityEvent {
 		listenEvent(EventEnum.GET_ACTIVITY_AWARD_TIP, ActivityConst.ACT_TOPUP_SERVER, this::process);
 	}
 
+	@Autowired
+	ActivityManager activityManager;
+
 	@Override
 	public void process(EventEnum eventEnum, IActivityActor actor) {
 //		LogHelper.MESSAGE_LOGGER.info("ServerCensusPersonTipEvent");
 		int activityId = actor.getActivityId();
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
+		//ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 		ActivityBase activityBase = actor.getActivityBase();
 		ActivityData activityData = activityManager.getActivity(activityBase);
 		Player player = actor.getPlayer();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
+		//StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> awardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
 		if (awardList == null || awardList.isEmpty()) {
 			return;

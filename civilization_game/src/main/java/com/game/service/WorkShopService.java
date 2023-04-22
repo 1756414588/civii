@@ -21,8 +21,6 @@ import com.game.manager.*;
 import com.game.message.handler.ClientHandler;
 import com.game.pb.WorkShopPb;
 import com.game.pb.WorkShopPb.*;
-import com.game.season.SeasonManager;
-import com.game.season.talent.entity.EffectType;
 import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
 import com.game.util.SynHelper;
@@ -64,8 +62,7 @@ public class WorkShopService {
 	@Autowired
 	private EventManager eventManager;
 	@Autowired
-	SeasonManager seasonManager;
-
+	ActivityEventManager activityEventManager;
 
 	public boolean isWorkShopLvOk(int workShopLv, int quality) {
 		if (workShopLv == 1 && quality >= Quality.GOLD.get()) {
@@ -257,8 +254,6 @@ public class WorkShopService {
 		//LogHelper.GAME_DEBUG.error("生产队列的实际period为: " + period);
 
 		Award award = awards.get(0);
-		int buf = seasonManager.getBuf(player, EffectType.EFFECT_TYPE31);
-		award.setCount(award.getCount() + buf);
 		workQue.setAward(award);
 		workQues.put(workQue.getKeyId(), workQue);
 
@@ -354,16 +349,14 @@ public class WorkShopService {
 		StaticProp staticProp = staticPropMgr.getStaticProp(itemId);
 		if (staticProp != null) {
 			doMakePropTask(player, staticProp.getColor());
+			eventManager.makeProp(player, Lists.newArrayList(paperConfig.getPropName(), staticProp.getPropName()));
 		}
 
 		//更新通行证活动进度
-		ActivityEventManager.getInst().activityTip(EventEnum.WORKS_PRODUCE, player, 1, 0);
+		activityEventManager.activityTip(EventEnum.WORKS_PRODUCE, player, 1, 0);
 //        activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.MAKE_PROP_IN_WORKSHOP, 1);
 //        activityManager.updActPerson(player, ActivityConst.ACT_SQUA, 1, NineCellConst.CELL_9);
-		eventManager.makeProp(player, Lists.newArrayList(
-			paperConfig.getPropName(),
-			staticProp.getPropName()
-		));
+
 	}
 
 	// 生产完成
@@ -497,7 +490,7 @@ public class WorkShopService {
 
 		// 当前购买次数
 		Lord lord = player.getLord();
-		int buyTimes = playerManager.buyWorkTimes(player);
+		int buyTimes = lord.getBuyWorkShopQue();
 		Map<Integer, StaticWorkShopBuy> staticWorkShopBuyMap = staticWorkShopMgr.getWorkShopBuyMap();
 		if (staticWorkShopBuyMap == null) {
 			handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);

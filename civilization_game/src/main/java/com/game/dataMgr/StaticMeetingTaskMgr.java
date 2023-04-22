@@ -2,6 +2,7 @@ package com.game.dataMgr;
 
 import com.game.constant.ArmyEnum;
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.s.StaticMeetingCommand;
 import com.game.domain.s.StaticMeetingTask;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
  * @description
  */
 @Component
+@LoadData(name = "议会厅任务")
 public class StaticMeetingTaskMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -27,8 +29,13 @@ public class StaticMeetingTaskMgr extends BaseDataMgr {
     private Map<Integer, StaticMeetingTask> meetingTasks = new ConcurrentHashMap<>();
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         meetingTasks = staticDataDao.selectMeetingTask();
+    }
+
+    @Override
+    public void init() throws Exception{
+
     }
 
 

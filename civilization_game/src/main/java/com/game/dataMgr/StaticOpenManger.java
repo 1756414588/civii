@@ -2,6 +2,7 @@ package com.game.dataMgr;
 
 import com.game.constant.OpenConditionType;
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.p.Command;
 import com.game.domain.p.Task;
@@ -21,6 +22,7 @@ import java.util.Map;
  * @description
  */
 @Component
+@LoadData(name = "功能开放")
 public class StaticOpenManger extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -30,8 +32,13 @@ public class StaticOpenManger extends BaseDataMgr {
     private TaskManager taskManager;
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         opens = staticDataDao.selectStaticOpen();
+    }
+
+    @Override
+    public void init() throws Exception{
+
     }
 
 

@@ -6,11 +6,11 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,13 +18,14 @@ import java.util.Optional;
 /**
  * 大杀四方
  */
+@Component
 public class ActKillAllEvent extends BaseActivityEvent {
 
-	private static ActKillAllEvent inst = new ActKillAllEvent();
-
-	public static ActKillAllEvent getInst() {
-		return inst;
-	}
+	//private static ActKillAllEvent inst = new ActKillAllEvent();
+	//
+	//public static ActKillAllEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -37,7 +38,6 @@ public class ActKillAllEvent extends BaseActivityEvent {
 		ActRecord actRecord = actor.getActRecord();
 		ActivityBase activityBase = actor.getActivityBase();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		// 击杀数量
 		int record = actRecord.getRecord(1);
 		Map<Integer, Integer> received = actRecord.getReceived();
@@ -64,7 +64,6 @@ public class ActKillAllEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 
 		Map<Integer, Integer> received = actRecord.getReceived();
 		List<StaticActAward> awardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());

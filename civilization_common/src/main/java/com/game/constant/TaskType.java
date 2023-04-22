@@ -56,6 +56,10 @@ public interface TaskType {
 	int POS_WEAR_EQUIP = 52;
 	// 完成塔防关卡（param：塔防关卡id）
 	int COMPLETE_TOWER_DEFENSE = 54;
+	int AUTO_CPM =55;//自动完成该任务
+	int AUTO_S_TASK=56;//完成所属的五个章节任务后完成该任务
+	int GOVER =57;
+	int QUICK_MONSTER =58;
 
 }
 

@@ -10,6 +10,7 @@ import com.game.constant.Reason;
 import com.game.constant.TaskType;
 import com.game.constant.TdDropLimitId;
 import com.game.dataMgr.StaticPropMgr;
+import com.game.dataMgr.StaticTDMgr;
 import com.game.domain.Award;
 import com.game.domain.Player;
 import com.game.domain.p.*;
@@ -87,6 +88,8 @@ import org.springframework.stereotype.Service;
 public class TDService {
 
 	@Autowired
+	private StaticTDMgr staticTDMgr;
+	@Autowired
 	private TDManager tdManager;
 	@Autowired
 	private PlayerManager playerManager;
@@ -107,7 +110,7 @@ public class TDService {
 			builder.addPowers(e);
 		});
 		player.getTdBouns().forEach((e, f) -> {
-			StaticTowerWarBonus bonus = tdManager.getTowerWarBonusMap(f);
+			StaticTowerWarBonus bonus = staticTDMgr.getTowerWarBonusMap(f);
 			builder.addBounds(CommonPb.ThreeInt.newBuilder().setV1(e).setV2(f).setV3(bonus.getEffect()).build());
 		});
 		handler.sendMsgToPlayer(TDPb.TDBounsRs.ext, builder.build());
@@ -132,10 +135,10 @@ public class TDService {
 		// 第一次初始化检查下战力
 //        manager.openBouns(player);
 		TDPb.TDMapInitRs.Builder builder = TDPb.TDMapInitRs.newBuilder();
-		tdManager.getTowerWarMapMap().forEach((e, f) -> {
+		staticTDMgr.getTowerWarMapMap().forEach((e, f) -> {
 			f.getLevel_list().forEach(levelId -> {
 				if (levelId != 999) {
-					StaticTowerWarLevel towerWarLevel = tdManager.getTowerWarLevel(levelId);
+					StaticTowerWarLevel towerWarLevel = staticTDMgr.getTowerWarLevel(levelId);
 					builder.addMap(mapInfo(towerWarLevel, player.getTdMap().get(levelId), f.getDifficulty()));
 				}
 			});
@@ -154,9 +157,9 @@ public class TDService {
 			handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
 			return;
 		}
-		StaticTowerWarLevel towerWarLevel = tdManager.getTowerWarLevel(req.getTowerId());
+		StaticTowerWarLevel towerWarLevel = staticTDMgr.getTowerWarLevel(req.getTowerId());
 		if (req.getIsGuide()) {
-			towerWarLevel = tdManager.getTowerWarLevel(999);
+			towerWarLevel = staticTDMgr.getTowerWarLevel(999);
 		}
 
 		if (towerWarLevel == null) {
@@ -217,10 +220,10 @@ public class TDService {
 			waveList.forEach(waveArr -> {
 				int waveId = waveArr.get(0);
 				// 波次信息
-				StaticTowerWarWave wave = tdManager.getTowerWarWave(waveId);
+				StaticTowerWarWave wave = staticTDMgr.getTowerWarWave(waveId);
 				wave.getMonster_list().forEach(monsterPair -> {
 					Double monsterId = monsterPair.get(1);
-					StaticTowerWarMonster monster = tdManager.getTowerWarMonster(monsterId.intValue());
+					StaticTowerWarMonster monster = staticTDMgr.getTowerWarMonster(monsterId.intValue());
 					monsterMap.put(monster.getId(), monster);
 				});
 			});
@@ -243,7 +246,7 @@ public class TDService {
 				CommonPb.WaveInfo.Builder waveInfo = CommonPb.WaveInfo.newBuilder();
 				waveInfo.setRoute(route);
 				// 波次信息
-				StaticTowerWarWave wave = tdManager.getTowerWarWave(waveId);
+				StaticTowerWarWave wave = staticTDMgr.getTowerWarWave(waveId);
 				wave.getMonster_list().forEach(monsterPair -> {
 					// 触发时间
 					Double monsterTime = monsterPair.get(0);
@@ -265,7 +268,7 @@ public class TDService {
 		builder.setBaseSupplies(towerWarLevel.getBase_supplies());
 		builder.addAllStartLimit(towerWarLevel.getStart_limit());
 		player.getTdBouns().forEach((e, f) -> {
-			StaticTowerWarBonus bonus = tdManager.getTowerWarBonusMap(f);
+			StaticTowerWarBonus bonus = staticTDMgr.getTowerWarBonusMap(f);
 			builder.addBounds(CommonPb.ThreeInt.newBuilder().setV1(e).setV2(f).setV3(bonus.getEffect()).build());
 		});
 
@@ -285,7 +288,7 @@ public class TDService {
 			return;
 		}
 
-		StaticTowerWarLevel towerWarLevel = tdManager.getTowerWarLevel(report.getLevelId());
+		StaticTowerWarLevel towerWarLevel = staticTDMgr.getTowerWarLevel(report.getLevelId());
 		if (towerWarLevel == null) {
 			handler.sendErrorMsgToPlayer(GameError.TOWER_NON_EXISTENT);
 			return;
@@ -349,7 +352,7 @@ public class TDService {
 			return;
 		}
 
-		StaticTowerWarLevel towerWarLevel = tdManager.getTowerWarLevel(req.getLevelId());
+		StaticTowerWarLevel towerWarLevel = staticTDMgr.getTowerWarLevel(req.getLevelId());
 		if (towerWarLevel == null) {
 			handler.sendErrorMsgToPlayer(GameError.TOWER_NON_EXISTENT);
 			return;
@@ -406,7 +409,7 @@ public class TDService {
 			return;
 		}
 		TDPb.TDTowerInitRs.Builder builder = TDPb.TDTowerInitRs.newBuilder();
-		tdManager.getTowerWarTowerMap().forEach((e, f) -> {
+		staticTDMgr.getTowerWarTowerMap().forEach((e, f) -> {
 			builder.addTowers(CommonPb.TowerInfo.newBuilder().setId(f.getId()).setName(f.getName()).setIcon(f.getIcon()).setModel(f.getModel()).setType(f.getType()).setLevel(f.getLevel()).setDamage(f.getDamage()).setAttackRate(f.getAttack_rate()).setAttackRange(f.getAttack_range()).setDamageArea(f.getDamage_area()).setBuildCost(f.getBuild_cost()).setUpgradeTarget(f.getUpgrade_target()).setRecoverPrice(f.getRecover_price()).setBulletModel(f.getBullet_model()).setBulletSpeed(f.getBullet_speed()).setDesc(f.getDesc()).build());
 		});
 		handler.sendMsgToPlayer(TDPb.TDTowerInitRs.ext, builder.build());
@@ -426,14 +429,14 @@ public class TDService {
 		int val;
 	}
 
-	private void initPlayerTdMap(Player player) {
+	public void initPlayerTdMap(Player player) {
 		int tdMapSize = player.getTdMap().size();
 		boolean isFirst = tdMapSize == 0;
-		if (isFirst || tdMapSize != tdManager.getTowerWarLevelMap().size()) {
-			tdManager.getTowerWarMapMap().forEach((e, f) -> {
+		if (isFirst || tdMapSize != staticTDMgr.getTowerWarLevelMap().size()) {
+			staticTDMgr.getTowerWarMapMap().forEach((e, f) -> {
 				f.getLevel_list().forEach(levelId -> {
 					if (player.getTdMap() == null || player.getTdMap().get(levelId) == null) {
-						StaticTowerWarLevel level = tdManager.getTowerWarLevel(levelId);
+						StaticTowerWarLevel level = staticTDMgr.getTowerWarLevel(levelId);
 						TD td = new TD(levelId, OpenState.CLOSE.val, 0, level.getStart_limit());
 						player.getTdMap().put(levelId, td);
 					}
@@ -501,7 +504,7 @@ public class TDService {
 		tdManager.getEndlessTDInfo(player).wrapPb(builder);
 		builder.setTdMoney(player.getTdMoney());
 		tdManager.getEndlessTDInfo(player).getEndlessTDBonus().forEach((e, f) -> {
-			StaticTowerWarBonus bonus = tdManager.getEndlessTowerWarBonusMap(f);
+			StaticTowerWarBonus bonus = staticTDMgr.getEndlessTowerWarBonusMap(f);
 			builder.addBuff(CommonPb.ThreeInt.newBuilder().setV1(e).setV2(f).setV3(bonus.getEffect()).build());
 		});
 		tdManager.getBounds(player).forEach(e -> {
@@ -532,7 +535,7 @@ public class TDService {
 		builder.setSelfRank(tdManager.getPlayerEndlessTDRank(player).wrapTDRank());
 		TDRankInfo.Builder rankInfoBuilder = TDRankInfo.newBuilder();
 		rankInfoBuilder.setRankdate("0");
-		int limit = tdManager.getEndlessTDDropLimit(TdDropLimitId.RANK_COUNT).getLimit();
+		int limit = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.RANK_COUNT).getLimit();
 		List<EndlessTDRank> weekEndlessTDRanks = tdManager.getWeekEndlessTDRanks();
 		limit = weekEndlessTDRanks.size() > limit ? limit : weekEndlessTDRanks.size();
 		weekEndlessTDRanks.subList(0, limit).forEach(e -> {
@@ -571,7 +574,7 @@ public class TDService {
 		}
 		int id = rq.getPos();
 		int count = rq.getCount() == 0 ? 1 : rq.getCount();
-		StaticEndlessArmory endlessArmory = tdManager.getEndlessShopMap(id);
+		StaticEndlessArmory endlessArmory = staticTDMgr.getEndlessShopMap(id);
 		if (endlessArmory == null) {
 			handler.sendErrorMsgToPlayer(GameError.PARAM_ERROR);
 			return;
@@ -644,7 +647,7 @@ public class TDService {
 		}
 		int id = rq.getPos();
 		int count = rq.getCount() == 0 ? 1 : rq.getCount();
-		StaticEndlessArmory endlessArmory = tdManager.getEndlessArmory(id);
+		StaticEndlessArmory endlessArmory = staticTDMgr.getEndlessArmory(id);
 		if (endlessArmory == null) {
 			handler.sendErrorMsgToPlayer(GameError.PARAM_ERROR);
 			return;
@@ -741,7 +744,7 @@ public class TDService {
 			handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
 			return;
 		}
-		HashMap<Integer, Item> itemMap = player.getItemMap();
+		Map<Integer, Item> itemMap = player.getItemMap();
 		List<Item> collect = itemMap.values().stream().filter(e -> {
 			StaticProp staticProp = staticPropMgr.getStaticProp(e.getItemId());
 			return staticProp != null && staticProp.getPropType() == ItemType.ENDLESS_TD && e.getItemNum() > 0;
@@ -802,7 +805,7 @@ public class TDService {
 		EndlessTDGameInfo gameInfo = tdManager.getGameInfo(player);
 		gameInfo.init();
 		gameInfo.getSelectPropId().clear();
-		StaticEndlessBaseinfo endlessBaseInfo = tdManager.getEndlessBaseInfo();
+		StaticEndlessBaseinfo endlessBaseInfo = staticTDMgr.getEndlessBaseInfo();
 		int tdMoney = weekMaxFraction / endlessBaseInfo.getCoin_reward();
 		Award award = new Award(AwardType.LORD_PROPERTY, LordPropertyType.TD_MONEY, tdMoney);
 		playerManager.addAward(player, award, Reason.ENDLESS_TD_FIGHT_AUTO);
@@ -844,7 +847,7 @@ public class TDService {
 					handler.sendErrorMsgToPlayer(GameError.COUNT_ERROR);
 					return;
 				}
-				StaticEndlessItem endlessItem = tdManager.getEndlessItem(proId);
+				StaticEndlessItem endlessItem = staticTDMgr.getEndlessItem(proId);
 				if (endlessItem == null) {
 					handler.sendErrorMsgToPlayer(GameError.PARAM_ERROR);
 					return;
@@ -928,11 +931,11 @@ public class TDService {
 		rq.getLevelId();
 		gameInfo.gameSettlement(rq);
 		tdManager.checkFraction(player, rq.getFraction(), rq.getLifePoint());
-		int luckId = tdManager.getEndlessTDDropLimit(TdDropLimitId.INCREASE_LUCK).getLimit();
-		int addId = tdManager.getEndlessTDDropLimit(TdDropLimitId.INCREASE_PROP).getLimit();
-		int awardNum = tdManager.getEndlessTDDropLimit(TdDropLimitId.NUMBER_OF_AWARDS).getLimit();
-		List<List<Integer>> unique = tdManager.getEndlessTDDropLimit(TdDropLimitId.UNIQUE).getParam2();
-		StaticEndlessLevel endlessLevel = tdManager.getEndlessLevel(gameInfo.getLevelId());
+		int luckId = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.INCREASE_LUCK).getLimit();
+		int addId = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.INCREASE_PROP).getLimit();
+		int awardNum = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.NUMBER_OF_AWARDS).getLimit();
+		List<List<Integer>> unique = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.UNIQUE).getParam2();
+		StaticEndlessLevel endlessLevel = staticTDMgr.getEndlessLevel(gameInfo.getLevelId());
 		List<List<Integer>> drop = endlessLevel.getDrop();
 		// 更好的掉落概率
 		if (tdManager.checkSpecialItem(player, luckId) > 0) {
@@ -943,7 +946,7 @@ public class TDService {
 			awardNum += 1;
 		}
 		// 整局游戏里存在获取次数限制的道具[道具id, 获取次数]
-		Map<Integer, StaticEndlessItem> itemMap = new HashMap<>(tdManager.getEndlessItemMap());
+		Map<Integer, StaticEndlessItem> itemMap = new HashMap<>(staticTDMgr.getEndlessItemMap());
 		unique.forEach(e -> {
 			int propId = e.get(0);
 			if (tdManager.checkSpecialItem(player, propId) >= e.get(1)) {
@@ -951,16 +954,16 @@ public class TDService {
 			}
 		});
 		// 在怪物减速大于等于30%后，无法掉落选定的道具
-		int slowDownLimit = tdManager.getEndlessTDDropLimit(TdDropLimitId.MONSTER_SLOW_DOWN).getLimit();
-		List<Integer> slowDownParam = tdManager.getEndlessTDDropLimit(TdDropLimitId.MONSTER_SLOW_DOWN).getParam();
+		int slowDownLimit = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.MONSTER_SLOW_DOWN).getLimit();
+		List<Integer> slowDownParam = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.MONSTER_SLOW_DOWN).getParam();
 		if (gameInfo.getPropBuff().getOrDefault(EndlessTDItemEffectType.type_1, 0) >= slowDownLimit) {
 			slowDownParam.forEach(e -> {
 				itemMap.remove(e);
 			});
 		}
 		// 当升级效率大于X后无法选择的道具
-		int towerUpgradeLimit = tdManager.getEndlessTDDropLimit(TdDropLimitId.TOWER_UPGRADE_LIMIT).getLimit();
-		List<Integer> towerUpgradeParam = tdManager.getEndlessTDDropLimit(TdDropLimitId.TOWER_UPGRADE_LIMIT).getParam();
+		int towerUpgradeLimit = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.TOWER_UPGRADE_LIMIT).getLimit();
+		List<Integer> towerUpgradeParam = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.TOWER_UPGRADE_LIMIT).getParam();
 		if (gameInfo.getPropBuff().getOrDefault(EndlessTDItemEffectType.type_23, 0) >= towerUpgradeLimit) {
 			towerUpgradeParam.forEach(e -> {
 				itemMap.remove(e);
@@ -1000,7 +1003,7 @@ public class TDService {
 		}
 		EndlessTDReportRs.Builder builder = EndlessTDReportRs.newBuilder();
 		// 测试用 掉落指定道具
-		StaticEndlessTDDropLimit endlessTDDropLimit = tdManager.getEndlessTDDropLimit(TdDropLimitId.TEST_IDENTICAL_PROP);
+		StaticEndlessTDDropLimit endlessTDDropLimit = staticTDMgr.getEndlessTDDropLimit(TdDropLimitId.TEST_IDENTICAL_PROP);
 		if (endlessTDDropLimit != null && endlessTDDropLimit.getLimit() == 1 && !endlessTDDropLimit.getParam().isEmpty()) {
 			awardItems.clear();
 			endlessTDDropLimit.getParam().forEach(e -> {
@@ -1086,7 +1089,7 @@ public class TDService {
 		tdManager.updateWeekEndlessTDRank(player);
 		builder.setFraction(fraction);
 		builder.setRemainingTimes(endlessTDInfo.getRemainingTimes());
-		StaticEndlessBaseinfo endlessBaseInfo = tdManager.getEndlessBaseInfo();
+		StaticEndlessBaseinfo endlessBaseInfo = staticTDMgr.getEndlessBaseInfo();
 		int tdMoney = fraction / endlessBaseInfo.getCoin_reward();
 		Award award = new Award(AwardType.LORD_PROPERTY, LordPropertyType.TD_MONEY, tdMoney);
 		playerManager.addAward(player, award, Reason.ENDLESS_TD_FIGHT_AUTO);
@@ -1106,7 +1109,7 @@ public class TDService {
 			return;
 		}
 		TDPb.EndlessTDTowerInitRs.Builder builder = TDPb.EndlessTDTowerInitRs.newBuilder();
-		tdManager.getTdEndlessTower().forEach((e, f) -> {
+		staticTDMgr.getTdEndlessTower().forEach((e, f) -> {
 			builder.addTowers(CommonPb.TowerInfo.newBuilder().setId(f.getId()).setName(f.getName()).setIcon(f.getIcon()).setModel(f.getModel()).setType(f.getType()).setLevel(f.getLevel()).setDamage(f.getDamage()).setAttackRate(f.getAttack_rate()).setAttackRange(f.getAttack_range()).setDamageArea(f.getDamage_area()).setBuildCost(f.getBuild_cost()).setUpgradeTarget(f.getUpgrade_target()).setRecoverPrice(f.getRecover_price()).setBulletModel(f.getBullet_model()).setBulletSpeed(f.getBullet_speed()).setDesc(f.getDesc()).build());
 		});
 		handler.sendMsgToPlayer(TDPb.EndlessTDTowerInitRs.ext, builder.build());
@@ -1123,7 +1126,7 @@ public class TDService {
 			handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
 			return;
 		}
-		Map<Integer, StaticBulletWarLevel> allStaticBulletWarLevel = tdManager.getAllStaticBulletWarLevel();
+		Map<Integer, StaticBulletWarLevel> allStaticBulletWarLevel = staticTDMgr.getAllStaticBulletWarLevel();
 		BulletWarInfo bulletWarInfo = player.getBulletWarInfo();
 		TDPb.BulletWarInfoRs.Builder builder = TDPb.BulletWarInfoRs.newBuilder();
 		builder.setMaxLevel(bulletWarInfo.getMaxId());
@@ -1150,7 +1153,7 @@ public class TDService {
 			return;
 		}
 		int levelId = rq.getLevelId();
-		StaticBulletWarLevel staticBulletWarLevel = tdManager.getStaticBulletWarLevel(levelId);
+		StaticBulletWarLevel staticBulletWarLevel = staticTDMgr.getStaticBulletWarLevel(levelId);
 		if (staticBulletWarLevel == null) {
 			handler.sendErrorMsgToPlayer(GameError.PARAM_ERROR);
 			return;

@@ -69,6 +69,9 @@ public class ItemManager {
 				staticProp.getPropName(),
 				item.getItemNum()
 			));
+
+
+
 		}
 		item.setLordId(player.roleId);
 		saveItemServer.saveData(item);

@@ -1,6 +1,5 @@
 package com.game.acion.login;
 
-import com.game.acion.LoginAction;
 import com.game.acion.MessageEvent;
 import com.game.domain.Robot;
 import com.game.packet.PacketCreator;
@@ -10,13 +9,13 @@ import com.game.util.LogHelper;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @Author 陈奎
  * @Description 角色登录
  * @Date 2022/9/19 10:50
  **/
 
 @Component
-public class RoleLoginAction extends LoginAction {
+public class RoleLoginAction extends EnterGameAction {
 
 	public RoleLoginAction() {
 		RoleLoginRq.Builder builder = RoleLoginRq.newBuilder();

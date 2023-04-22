@@ -20,8 +20,6 @@ import com.game.message.handler.cs.ResourcePacketHandler;
 import com.game.pb.CommonPb;
 import com.game.pb.DepotPb;
 import com.game.pb.DepotPb.*;
-import com.game.season.SeasonManager;
-import com.game.season.talent.entity.EffectType;
 import com.game.server.GameServer;
 import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
@@ -61,8 +59,7 @@ public class DepotService {
     @Autowired
     private SurpriseGiftManager surpriseGiftManager;
     @Autowired
-    SeasonManager seasonManager;
-
+    ActivityEventManager activityEventManager;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -100,9 +97,6 @@ public class DepotService {
         Lord lord = player.getLord();
         long depotTime = lord.getDepotTime();
         long now = System.currentTimeMillis();
-
-        int buf = seasonManager.getBuf(player, EffectType.EFFECT_TYPE26);// EFFECT_TYPE26(26, "市场兑换资源单次冷却时间降低（固定数值）"),
-        long l = TimeHelper.HOUR_MS - buf;
         if (depotTime + TimeHelper.HOUR_MS >= now) {
             handler.sendErrorMsgToPlayer(GameError.DEPOT_CD);
             return;
@@ -230,9 +224,12 @@ public class DepotService {
         taskManager.doTask(TaskType.DEPOT, player);
 
         //更新通行证活动进度
-        ActivityEventManager.getInst().activityTip(EventEnum.MARKET_BUY, player, 1, 0);
+        activityEventManager.activityTip(EventEnum.MARKET_BUY, player, 1, 0);
 //        activityManager.updatePassPortTaskCond(player,ActPassPortTaskType.BUY_DEPOT_PROP,1);
+        achievementService.addAndUpdate(player,AchiType.AT_54,1);
     }
+    @Autowired
+    AchievementService achievementService;
 
     /**
      * 资源兑换

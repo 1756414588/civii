@@ -15,7 +15,7 @@ public class StaticTask {
     private String taskName;
     private int type;
     private int typeChild;
-    private int triggerId;
+    //private int triggerId;
     private int process;
     private int exp;
     private List<List<Long>> awardList;
@@ -25,5 +25,10 @@ public class StaticTask {
     private int newState;
     private int generateMonster;
     private int collectTimes;
-    private List<Integer> mulTriggerId;
+    //private List<Integer> mulTriggerId;
+
+    private int chapter_task;
+    private int chapter_autogive;
+    private int next;
+    private int first;
 }

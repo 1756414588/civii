@@ -2,6 +2,7 @@ package com.game.cache;
 
 import com.game.dao.s.StaticConfigDao;
 import com.game.define.LoadData;
+import com.game.domain.s.StaticWorldCity;
 import com.game.domain.s.StaticWorldMap;
 import com.game.load.ILoadData;
 import java.util.HashMap;
@@ -10,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @Author 陈奎
  * @Description
  * @Date 2022/9/20 16:50
  **/
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 public class StaticWorldMapCache implements ILoadData {
 
 	private Map<Integer, StaticWorldMap> worldMaps = new HashMap<>();
+	private Map<Integer, StaticWorldCity> cityMap = new HashMap<>();
 
 	@Autowired
 	private StaticConfigDao staticDataDao;
@@ -27,6 +29,7 @@ public class StaticWorldMapCache implements ILoadData {
 	@Override
 	public void load() {
 		worldMaps = staticDataDao.selectWorldMap();
+		cityMap = staticDataDao.selectWorldCity();
 	}
 
 	@Override
@@ -67,5 +70,9 @@ public class StaticWorldMapCache implements ILoadData {
 
 	public Map<Integer, StaticWorldMap> getWorldMaps() {
 		return worldMaps;
+	}
+
+	public StaticWorldCity getWorldCity(int cityId) {
+		return cityMap.get(cityId);
 	}
 }

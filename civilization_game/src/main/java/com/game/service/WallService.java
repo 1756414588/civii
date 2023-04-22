@@ -4,10 +4,7 @@ import com.game.constant.*;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticWallMgr;
 import com.game.domain.Player;
-import com.game.domain.p.Hero;
-import com.game.domain.p.Wall;
-import com.game.domain.p.WallDefender;
-import com.game.domain.p.WallFriend;
+import com.game.domain.p.*;
 import com.game.domain.s.StaticWallMonsterLv;
 import com.game.manager.MarchManager;
 import com.game.manager.PlayerManager;
@@ -24,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 public class WallService {
@@ -54,10 +54,13 @@ public class WallService {
         }
 
         Wall wall = player.getWall();
-        List<Integer> defenceHero = wall.getDefenceHero();
-        checkWall(player, wall);
+        //List<Integer> defenceHero = wall.getDefenceHero();
+        //checkWall(player, wall);
         WallPb.GetWallInfoRs.Builder builder = WallPb.GetWallInfoRs.newBuilder();
-        builder.addAllHeroId(defenceHero);
+
+        //List<WarDefenseHero> defenseArmyList = player.getDefenseArmyList();
+        //List<Integer> collect = defenseArmyList.stream().mapToInt(x -> x.getHeroId()).boxed().collect(Collectors.toList());
+        builder.addAllHeroId(player.getEmbattleList());
         builder.setEndTime(wall.getEndTime());
         Map<Integer, WallDefender> defenderMap = wall.getWallDefenders();
         for (WallDefender defender : defenderMap.values()) {
@@ -67,7 +70,7 @@ public class WallService {
             builder.addDefender(defender.wrapPb());
         }
 
-        HashMap<Integer, WallFriend> wallFriendMap = wall.getWallFriends();
+        Map<Integer, WallFriend> wallFriendMap = wall.getWallFriends();
         // 没有行军的友军应该删除
         Iterator<WallFriend> it = wallFriendMap.values().iterator();
         while (it.hasNext()) {
@@ -93,44 +96,44 @@ public class WallService {
         handler.sendMsgToPlayer(WallPb.GetWallInfoRs.ext, builder.build());
     }
 
-    public void checkWall(Player player, Wall wall) {
-        List<Integer> defenceHero = wall.getDefenceHero();
-        List<Integer> embattleList = player.getEmbattleList();
-        Iterator<Integer> iterator = defenceHero.iterator();
-        Map<Integer, Integer> heros = new HashMap<>();
-        while (iterator.hasNext()) {
-            Integer heroId = iterator.next();
-            heros.put(heroId, null);
-            if (heroId == null) {
-                continue;
-            }
-
-            Hero hero = player.getHero(heroId);
-            if (heroId >= 0) {
-                if (hero == null) {
-                    iterator.remove();
-                }
-            }
-            if (!embattleList.contains(heroId)) {
-                wall.getDefenceHero().clear();
-                wall.getDefenceHero().addAll(embattleList);
-                break;
-            }
-        }
-        int index = 0;
-        for (int i = 0; i < embattleList.size(); i++) {
-            if (embattleList.get(i) > 0) {
-                ++index;
-            }
-        }
-
-        //容错  ，防止英雄id 重复
-        if (defenceHero.size() != index || heros.size() != defenceHero.size()) {
-            wall.getDefenceHero().clear();
-            wall.getDefenceHero().addAll(embattleList);
-        }
-
-    }
+    //public void checkWall(Player player, Wall wall) {
+    //	List<Integer> defenceHero = wall.getDefenceHero();
+    //	List<Integer> embattleList = player.getEmbattleList();
+    //	Iterator<Integer> iterator = defenceHero.iterator();
+    //	Map<Integer, Integer> heros = new HashMap<>();
+    //	while (iterator.hasNext()) {
+    //		Integer heroId = iterator.next();
+    //		heros.put(heroId, null);
+    //		if (heroId == null) {
+    //			continue;
+    //		}
+    //
+    //		Hero hero = player.getHero(heroId);
+    //		if (heroId >= 0) {
+    //			if (hero == null) {
+    //				iterator.remove();
+    //			}
+    //		}
+    //		if (!embattleList.contains(heroId)) {
+    //			wall.getDefenceHero().clear();
+    //			wall.getDefenceHero().addAll(embattleList);
+    //			break;
+    //		}
+    //	}
+    //	int index = 0;
+    //	for (int i = 0; i < embattleList.size(); i++) {
+    //		if (embattleList.get(i) > 0) {
+    //			++index;
+    //		}
+    //	}
+    //
+    //	//容错  ，防止英雄id 重复
+    //	if (defenceHero.size() != index || heros.size() != defenceHero.size()) {
+    //		wall.getDefenceHero().clear();
+    //		wall.getDefenceHero().addAll(embattleList);
+    //	}
+    //
+    //}
 
     // 交换武将位置
     public void changeHeroPos(WallPb.ChangeHeroPosRq req, ClientHandler handler) {
@@ -139,45 +142,17 @@ public class WallService {
             handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
             return;
         }
-
         // 客户端发来的英雄Id
         List<Integer> reqHeroIds = req.getHeroIdList();
-        // 检查英雄Id的合法性
-        Wall wall = player.getWall();
-        if (wall == null) {
-            LogHelper.CONFIG_LOGGER.info("wall is null");
-            return;
+        List<Integer> embattleList = player.getEmbattleList();
+        long count = embattleList.stream().filter(x -> x > 0).count();
+        if (reqHeroIds.size() != count) {
+            handler.sendErrorMsgToPlayer(GameError.PARAM_ERROR);
         }
-
-        List<Integer> heroIds = wall.getDefenceHero();
-        for (Integer reqHeroId : reqHeroIds) {
-            if (!heroIds.contains(reqHeroId)) {
-                handler.sendErrorMsgToPlayer(GameError.HERO_NOT_EXISTS);
-                return;
-            }
+        for (int i = 0; i < reqHeroIds.size(); i++) {
+            Integer integer = reqHeroIds.get(i);
+            embattleList.set(i, integer);
         }
-
-        // 判断重复的武将
-        // 检测英雄是否重复
-        HashSet<Integer> checkHero = new HashSet<Integer>();
-        // 检查英雄是否上阵
-        for (Integer heroId : reqHeroIds) {
-            if (!isEmbattle(player, heroId)) {
-                handler.sendErrorMsgToPlayer(GameError.HERO_NOT_EMBATTLE);
-                return;
-            }
-            checkHero.add(heroId);
-        }
-
-        // 有相同的英雄出征
-        if (checkHero.size() != reqHeroIds.size()) {
-            handler.sendErrorMsgToPlayer(GameError.HAS_SAME_HERO_ID);
-            return;
-        }
-
-        heroIds.clear();
-        heroIds.addAll(reqHeroIds);
-
         WallPb.ChangeHeroPosRs.Builder builder = WallPb.ChangeHeroPosRs.newBuilder();
         handler.sendMsgToPlayer(WallPb.ChangeHeroPosRs.ext, builder.build());
     }
@@ -395,20 +370,19 @@ public class WallService {
             handler.sendErrorMsgToPlayer(GameError.WALL_LEVEL_NOT_ENOUGH);
             return;
         }
-
-        int maxNum = 0;
-        if (wallLv >= openLv) {
-            maxNum = (wallLv - openLv) * 2 + staticLimitMgr.getNum(57);
-        } else {
-            maxNum = 0;
-        }
+        int maxNum  = (wallLv - openLv) * 2 + staticLimitMgr.getNum(57);
+//        if (wallLv >= openLv) {
+//
+//        } else {
+//            maxNum = 0;
+//        }
 
         if (maxNum <= 0) {
             handler.sendErrorMsgToPlayer(GameError.WALL_CANNOT_ASSIST);
             return;
         }
 
-        HashMap<Integer, WallFriend> wallFriendMap = wall.getWallFriends();
+        Map<Integer, WallFriend> wallFriendMap = wall.getWallFriends();
 
         int currentNum = wallFriendMap.size();
         List<Integer> heroIds = req.getHeroIdsList();
@@ -464,7 +438,7 @@ public class WallService {
         }
 
         // 生成行军
-        March march = worldManager.createRebelAndAssistMarch(player, target, heroIds, targetPos, MarchType.CityFriendAssist);
+        March march = worldManager.createMarch(player, heroIds, targetPos);
         march.setMarchType(MarchType.CityFriendAssist);
         march.setAssistId(targetId);
         // 添加行军到玩家身上

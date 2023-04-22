@@ -5,13 +5,14 @@ import com.game.define.LoadData;
 import com.game.domain.RobotConfig;
 import com.game.load.ILoadData;
 import com.game.server.AppPropertes;
+import com.game.util.LogHelper;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@LoadData(name = "机器人配置缓存", initSeq = 100)
+@LoadData(name = "Config配置缓存", initSeq = 100)
 public class ConfigCache implements ILoadData {
 
 	@Autowired
@@ -43,6 +44,30 @@ public class ConfigCache implements ILoadData {
 			return configMap.get(key).getValue();
 		}
 		return null;
+	}
+
+	public int getIntValue(String key) {
+		if (!configMap.containsKey(key)) {
+			return 0;
+		}
+		try {
+			return Integer.valueOf(configMap.get(key).getValue().trim());
+		} catch (Exception e) {
+			LogHelper.ERROR_LOGGER.error(e.getMessage(), e);
+			return 0;
+		}
+	}
+
+	public long getLongValue(String key) {
+		if (!configMap.containsKey(key)) {
+			return 0L;
+		}
+		try {
+			return Long.valueOf(configMap.get(key).getValue().trim());
+		} catch (Exception e) {
+			LogHelper.ERROR_LOGGER.error(e.getMessage(), e);
+			return 0L;
+		}
 	}
 
 	/**

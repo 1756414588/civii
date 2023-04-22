@@ -4,12 +4,11 @@ import com.game.acion.IAction;
 import com.game.acion.MessageEvent;
 import com.game.domain.Robot;
 import com.game.domain.p.LoginMessage;
-import com.game.domain.p.RobotMessage;
 import com.game.packet.Packet;
 import com.game.pb.BasePb.Base;
 
 /**
- *
+ * @Author 陈奎
  * @Description
  * @Date 2022/9/19 15:06
  **/
@@ -51,7 +50,12 @@ public class LoginEvent implements IAction {
 	}
 
 	@Override
-	public RobotMessage getRobotMessage() {
+	public int getGroup() {
+		return 0;
+	}
+
+	@Override
+	public byte[] getMessage() {
 		return null;
 	}
 }

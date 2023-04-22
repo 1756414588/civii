@@ -2,9 +2,9 @@ package com.game.message;
 
 import com.game.define.LoadData;
 import com.game.load.ILoadData;
+import com.game.manager.MessageEventManager;
 import com.game.message.cs.AttackRebelHandler;
 import com.game.acion.login.CreateRoleHandler;
-import com.game.message.cs.CommonPacketHandler;
 import com.game.message.cs.DecompoundEquipHandler;
 import com.game.message.cs.DoneEquipHandler;
 import com.game.message.cs.EmbattleHeroHandler;
@@ -18,6 +18,8 @@ import com.game.message.cs.GetMapNpcHandler;
 import com.game.message.cs.GetStarAwardHandler;
 import com.game.message.cs.HeroMissionHandler;
 import com.game.message.cs.MissionDoneHandler;
+import com.game.message.cs.SynChatHandler;
+import com.game.message.cs.SynCountryWarHandler;
 import com.game.message.cs.SynMarchHandler;
 import com.game.message.cs.TaskAwardHandler;
 import com.game.acion.login.BeginGameHander;
@@ -27,6 +29,8 @@ import com.game.message.cs.SynEntityHandler;
 import com.game.message.cs.SynEntityUpdateHandler;
 import com.game.message.cs.WearEquipHandler;
 import com.game.pb.BasePb.Base;
+import com.game.pb.BuildingPb.GetBuildingRs;
+import com.game.pb.ChatPb.SynChatRq;
 import com.game.pb.EquipPb.DecompoundEquipRs;
 import com.game.pb.EquipPb.DoneEquipRs;
 import com.game.pb.EquipPb.GetEquipBagRs;
@@ -46,6 +50,7 @@ import com.game.pb.TaskPb.TaskAwardRs;
 import com.game.pb.WorldPb.AttackRebelRs;
 import com.game.pb.WorldPb.GetMapRs;
 import com.game.pb.WorldPb.GetMarchRs;
+import com.game.pb.WorldPb.SynCountryWarRq;
 import com.game.pb.WorldPb.SynEntityAddRq;
 import com.game.pb.WorldPb.SynEntityRq;
 import com.game.pb.WorldPb.SynEntityUpdateRq;
@@ -63,7 +68,7 @@ public class MessagePool implements ILoadData {
 	public Map<Integer, IMessageHandler> pools = new HashMap<>();
 
 	@Autowired
-	private CommonPacketHandler commonPacketHandler;
+	private MessageEventManager messageEventManager;
 
 	@Override
 	public void load() {
@@ -78,6 +83,7 @@ public class MessagePool implements ILoadData {
 		this.registerBag();
 		this.regitserTask();
 		this.registerMail();
+		this.registerBuilding();
 	}
 
 	private void registerLogin() {
@@ -92,6 +98,8 @@ public class MessagePool implements ILoadData {
 		register(SynEntityAddRq.EXT_FIELD_NUMBER, 0, SynEntityAddHandler.class);
 		register(SynEntityUpdateRq.EXT_FIELD_NUMBER, 0, SynEntityUpdateHandler.class);
 		register(GetMapNpcRs.EXT_FIELD_NUMBER, 0, GetMapNpcHandler.class);
+		register(SynCountryWarRq.EXT_FIELD_NUMBER, 0, SynCountryWarHandler.class);
+		register(SynChatRq.EXT_FIELD_NUMBER, 0, SynChatHandler.class);
 	}
 
 	private void registerHero() {
@@ -115,6 +123,10 @@ public class MessagePool implements ILoadData {
 		register(WearEquipRs.EXT_FIELD_NUMBER, 0, WearEquipHandler.class);
 		register(DoneEquipRs.EXT_FIELD_NUMBER, 0, DoneEquipHandler.class);
 		register(DecompoundEquipRs.EXT_FIELD_NUMBER, 0, DecompoundEquipHandler.class);
+	}
+
+	private void registerBuilding() {
+//		register(GetBuildingRs.EXT_FIELD_NUMBER, 0, GetBuildingHandler.class);
 	}
 
 	private void regitserTask() {
@@ -143,8 +155,7 @@ public class MessagePool implements ILoadData {
 		if (handler != null) {
 			handler.action(ctx, accountKey, msg);
 		}
-
-		// 通用包处理
-		commonPacketHandler.action(ctx, accountKey, msg);
+		// 事件处理
+		messageEventManager.callEvent(ctx, accountKey, msg);
 	}
 }

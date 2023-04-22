@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
+ * @Author 陈奎
  * @Description 初始化接口
  * @Date 2022/9/9 11:30
  **/
@@ -18,9 +18,16 @@ public @interface LoadData {
 	String name();
 
 	/**
-	 * 初始化数据方法加载顺序
+	 * ini方法加载顺序.顺时针加载
 	 *
 	 * @return
 	 */
-	int initSeq();
+	int initSeq() default 1000;
+
+	/**
+	 * 1.配置 2.用户数据
+	 *
+	 * @return
+	 */
+	int type() default 1;
 }

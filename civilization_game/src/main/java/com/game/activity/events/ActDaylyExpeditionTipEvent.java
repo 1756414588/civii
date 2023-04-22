@@ -6,24 +6,25 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 
 /**
  * 每日远征
  */
+@Component
 public class ActDaylyExpeditionTipEvent extends BaseActivityEvent {
 
-	public static ActDaylyExpeditionTipEvent inst = new ActDaylyExpeditionTipEvent();
-
-	public static ActDaylyExpeditionTipEvent getInst() {
-		return inst;
-	}
+	//public static ActDaylyExpeditionTipEvent inst = new ActDaylyExpeditionTipEvent();
+	//
+	//public static ActDaylyExpeditionTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -38,7 +39,6 @@ public class ActDaylyExpeditionTipEvent extends BaseActivityEvent {
 			return;
 		}
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		if (null == condList || condList.size() == 0) {
 			return;

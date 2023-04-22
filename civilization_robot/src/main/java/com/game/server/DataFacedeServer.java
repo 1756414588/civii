@@ -1,7 +1,7 @@
 package com.game.server;
 
 import com.game.define.DataFacede;
-import com.game.server.datafacede.SaveRecordServer;
+import com.game.server.datafacede.SaveRobotDataServer;
 import com.game.server.thread.SaveServer;
 import com.game.spring.SpringUtil;
 import com.game.util.ClassUtil;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
+ * @Author 陈奎
  * @Description 数据存储服务
  * @Date 2022/9/9 11:30
  **/
@@ -21,7 +21,7 @@ public class DataFacedeServer {
 	private List<SaveServer> serverList = new ArrayList<>();
 
 	public DataFacedeServer() {
-		Package pack = SaveRecordServer.class.getPackage();
+		Package pack = SaveRobotDataServer.class.getPackage();
 		Set<Class<?>> allClasses = ClassUtil.getClasses(pack);
 
 		for (Class<?> clazz : allClasses) {

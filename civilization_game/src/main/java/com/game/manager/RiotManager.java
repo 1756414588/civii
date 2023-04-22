@@ -13,6 +13,7 @@ import com.game.domain.s.*;
 import com.game.log.consumer.EventManager;
 import com.game.pb.RiotPb;
 import com.game.pb.WorldPb;
+import com.game.service.AchievementService;
 import com.game.service.RoitService;
 import com.game.util.DateHelper;
 import com.game.util.LogHelper;
@@ -60,7 +61,8 @@ public class RiotManager {
 	private MarchManager marchManager;
 	@Autowired
 	private TechManager techManager;
-
+	@Autowired
+	ActivityEventManager activityEventManager;
 
 	// 通过areaType获取最多刷新的怪物数量
 	// arateType: 地图类型, keyId: 配置Id
@@ -136,16 +138,15 @@ public class RiotManager {
 
 				for (int num = 1; num <= maxNum; num++) {
 					Pos monsterPos = mapInfo.randPickPos();
-					if (monsterPos.isError() || !mapInfo.isFreePos(monsterPos)) {
-						continue;
-					}
+					//if (monsterPos.isError() || !mapInfo.isFreePos(monsterPos)) {
+					//	continue;
+					//}
 
 					// 创建一个野怪
-					worldManager.addRiotMonster(monsterPos,
-						monsterId,
-						worldMonster.getLevel(),
-						mapInfo,
-						AddMonsterReason.FLUSH_SPECIAL_MONSTER);
+					Monster monster = worldManager.addRiotMonster(monsterPos, monsterId, worldMonster.getLevel(), mapInfo, AddMonsterReason.FLUSH_SPECIAL_MONSTER);
+					if (monster == null) {
+						continue;
+					}
 					totalNum++;
 					if (totalNum >= maxNum) {
 						break;
@@ -178,10 +179,10 @@ public class RiotManager {
 			}
 
 			if (player.getCommandLv() < staticWorldActPlan.getContinues().get(3)) {
-                continue;
-            }
+				continue;
+			}
 
-            if (!player.getFullLoad().get()) {
+			if (!player.getFullLoad().get()) {
 				continue;
 			}
 
@@ -330,7 +331,7 @@ public class RiotManager {
 				doRiotWar(warInfo);
 				simpleData.getRiotWar().clear();
 				warInfo.setState(WarState.Finish);
-                iterator.remove();
+				iterator.remove();
 			}
 		}
 	}
@@ -342,90 +343,86 @@ public class RiotManager {
 	 * @param warInfo
 	 */
 	public void doRiotWar(WarInfo warInfo) {
-        try {
-		StaticWorldMonster worldMonster = staticWorldMgr.getMonster((int) warInfo.getAttackerId());
-		if (worldMonster == null) {
-			LogHelper.CONFIG_LOGGER.info("worldMonster is null.");
-			return;
-		}
-		Player player = playerManager.getPlayer(warInfo.getDefencerId());
-		if (player == null) {
-			LogHelper.CONFIG_LOGGER.info("target is null!");
-			return;
-		}
-
-		List<Integer> monsterIds = worldMonster.getMonsterIds();
-		Team monsterTeam = battleMgr.initRiotMonsterTeam(monsterIds, BattleEntityType.ROIT_MONSTER, player);
-		// 防守方: 援助 + 当前玩家的驻防武将 + 其他玩家驻防武将 + 城防军
-		Team playerTeam = battleMgr.initDefencer(warInfo, BattleEntityType.HERO, false);
-		Random rand = new Random(System.currentTimeMillis());
-		// seed 开始战斗
-		battleMgr.doTeamBattle(monsterTeam, playerTeam, rand, ActPassPortTaskType.IS_WORLD_WAR);
-		activityManager.calcuKillAll(warInfo, playerTeam, monsterTeam);
-
-		if (player == null) {
-			LogHelper.CONFIG_LOGGER.info("attacker is null!");
-			return;
-		}
-
-		if (!playerTeam.isWin()) {
-			//不能继续了
-			player.getSimpleData().setWaveContinue(true);
-			//清除信息
-			if (player.getSimpleData() != null) {
-				player.getSimpleData().getRiotWar().clear();
+		try {
+			StaticWorldMonster worldMonster = staticWorldMgr.getMonster((int) warInfo.getAttackerId());
+			if (worldMonster == null) {
+				LogHelper.CONFIG_LOGGER.info("worldMonster is null.");
+				return;
 			}
-			WorldActPlan worldActPlan = roitService.getWorldRoitActPlan();
-			eventManager.worldActRiot(player, 2,
-				Lists.newArrayList(
-					worldActPlan.getId(),
-					player.getSimpleData().getAttackWave()
-				));
-		}
-		//清除行军信息
-		March march = player.getSimpleData().getRiotMarchs();
-		if (march != null) {
-			march.setState(MarchState.Done);
-			worldManager.synMarchToPlayer(player, march);
-			marchManager.backKey(march.getKeyId());
-			player.getSimpleData().setRiotMarchs(null);
-		}
+			Player player = playerManager.getPlayer(warInfo.getDefencerId());
+			if (player == null) {
+				LogHelper.CONFIG_LOGGER.info("target is null!");
+				return;
+			}
 
-		player.getSimpleData().setAttackWave(player.getSimpleData().getAttackWave() + 1);
+			List<Integer> monsterIds = worldMonster.getMonsterIds();
+			Team monsterTeam = battleMgr.initRiotMonsterTeam(monsterIds, BattleEntityType.ROIT_MONSTER, player);
+			// 防守方: 援助 + 当前玩家的驻防武将 + 其他玩家驻防武将 + 城防军
+			Team playerTeam = battleMgr.initDefencer(warInfo, BattleEntityType.HERO, false);
+			Random rand = new Random(System.currentTimeMillis());
+			// seed 开始战斗
+			battleMgr.doTeamBattle(monsterTeam, playerTeam, rand, ActPassPortTaskType.IS_WORLD_WAR);
+			activityManager.calcuKillAll(warInfo, playerTeam, monsterTeam);
 
-		// 防守者经验值
-		HeroAddExp heroAddExp = worldManager.caculateTeamKill(playerTeam, playerTeam.getLordId());
-		worldManager.caculateTeamDefenceKill(playerTeam);
-		// 处理玩家扣血
-		HashMap<Integer, Integer> defenceRec = new HashMap<Integer, Integer>();
-		HashMap<Long, HashMap<Integer, Integer>> allDefenceRec = new HashMap<>();
-		worldManager.handleDefenceSoldier(playerTeam, player, MarchReason.RIOT_WAR_ATTEND, allDefenceRec);
-		defenceRec = allDefenceRec.get(player.getLord().getLordId());
-		// 同步所有参战人员的属性变化, 处理士兵血量和威望
-		HashBasedTable<Long, Integer, Integer> allSoldierRec = HashBasedTable.create();
-		handlePvpWarHp(warInfo, playerTeam, allSoldierRec, WarType.RIOT_WAR);
-		// 根据结果不同发送不同的邮件给玩家
-		worldManager.soldierAutoAdd(player);
-		handePvpWarRemove(warInfo);  // 通知参战双方删除战斗
-		battleMailMgr.riotMail(playerTeam, monsterTeam, player,
-			worldMonster.getId(), new ArrayList<Award>(),
-			heroAddExp, allSoldierRec);
-		//战斗结束 移除兵力减少的buff
-		player.getSimpleData().getRiotBuff().remove(RiotBuff.LESSTROOPS);
-		synRiotBuff(player);
-		//防守兵力返回
-		warInfo.getDefenceMarches().forEach(march2 -> {
-			Player target = playerManager.getPlayer(march2.getLordId());
-			// 通知所有部队遣返
-			marchManager.doWarMarchReturn(target, warInfo, Reason.RIOT_WAVE);
-		});
-		if (playerTeam.isWin()) {
-			//更新通行证任务
-			ActivityEventManager.getInst().activityTip(EventEnum.RIOT_WAR, player, 1, 0);
+
+			if (!playerTeam.isWin()) {
+				//不能继续了
+				player.getSimpleData().setWaveContinue(true);
+				//清除信息
+				if (player.getSimpleData() != null) {
+					player.getSimpleData().getRiotWar().clear();
+				}
+				WorldActPlan worldActPlan = roitService.getWorldRoitActPlan();
+				eventManager.worldActRiot(player, 2,
+					Lists.newArrayList(
+						worldActPlan.getId(),
+						player.getSimpleData().getAttackWave()
+					));
+			}
+			//清除行军信息
+			March march = player.getSimpleData().getRiotMarchs();
+			if (march != null) {
+				march.setState(MarchState.Done);
+				worldManager.synMarchToPlayer(player, march);
+				marchManager.backKey(march.getKeyId());
+				player.getSimpleData().setRiotMarchs(null);
+			}
+
+			player.getSimpleData().setAttackWave(player.getSimpleData().getAttackWave() + 1);
+
+			// 防守者经验值
+			HeroAddExp heroAddExp = worldManager.caculateTeamKill(playerTeam, playerTeam.getLordId());
+			worldManager.caculateTeamDefenceKill(playerTeam);
+			// 处理玩家扣血
+			HashMap<Integer, Integer> defenceRec = new HashMap<Integer, Integer>();
+			HashMap<Long, HashMap<Integer, Integer>> allDefenceRec = new HashMap<>();
+			worldManager.handleDefenceSoldier(playerTeam, player, MarchReason.RIOT_WAR_ATTEND, allDefenceRec);
+			defenceRec = allDefenceRec.get(player.getLord().getLordId());
+			// 同步所有参战人员的属性变化, 处理士兵血量和威望
+			HashBasedTable<Long, Integer, Integer> allSoldierRec = HashBasedTable.create();
+			handlePvpWarHp(warInfo, playerTeam, allSoldierRec, WarType.RIOT_WAR);
+			// 根据结果不同发送不同的邮件给玩家
+			worldManager.soldierAutoAdd(player);
+			handePvpWarRemove(warInfo);  // 通知参战双方删除战斗
+			battleMailMgr.riotMail(playerTeam, monsterTeam, player,
+				worldMonster.getId(), new ArrayList<Award>(),
+				heroAddExp, allSoldierRec);
+			//战斗结束 移除兵力减少的buff
+			player.getSimpleData().getRiotBuff().remove(RiotBuff.LESSTROOPS);
+			synRiotBuff(player);
+			//防守兵力返回
+			warInfo.getDefenceMarches().forEach(march2 -> {
+				Player target = playerManager.getPlayer(march2.getLordId());
+				// 通知所有部队遣返
+				marchManager.doWarMarchReturn(target, warInfo, Reason.RIOT_WAVE);
+			});
+			if (playerTeam.isWin()) {
+				//更新通行证任务
+				activityEventManager.activityTip(EventEnum.RIOT_WAR, player, 1, 0);
 //            activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.MONSTER_INTRUSION, 1);
-            }
-        } catch (Exception e) {
-            LogHelper.ERROR_LOGGER.error(e.getMessage(), e);
+			}
+		} catch (Exception e) {
+			LogHelper.ERROR_LOGGER.error(e.getMessage(), e);
 		}
 	}
 
@@ -533,10 +530,12 @@ public class RiotManager {
 
 			if (soilder > 0) {
 				activityManager.updActPerson(player, ActivityConst.ACT_SOILDER_RANK, soilder, 0);
+				achievementService.addAndUpdate(player,AchiType.AT_25,soilder);
 			}
 		}
 	}
-
+	@Autowired
+	AchievementService achievementService;
 
 	/**
 	 * 获取玩家总的杀敌数

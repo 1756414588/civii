@@ -1,16 +1,15 @@
 package com.game.acion;
 
 import com.game.domain.Robot;
-import com.game.domain.p.RobotMessage;
 import com.game.pb.BasePb.Base;
 
 public interface IAction {
 
 	long getId();
 
-	void doAction(MessageEvent messageEvent, Robot robot);
+	void doAction(MessageEvent event, Robot robot);
 
-	void onResult(MessageEvent messageEvent, Robot robot, Base base);
+	void onResult(MessageEvent event, Robot robot, Base base);
 
 	void registerEvent(Robot robot);
 
@@ -18,6 +17,9 @@ public interface IAction {
 
 	long getRemain();
 
-	RobotMessage getRobotMessage();
+	int getGroup();
+
+	byte[] getMessage();
+
 
 }

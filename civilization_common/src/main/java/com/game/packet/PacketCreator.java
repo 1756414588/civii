@@ -4,7 +4,7 @@ import com.game.pb.BasePb.Base;
 import io.netty.buffer.ByteBuf;
 
 /**
- *
+ * @Author 陈奎
  * @Description 服务器通信包创建器
  * @Date 2022/9/9 11:30
  **/
@@ -13,6 +13,20 @@ public class PacketCreator {
 
 	public static Packet create(int cmd, byte[] bytes) {
 		return create(cmd, 0, bytes);
+	}
+
+	public static Packet create(byte[] bytes) {
+		Packet packet = new Packet();
+		packet.bytes = bytes;
+		return packet;
+	}
+
+	public static Packet create(byte[] bytes, long roleId, long channelId) {
+		Packet packet = new Packet();
+		packet.bytes = bytes;
+		packet.roleId = roleId;
+		packet.channelId = channelId;
+		return packet;
 	}
 
 	public static Packet create(int cmd, int error, byte[] bytes) {

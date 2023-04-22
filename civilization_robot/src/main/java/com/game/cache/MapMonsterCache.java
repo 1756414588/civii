@@ -5,6 +5,7 @@ import com.game.domain.WorldPos;
 import com.game.load.ILoadData;
 import com.game.pb.CommonPb;
 import com.game.pb.CommonPb.Pos;
+import com.game.util.LogHelper;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @Author 陈奎
  * @Description
  * @Date 2022/9/16 11:12
  **/
@@ -52,6 +53,8 @@ public class MapMonsterCache implements ILoadData {
 		if (worldEntity.getEntityType() != 1) {
 			return;
 		}
+
+		LogHelper.CHANNEL_LOGGER.info("野怪消失 pos:{} level:{}", worldEntity.getEntityType(), new WorldPos(pos.getX(), pos.getY()));
 
 		WorldPos worldPos = new WorldPos(pos.getX(), pos.getY(), worldEntity.getLevel());
 		int mapId = staticWorldMapCache.getMapId(pos.getX(), pos.getY());

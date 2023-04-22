@@ -5,9 +5,9 @@ import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticPropMgr;
 import com.game.dataMgr.StaticRebelMgr;
 import com.game.dataMgr.StaticWorldMgr;
+import com.game.domain.Award;
 import com.game.domain.Player;
 import com.game.domain.WorldData;
-import com.game.domain.Award;
 import com.game.domain.p.Item;
 import com.game.domain.p.SimpleData;
 import com.game.domain.p.WorldActPlan;
@@ -119,7 +119,7 @@ public class RebelService {
             return;
         }
         //添加限制，避免玩家改道具id用其他的道具也能开叛军
-		if (itemId != RebelConsts.ITEM_ID_1 && itemId != RebelConsts.ITEM_ID_2 && itemId != RebelConsts.ITEM_ID_3) {
+        if (itemId != RebelConsts.ITEM_ID_1 && itemId != RebelConsts.ITEM_ID_2 && itemId != RebelConsts.ITEM_ID_3) {
             handler.sendErrorMsgToPlayer(GameError.ITEM_NOT_FOUND);
             return;
         }
@@ -129,7 +129,7 @@ public class RebelService {
             return;
         }
         // 检测背包是否存在
-        HashMap<Integer, Item> items = player.getItemMap();
+        Map<Integer, Item> items = player.getItemMap();
         Item item = items.get(itemId);
         if (item == null) {
             handler.sendErrorMsgToPlayer(GameError.ITEM_NOT_FOUND);
@@ -148,6 +148,13 @@ public class RebelService {
             handler.sendErrorMsgToPlayer(GameError.ITEM_EFFECT_VALUE_IS_NULL);
             return;
         }
+        long monsterId = effectValue.get(0).get(0);
+        StaticWorldMonster staticWorldMonster = staticWorldMgr.getMonster((int) monsterId);
+        if (staticWorldMonster == null) {
+            handler.sendErrorMsgToPlayer(GameError.WORLD_MONSTER_NOT_FOUND);
+            return;
+        }
+
         List<Entity> list = new ArrayList<>();
         int mapId = worldManager.getMapId(player);
         Pos pos = new Pos(req.getPox(), req.getPoy());
@@ -161,17 +168,18 @@ public class RebelService {
             }
             return;
         }
-        long monsterId = effectValue.get(0).get(0);
-        StaticWorldMonster staticWorldMonster = staticWorldMgr.getMonster((int) monsterId);
-        if (staticWorldMonster == null) {
+        // 地图创建叛军
+        RebelMonster rebelMonster = worldManager.addRebelMonster(pos, staticWorldMonster.getId(), staticWorldMonster.getLevel(), mapInfo, AddMonsterReason.ADD_REBEL_MONSTER, player.getCountry());
+        if (rebelMonster == null) {
             handler.sendErrorMsgToPlayer(GameError.WORLD_MONSTER_NOT_FOUND);
             return;
         }
+
         item = itemManager.subItem(player, itemId, 1, Reason.REBEL_ITEM_EXCHANGE);
         RebelPb.UseRebelPropRs.Builder builder = RebelPb.UseRebelPropRs.newBuilder();
         builder.setProp(item.wrapPb());
         handler.sendMsgToPlayer(RebelPb.UseRebelPropRs.ext, builder.build());
-        RebelMonster rebelMonster = worldManager.addRebelMonster(pos, staticWorldMonster.getId(), staticWorldMonster.getLevel(), mapInfo, AddMonsterReason.ADD_REBEL_MONSTER, player.getCountry());
+
         rebelMonster.setCreateTime(System.currentTimeMillis());
         mapInfo.getRebelMap().put(pos, rebelMonster);
         player.addCallRebel();
@@ -232,9 +240,10 @@ public class RebelService {
 
     public void clearRebelMonster(MapInfo mapInfo, RebelMonster rebelMonster) {
         // 清除野怪
-        worldManager.clearRebelMonsterPos(mapInfo, rebelMonster.getPos());
-        // 同步野怪
-        worldManager.synEntityRemove(rebelMonster, mapInfo.getMapId(), rebelMonster.getPos());
+//        worldManager.clearRebelMonsterPos(mapInfo, rebelMonster.getPos());
+//        // 同步野怪
+//        worldManager.synEntityRemove(rebelMonster, mapInfo.getMapId(), rebelMonster.getPos());
+        mapInfo.clearPos(rebelMonster.getPos());
         warManager.cancelRebelWar(rebelMonster, mapInfo, -1);
 
     }
@@ -276,7 +285,6 @@ public class RebelService {
             logger.error("StaticRebelExchange is not exist id {}", req.getId());
             return;
         }
-
 
         if (player.getLevel() < staticRebelExchange.getLimitLv()) {
             logger.error("exchangeRebelAward  error : level is not enough  ");
@@ -455,24 +463,24 @@ public class RebelService {
             builder.addExchangeInfo(exchangeInfo);
         }
         handler.sendMsgToPlayer(RebelPb.GetExchangeInfoRs.ext, builder.build());
-	}
+    }
 
-	/**
-	 * 首次进入伏击叛军引导奖励
-	 **/
-	public void rebelGuideAwardRq(ClientHandler handler) {
-		Player player = playerManager.getPlayer(handler.getRoleId());
-		if (player == null) {
-			handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
-			return;
-		}
-		SimpleData simpleData = player.getSimpleData();
-		RebelGuideAwardRs.Builder builder = RebelGuideAwardRs.newBuilder();
-		if (!simpleData.isFirstRebelGuideAward()) {
-            playerManager.addAward(player,AwardType.PROP,189,1,Reason.REBEL_ITEM_EXCHANGE);
-			builder.setAward(CommonPb.Award.newBuilder().setType(AwardType.PROP).setId(189).setCount(1).build());
-			simpleData.setFirstRebelGuideAward(true);
-		}
-		handler.sendMsgToPlayer(RebelGuideAwardRs.ext, builder.build());
-	}
+    /**
+     * 首次进入伏击叛军引导奖励
+     **/
+    public void rebelGuideAwardRq(ClientHandler handler) {
+        Player player = playerManager.getPlayer(handler.getRoleId());
+        if (player == null) {
+            handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
+            return;
+        }
+        SimpleData simpleData = player.getSimpleData();
+        RebelGuideAwardRs.Builder builder = RebelGuideAwardRs.newBuilder();
+        if (!simpleData.isFirstRebelGuideAward()) {
+            playerManager.addAward(player, AwardType.PROP, 189, 1, Reason.REBEL_ITEM_EXCHANGE);
+            builder.setAward(CommonPb.Award.newBuilder().setType(AwardType.PROP).setId(189).setCount(1).build());
+            simpleData.setFirstRebelGuideAward(true);
+        }
+        handler.sendMsgToPlayer(RebelGuideAwardRs.ext, builder.build());
+    }
 }

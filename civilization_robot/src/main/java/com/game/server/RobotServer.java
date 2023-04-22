@@ -45,9 +45,12 @@ public class RobotServer extends AbsServer {
 
 	private AppPropertes property;
 
+	private boolean ready;
+
 	public RobotServer() {
 		super(App.GATE.getName());
 	}
+
 
 	@Override
 	public void run() {
@@ -190,6 +193,13 @@ public class RobotServer extends AbsServer {
 		return App.GATE.getName();
 	}
 
+	public void setReady(boolean ready){
+		this.ready = ready;
+	}
+
+	public boolean isReady() {
+		return ready;
+	}
 }
 
 

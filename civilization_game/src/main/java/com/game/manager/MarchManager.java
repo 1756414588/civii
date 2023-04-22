@@ -1,9 +1,11 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.constant.GameError;
 import com.game.constant.MailId;
 import com.game.constant.MapId;
 import com.game.constant.MarchState;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.s.StaticWorldMap;
 import com.game.flame.FlameWarManager;
@@ -24,7 +26,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
-public class MarchManager {
+@LoadData(name = "行军管理", type = Loading.LOAD_USER_DB)
+public class MarchManager extends BaseManager {
 
 	private Queue<Integer> marchKey;
 	private final static int MIN_MARCHKEY = 1000;
@@ -39,12 +42,16 @@ public class MarchManager {
 	@Autowired
 	private FlameWarManager flameWarManager;
 
-	@PostConstruct
-	private void init() {
+	@Override
+	public void load() throws Exception {
 		marchKey = new ConcurrentLinkedQueue<>();
 		for (int i = MIN_MARCHKEY; i < MAX_MARCHKEY; i++) {
 			marchKey.add(i);
 		}
+	}
+
+	@Override
+	public void init() throws Exception {
 	}
 
 	public int getMarchKey() {
@@ -121,12 +128,12 @@ public class MarchManager {
 
 		long period = worldManager.getPeriod(player, march.getEndPos(), march.getStartPos(), bookEffectMarch);
 
-		//Pos startPos = march.getStartPos();
-		//Pos endPos = march.getEndPos();
-		//int mapId = worldManager.getMapId(endPos);
-		//if (mapId == MapId.FIRE_MAP) {
-		//	period = flameWarManager.getPeriod(player, startPos, endPos, bookEffectMarch);
-		//}
+		Pos startPos = march.getStartPos();
+		Pos endPos = march.getEndPos();
+		int mapId = worldManager.getMapId(endPos);
+		if (mapId == MapId.FIRE_MAP) {
+			period = flameWarManager.getPeriod(player, startPos, endPos, bookEffectMarch);
+		}
 
 		period = worldManager.checkPeriod(march, period);
 
@@ -149,6 +156,7 @@ public class MarchManager {
 
 	/**
 	 * 杀虫返回
+	 *
 	 * @param march
 	 * @param reason
 	 */

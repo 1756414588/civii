@@ -24,11 +24,13 @@ public class Camp implements Cloneable {
     }
 
 
-    public void incrementLevel(int buildingId) {
+    public int incrementLevel(int buildingId) {
         BuildingBase buildingBase = camp.get(buildingId);
         if (buildingBase != null) {
             buildingBase.incrementLevel();
+            return buildingBase.getLevel();
         }
+        return 1;
     }
 
     public void gmIncrementLevel(int buildingId, int level) {

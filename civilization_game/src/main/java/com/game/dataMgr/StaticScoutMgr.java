@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticScout;
 import com.game.domain.s.StaticScoutLv;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@LoadData(name = "侦察")
 public class StaticScoutMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -43,10 +45,13 @@ public class StaticScoutMgr extends BaseDataMgr {
     private Map<Integer, StaticScoutLv> scoutLvMap = new HashMap<Integer, StaticScoutLv>();
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         scoutMap   = staticDataDao.selectScoutMap();
         scoutLvMap = staticDataDao.selectScoutLvMap();
+    }
 
+    @Override
+    public void init() throws Exception{
     }
 
     public StaticScoutLv getScoutLv(int level) {

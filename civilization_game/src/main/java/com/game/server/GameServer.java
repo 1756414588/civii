@@ -1,5 +1,6 @@
 package com.game.server;
 
+import com.game.Loading;
 import com.game.domain.Player;
 import com.game.log.consumer.LoggerConsumer;
 import com.game.manager.*;
@@ -9,25 +10,26 @@ import com.game.network.NetManager;
 import com.game.packet.Packet;
 import com.game.packet.PacketCreator;
 import com.game.pb.BasePb.Base;
-import com.game.season.ModuleMgr;
-import com.game.season.SeasonManager;
+import com.game.server.netserver.MessageFilter;
 import com.game.server.netserver.NetServer;
 import com.game.service.WorldActPlanService;
 import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
 import com.game.util.TimeHelper;
 import io.netty.channel.ChannelHandlerContext;
+
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.Setter;
 
 /**
- *
+ * @Author 陈奎
  * @Description 游戏服务器
  * @Date 2022/9/9 11:30
  **/
-
+@Setter
 public class GameServer extends AbsServer {
 
 	public NetServer hostServer;
@@ -67,68 +69,54 @@ public class GameServer extends AbsServer {
 		INet net = NetManager.getInst().get(player.getGateId());
 		if (net != null) {
 			net.send(packet);
+			if (!MessageFilter.isFilterPrint(packet.getCmd())) {
+				LogHelper.CHANNEL_LOGGER.info("sendToClient channelId:{} playerId:{} cmd:{}", packet.getChannelId(), packet.getRoleId(), packet.getCmd());
+			}
 		}
 	}
 
 	@Override
 	public void run() {
 		super.run();
-		currentDay = TimeHelper.getCurrentDay();
-		PlayerManager playerDataManager = SpringUtil.getBean(PlayerManager.class);
+
+		startOn();
 		try {
+
+			currentDay = TimeHelper.getCurrentDay();
+
+			// 加载pb
 			this.registerPbFile();
-			SpringUtil.getBean(BattleManager.class).init();
-			ModuleMgr.init();
-			playerDataManager.init();
-			SpringUtil.getBean(ActivityManager.class).init();
-			SpringUtil.getBean(HeroManager.class).init();
 
-		} catch (Exception e) {
-			LogHelper.GAME_LOGGER.error(e.getMessage(), e);
-			System.exit(-1);
-		}
-		loggerConsumer = SpringUtil.getBean(LoggerConsumer.class);
-		//loggerConsumer.init();
+			// 处理服务
+			ExecServer.getInst().init();
 
-		hostServer = new NetServer();
-		mainLogicServer = new LogicServer(SpringUtil.getBean(ServerManager.class).getServer().getServerName(), 500, 100);
+			//TODO 优化此处待优化
+			ServerManager serverManager = SpringUtil.getBean(ServerManager.class);
+			mainLogicServer = new LogicServer(serverManager.getServer().getServerName(), 500, 100);
 
-		try {
+			// 数据存储服务
+			dataFacedeServer = new DataFacedeServer();
+			dataFacedeServer.start();
+
+			// 加载服务
+			Loading.getInst().load();
+
+			// 网络服务
+			hostServer = new NetServer();
 			startServerThread(hostServer);
 			startServerThread(mainLogicServer);
-			dataFacedeServer = new DataFacedeServer();
 
 			// 兼容世界活动
 			SpringUtil.getBean(WorldActPlanService.class).openWorldAct();
-			SpringUtil.getBean(BroodWarManager.class).init();
-			SpringUtil.getBean(ZergManager.class).init();
-			SpringUtil.getBean(BroodWarManager.class).initBroodWar();
-			SpringUtil.getBean(ActManoeuvreManager.class).init();
-			// 合服后处理数据
-			SpringUtil.getBean(WorldManager.class).iniMergeServerPlayer();
-			SpringUtil.getBean(PublicDataManager.class).ini();
-			SpringUtil.getBean(SeasonManager.class).init();
 
 		} catch (Exception e) {
 			LogHelper.GAME_LOGGER.error(e.getMessage(), e);
+			startInterrupted();
 			System.exit(-1);
 		}
-		LogHelper.GAME_LOGGER.error("GameServer " + SpringUtil.getBean(ServerManager.class).getServer().getServerName() + " Started SUCCESS");
+		LogHelper.GAME_LOGGER.info("GameServer " + SpringUtil.getBean(ServerManager.class).getServer().getServerName() + " Started SUCCESS");
 
-		try {
-			// 执行run
-			String os = System.getProperty("os.name");
-			if (os != null && os.toLowerCase().startsWith("linux")) {
-				String[] command = {"/bin/sh", "-c", "rm -rf c_pid"};
-				Runtime.getRuntime().exec(command);
-			} else if (os != null && os.toLowerCase().startsWith("windows")) {
-				System.out.println("当前为window系统");
-			} else {// 其他系统
-				System.out.println("当前为其他系统");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		startComplete();
 	}
 
 	/**
@@ -143,8 +131,8 @@ public class GameServer extends AbsServer {
 		try {
 
 			// 优雅关闭任务执行器
-//			ExecServer.getInst().shutDownGraceful();
-//			LogHelper.GAME_LOGGER.info("【任务执行器】关闭..");
+			ExecServer.getInst().shutDownGraceful();
+			LogHelper.GAME_LOGGER.info("【任务执行器】关闭..");
 
 			mainLogicServer.shutDownGraceful();
 			LogHelper.GAME_LOGGER.info("【业务线程】关闭..");
@@ -153,7 +141,7 @@ public class GameServer extends AbsServer {
 			dataFacedeServer.shutDownGraceful();
 			LogHelper.GAME_LOGGER.info("【数据服务】关闭..");
 
-			loggerConsumer.stop();
+			//loggerConsumer.stop();
 
 			URL location = getClass().getProtectionDomain().getCodeSource().getLocation();
 			String runname = ManagementFactory.getRuntimeMXBean().getName();
@@ -183,8 +171,82 @@ public class GameServer extends AbsServer {
 
 	private void startServerThread(Runnable runnable) {
 		Thread thread = new Thread(runnable);
-		thread.setUncaughtExceptionHandler((t, e) -> LogHelper.ERROR_LOGGER.error("uncaughtException", e));
+		thread.setUncaughtExceptionHandler((t, e) -> {
+			LogHelper.ERROR_LOGGER.error("uncaughtException", e);
+			startInterrupted();
+			System.exit(-1);
+		});
 		thread.start();
 	}
+
+	/**
+	 * 启动开始
+	 */
+	private void startOn() {
+		try {
+
+			LogHelper.GAME_LOGGER.info("GAME 开始启动");
+
+			String os = System.getProperty("os.name");
+			if (os != null && os.toLowerCase().startsWith("linux")) {
+				String[] command = {"/bin/sh", "-c", "echo 0 > pid"};
+				Runtime.getRuntime().exec(command);
+			} else if (os != null && os.toLowerCase().startsWith("windows")) {
+				System.out.println("当前为window系统");
+			} else {// 其他系统
+				System.out.println("当前为其他系统");
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 启动中止
+	 */
+	private void startInterrupted() {
+		try {
+
+			LogHelper.GAME_LOGGER.info("GAME 启动失败");
+
+			String os = System.getProperty("os.name");
+			if (os != null && os.toLowerCase().startsWith("linux")) {
+				String[] command = {"/bin/sh", "-c", "echo 100 > pid"};
+				Runtime.getRuntime().exec(command);
+			} else if (os != null && os.toLowerCase().startsWith("windows")) {
+				System.out.println("当前为window系统");
+			} else {// 其他系统
+				System.out.println("当前为其他系统");
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 启动完成
+	 */
+	private void startComplete() {
+		try {
+
+			LogHelper.GAME_LOGGER.info("GAME 开始启动");
+
+			String os = System.getProperty("os.name");
+			if (os != null && os.toLowerCase().startsWith("linux")) {
+				String[] command = {"/bin/sh", "-c", "echo 200 > pid",};
+				Runtime.getRuntime().exec(command);
+			} else if (os != null && os.toLowerCase().startsWith("windows")) {
+				System.out.println("当前为window系统");
+			} else {// 其他系统
+				System.out.println("当前为其他系统");
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 
 }

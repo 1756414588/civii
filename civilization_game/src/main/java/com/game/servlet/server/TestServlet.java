@@ -64,14 +64,15 @@ public class TestServlet {
             int currentMapId = worldManager.getMapId(player);
             if (mapId != currentMapId) {
                 MapInfo mapInfo = worldManager.getMapInfo(currentMapId);
-                worldManager.removePlayerCity(playerPos, mapInfo);
+                //worldManager.removePlayerCity(playerPos, mapInfo);
                 MapInfo newMapInfo = worldManager.getMapInfo(mapId);
                 Pos randPos = randomPos(posMap, newMapInfo, 0);
                 if (randPos == null) {
                     return;
                 }
-                playerManager.changePlayerPos(player, randPos);
-                worldManager.addPlayerCity(randPos, newMapInfo, player);
+                //playerManager.changePlayerPos(player, randPos);
+                //worldManager.addPlayerCity(randPos, newMapInfo, player);
+                worldManager.changePlayerPos(player,randPos);
                 // 驻防武将回城
                 worldManager.handleWallFriendReturn(player);
                 // 迁城之后战斗全部删除

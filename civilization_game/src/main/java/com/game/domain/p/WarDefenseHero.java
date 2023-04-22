@@ -43,6 +43,12 @@ public class WarDefenseHero implements Cloneable {
 
     public WarDefenseHero() {
     }
+    public void reset(int heroId){
+        this.heroId = heroId;
+        this.lastRefreshTime = System.currentTimeMillis();
+        this.isAddSoldier = false;
+    }
+
 
 
     @Override

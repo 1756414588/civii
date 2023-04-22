@@ -27,6 +27,10 @@ public class MessageWork implements ITask {
 		return packet.getCmd();
 	}
 
+	public long getChannelId() {
+		return packet.getChannelId();
+	}
+
 	@Override
 	public void run() {
 		int cmd = 0;
@@ -36,6 +40,7 @@ public class MessageWork implements ITask {
 			cmd = packet.getCmd();
 			handler = gameServer.messagePool.getClientHandler(cmd);
 			if (handler == null) {
+				LogHelper.MESSAGE_LOGGER.info("channelId:{} playerId:{} cmd:{} unregistered", packet.getChannelId(), packet.getRoleId(), cmd);
 				return;
 			}
 
@@ -47,10 +52,12 @@ public class MessageWork implements ITask {
 			handler.action();
 			long end = System.currentTimeMillis();
 			long timeCost = end - start;
-			if (timeCost > 5) {
-				String className = handler.getClass().getSimpleName();
-				LogHelper.GAME_LOGGER.info("timeCost {} playerId:{} cmd:{} haust:{}", className, handler.getRoleId(), packet.getCmd(), timeCost);
-			}
+			//if (timeCost > 5) {
+//				String className = handler.getClass().getSimpleName();
+//				LogHelper.GAME_LOGGER.info("timeCost {} playerId:{} cmd:{} haust:{}", className, handler.getRoleId(), packet.getCmd(), timeCost);
+			//}
+			String className = handler.getClass().getSimpleName();
+			LogHelper.GAME_LOGGER.info("timeCost {} playerId:{} cmd:{} haust:{}", className, handler.getRoleId(), packet.getCmd(), timeCost);
 
 		} catch (Exception e) {
 			LogHelper.ERROR_LOGGER.error("MessageWork doHandler error channelId:{} cmd{} cause:{}", ChannelUtil.getRoleId(ctx), cmd, e.getMessage(), e);

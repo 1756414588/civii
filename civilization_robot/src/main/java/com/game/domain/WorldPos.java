@@ -8,10 +8,12 @@ import lombok.Setter;
 @Getter
 public class WorldPos {
 
+	private int mapId;
 	private int type;
 	private int x;
 	private int y;
 	private int level;
+	private boolean attack;
 
 	public WorldPos(int x, int y) {
 		this.x = x;
@@ -34,6 +36,10 @@ public class WorldPos {
 		return getX() ^ getY();
 	}
 
+	public int getPosValue() {
+		return this.x * 1000 + y;
+	}
+
 	@Override
 	public boolean equals(Object object) {
 		if (!(object instanceof Pos)) {
@@ -44,6 +50,6 @@ public class WorldPos {
 	}
 
 	public String toString() {
-		return new StringBuffer().append("[").append(x).append(",").append(y).append("]").toString();
+		return new StringBuffer().append("[").append(x).append(",").append(y).append(":").append(level).append("]").toString();
 	}
 }

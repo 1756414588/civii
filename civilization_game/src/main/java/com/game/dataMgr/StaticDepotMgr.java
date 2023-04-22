@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.game.util.RandomHelper;
 import com.google.common.collect.HashBasedTable;
 
 @Component
+@LoadData(name = "仓库")
 public class StaticDepotMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -27,7 +29,7 @@ public class StaticDepotMgr extends BaseDataMgr {
     private HashBasedTable<Integer, Integer, Double> exChangeRate = HashBasedTable.create();
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         depotList.clear();
         exChangeRate.clear();
         List<StaticDepot> list = staticDataDao.selectStaticDepot();
@@ -70,6 +72,10 @@ public class StaticDepotMgr extends BaseDataMgr {
         }
         staticExchanges = staticDataDao.selectStaticExchange();
         makeExchange();
+    }
+
+    @Override
+    public void init() throws Exception{
     }
 
     public StaticDepot getDepotByLv(int level) {

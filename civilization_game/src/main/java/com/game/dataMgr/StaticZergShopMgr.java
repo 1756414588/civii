@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticZergShop;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@LoadData(name = "主宰商店")
 public class StaticZergShopMgr extends BaseDataMgr {
 
 	@Autowired
@@ -24,7 +26,7 @@ public class StaticZergShopMgr extends BaseDataMgr {
 	private Map<Integer, StaticZergShop> shopMap = new HashMap<>();
 
 	@Override
-	public void init() throws Exception {
+	public void load() throws Exception {
 		List<StaticZergShop> list = staticDataDao.loadStaticZergShop();
 		list.forEach(e -> {
 			shopMap.put(e.getPropId(), e);
@@ -32,5 +34,9 @@ public class StaticZergShopMgr extends BaseDataMgr {
 		shops = list.stream().sorted(Comparator.comparing(StaticZergShop::getSort)).collect(Collectors.toList());
 	}
 
+	@Override
+	public void init() throws Exception {
+
+	}
 
 }

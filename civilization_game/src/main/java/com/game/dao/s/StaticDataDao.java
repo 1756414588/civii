@@ -2,23 +2,6 @@ package com.game.dao.s;
 
 import com.game.domain.s.*;
 import com.game.flame.entity.*;
-import com.game.season.StaticCompPlan;
-import com.game.season.directgift.entity.StaticSeasonLimitGift;
-import com.game.season.grand.entity.StaticSeasonTreasury;
-import com.game.season.hero.StaticComProf;
-import com.game.season.hero.StaticComSkill;
-import com.game.season.journey.entity.*;
-import com.game.season.seasongift.entity.StaticSeasonPayGift;
-import com.game.season.seven.entity.StaticSeasonSeven;
-import com.game.season.seven.entity.StaticSeasonSevenAward;
-import com.game.season.seven.entity.StaticSeasonSevenRank;
-import com.game.season.seven.entity.StaticSeasonSevenType;
-import com.game.season.talent.entity.StaticCompTalent;
-import com.game.season.talent.entity.StaticCompTalentType;
-import com.game.season.talent.entity.StaticCompTalentUp;
-import com.game.season.turn.entity.StaticTurn;
-import com.game.season.turn.entity.StaticTurnAward;
-import com.game.season.turn.entity.StaticTurnConfig;
 import org.apache.ibatis.annotations.MapKey;
 import com.game.domain.s.StaticBookSkillEffectType;
 import org.springframework.data.repository.query.Param;
@@ -695,49 +678,15 @@ public interface StaticDataDao {
     @MapKey("id")
     Map<Integer, StaticBulletWarLevel> loadBulletWar();
 
-    List<StaticCompPlan> loadComPlan();
-
-    List<StaticSeasonJourney> loadSeasonJourney();
-    List<StaticJourneyAward> loadJourneyAward();
-    List<StaticJourneyCamp> loadJourneyCamp();
-    List<StaticJourneyPerson> loadJourneyPerson();
-    List<StaticJourneyRankOfficer> loadJourneyRankOff();
-
-
-    List<StaticTurn> loadStaticTurn();
-    List<StaticTurnAward> loadStaticTurnAward();
-    StaticTurnConfig loadStaticTurnConfig();
-
-    @MapKey("keyId")
-    Map<Integer, StaticSeasonLimitGift> loadStaticSeasonLimitGift();
-
-    @MapKey("payMoneyId")
-    Map<Integer, StaticSeasonPayGift> loadStaticSeasonPayGift();
-
-    List<StaticSeasonSeven> loadStaticSeasonSeven();
-
-    List<StaticSeasonSevenType> loadStaticSeasonSevenType();
+    @MapKey("id")
+    Map<Integer, StaticAchievement> loadAchievement();
 
     @MapKey("id")
-    Map<Integer, StaticSeasonSevenAward> loadStaticSeasonSevenAward();
-
-    List<StaticSeasonSevenRank> loadStaticSeasonSevenRank();
+    Map<Integer, StaticAchiInfo> loadAchievementType();
 
     @MapKey("id")
-    Map<Integer, StaticSeasonTreasury> loadStaticSeasonTreasury();
+    Map<Integer, StaticAchiAwardBox> loadStaticAchiAwardBox();
 
-    @MapKey("id")
-    Map<Integer, StaticComSkill> loadStaticSeasonSkill();
-
-
-    @MapKey("profId")
-    Map<Integer, StaticComProf> loadStaticComProf();
-
-    StaticCompTalent loadStaticCompTalent();
-
-    @MapKey("keyId")
-    Map<Integer, StaticCompTalentUp> loadStaticCompTalentUp();
-
-    @MapKey("talentType")
-    Map<Integer, StaticCompTalentType> loadStaticCompTalentType();
+    @MapKey("countryId")
+    Map<Integer, StaticCountry> selectCountryMap();
 }

@@ -13,7 +13,6 @@
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.3.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd
-
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
@@ -56,7 +55,7 @@
 
     <import resource="spring-game-mybatis.xml"/>
     <import resource="spring-ini-mybatis.xml"/>
-    <import resource="spring-redis.xml"/>
+<!--    <import resource="spring-redis.xml"/>-->
     <import resource="spring-uc-mybatis.xml"/>
 
     <task:scheduler id="scheduler" pool-size="5"/>

@@ -5,6 +5,7 @@ import com.game.domain.p.Lord;
 import com.game.pb.CommonPb;
 
 public class ManChat extends Chat {
+
 	private Player player;
 	private long time;
 	private String msg;
@@ -42,11 +43,16 @@ public class ManChat extends Chat {
 	}
 
 	@Override
-	public CommonPb.Chat ser(int style, int officerId) {
+	public CommonPb.Chat ser(int style, int officerId, int targetCountry) {
 		CommonPb.Chat.Builder builder = CommonPb.Chat.newBuilder();
 		Lord lord = player.getLord();
 		builder.setLordId(lord.getLordId());
-		builder.setCountry(player.getCountry());
+		// 判断是否为游戏引导员发的阵营消息
+		if (targetCountry != 0 && player.getAccount().getIsGuider() == 1) {
+			builder.setCountry(targetCountry);
+		} else {
+			builder.setCountry(player.getCountry());
+		}
 		builder.setTitle(player.getTitle());
 		builder.setLevel(player.getLevel());
 		if (lord.getNick() != null) {

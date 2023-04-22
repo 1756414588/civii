@@ -2,15 +2,9 @@ package com.game.service;
 
 import com.game.activity.ActivityEventManager;
 import com.game.activity.define.EventEnum;
-import com.game.season.SeasonService;
-import com.game.season.seven.entity.SevenType;
 import com.game.util.PbHelper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+
+import java.util.*;
 
 import com.game.constant.*;
 import com.game.log.consumer.EventManager;
@@ -79,6 +73,8 @@ public class JourneyService {
 	private DailyTaskManager dailyTaskManager;
 	@Autowired
 	private EventManager eventManager;
+	@Autowired
+	ActivityEventManager activityEventManager;
 
 	/**
 	 * 获取胜利的最后关卡
@@ -179,7 +175,7 @@ public class JourneyService {
 		// 应该用玩家出战的英雄
 		// 出战英雄的Id有没有重复
 		Set<Integer> checkHeroSet = new HashSet<Integer>();
-		HashMap<Integer, Hero> heros = player.getHeros();
+		Map<Integer, Hero> heros = player.getHeros();
 		// 检查出战的英雄Id的合法性
 		for (Integer heroId : heroList) {
 			Hero hero = heros.get(heroId);
@@ -257,21 +253,20 @@ public class JourneyService {
 			// chatManager.updateChatShow(ChatShowType.PASS_JOURNEY, staticJOURNEY.getJOURNEYId(), player);
 			handleJourneyWin(player, staticJourney, journeyId, playerTeam, handler, builder);
 
-			ActivityEventManager.getInst().activityTip(EventEnum.JOURNEY_DONE, player, 1, 0);
+			activityEventManager.activityTip(EventEnum.JOURNEY_DONE, player, 1, 0);
 			// 更新通行证活动进度
 //            activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.DONE_JOURNEY_OR_SWEEP, 1);
 			activityManager.calculDailyExpedition(player, 1);
 			dailyTaskManager.record(DailyTaskId.EXPEDITION, player, 1);
 			activityManager.updActSeven(player, ActivityConst.TYPE_SET, Integer.valueOf(ActSevenConst.JOUNERY_DONE + String.valueOf(staticJourney.getJourneyId())), 0, 1);
-			seasonService.addSevenScore(SevenType.MILITARY, 1, player, 1);
+			achievementService.addAndUpdate(player,AchiType.AT_35,1);
 		} else {
 			handleJourneyFail(player, staticJourney, journeyId, playerTeam, handler, builder);
 		}
 		eventManager.journeryDone(player, Lists.newArrayList(journeyId, lord.getLastJourney(), 1, "", playerTeam.isWin()));
 		com.game.log.LogUser.log(LogTable.journey_log, JourneyLog.builder().lordId(player.roleId).nick(player.getNick()).level(player.getLevel()).journeyId(journeyId).result(playerTeam.isWin() ? 0 : 1).maxJourneyLog(player.getLord().getLastJourney()).build());
 	}
-	@Autowired
-	SeasonService seasonService;
+
 	public void handleJourneyWin(Player player, StaticJourney staticJourney, int journeyId, Team playerTeam, ClientHandler handler, JourneyDoneRs.Builder builder) {
 
 		Lord lord = player.getLord();
@@ -388,7 +383,7 @@ public class JourneyService {
 		handler.sendMsgToPlayer(JourneyPb.SweepJourneyRs.ext, builder.build());
 
 		// 更新通行证活动进度
-		ActivityEventManager.getInst().activityTip(EventEnum.JOURNEY_DONE, player, sweepTimes, 0);
+		activityEventManager.activityTip(EventEnum.JOURNEY_DONE, player, sweepTimes, 0);
 //        activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.DONE_JOURNEY_OR_SWEEP, sweepTimes);
 		activityManager.calculDailyExpedition(player, sweepTimes);
 		dailyTaskManager.record(DailyTaskId.EXPEDITION, player, sweepTimes);
@@ -462,5 +457,9 @@ public class JourneyService {
 		handler.sendMsgToPlayer(JourneyPb.BuyJourneyTimesRs.ext, builder.build());
 		activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.DONE_JOURNEY, 1);
 		eventManager.journeryBuy(player, Lists.newArrayList(count, price));
+		achievementService.addAndUpdate(player,AchiType.AT_16,count);
+
 	}
+	@Autowired
+	AchievementService achievementService;
 }

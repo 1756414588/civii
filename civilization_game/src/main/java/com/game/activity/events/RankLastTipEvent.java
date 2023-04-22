@@ -6,7 +6,6 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
@@ -14,10 +13,9 @@ import com.game.domain.p.CampMembersRank;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
 import com.game.domain.s.StaticActRankDisplay;
-import com.game.manager.ActivityManager;
-import com.game.util.LogHelper;
-import com.game.spring.SpringUtil;
 import com.game.util.TimeHelper;
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -26,19 +24,21 @@ import java.util.Optional;
 /**
  * 排名奖励，最后一天才能领奖 RANK_3
  */
+@Component
 public class RankLastTipEvent extends BaseActivityEvent {
 
-	private static RankLastTipEvent inst = new RankLastTipEvent();
-
-	public static RankLastTipEvent getInst() {
-		return inst;
-	}
+	//private static RankLastTipEvent inst = new RankLastTipEvent();
+	//
+	//public static RankLastTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
 		listenEvent(EventEnum.GET_ACTIVITY_AWARD_TIP, ActivityConst.ACT_TOPUP_RANK, this::process);
 //		listenEvent(EventEnum.GET_ACTIVITY_AWARD_TIP, ActivityConst.ACT_MENTOR_SCORE, this::process);
 	}
+
 
 	@Override
 	public void process(EventEnum activityEnum, IActivityActor actor) {
@@ -49,8 +49,8 @@ public class RankLastTipEvent extends BaseActivityEvent {
 
 //		LogHelper.MESSAGE_LOGGER.info("RankLastTipEvent activityId:{}", actor.getActivityId());
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
+		//StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
+		//ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 
 		Date rewardTime = TimeHelper.getRewardTime(activityBase.getEndTime());
 		Date now = new Date();

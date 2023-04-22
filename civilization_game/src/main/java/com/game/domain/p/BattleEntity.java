@@ -2,16 +2,14 @@ package com.game.domain.p;
 
 import com.game.pb.CommonPb;
 import com.game.pb.DataPb;
-import com.game.season.SkillModel;
-import com.game.season.StaticSeasonMgr;
-import com.game.season.hero.StaticComSkill;
-import com.game.server.GameServer;
-import com.game.spring.SpringUtil;
 import com.game.util.LogHelper;
 import io.netty.util.internal.StringUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.crypto.Data;
+import java.util.HashMap;
+import java.util.Map;
 
 //战斗实体
 public class BattleEntity {
@@ -36,8 +34,6 @@ public class BattleEntity {
 	private int techLv;                            //科技等级
 	private Map<Integer, Map<Integer, RecordEntity>> recordEntityMap = new HashMap<Integer, Map<Integer, RecordEntity>>();
 	private List<HeroBook> heroBooks = new ArrayList<>();// 武将的兵书
-	private SkillModel model;
-	private Hero hero;
 
 	public BattleEntity() {
 
@@ -354,43 +350,5 @@ public class BattleEntity {
 
 	public void setHeroBooks(List<HeroBook> heroBooks) {
 		this.heroBooks = heroBooks;
-	}
-
-	public void initSkill() {
-		if (this.hero != null) {
-			StaticSeasonMgr bean = SpringUtil.getBean(StaticSeasonMgr.class);
-			//StaticComSkill skill = bean.getSkillByTypeAndLevel(hero.getSkillType(), hero.getSkillLevel());
-			StaticComSkill skill = bean.getSkill(hero.getSkillId());
-			if (skill != null) {
-				switch (skill.getType()) {
-					case 1:
-						if (model == null) {
-							int i = new Random().nextInt(100);
-							model = new SkillModel();
-							if (i < skill.getPr()) {
-								model.setSkillId(skill.getId());
-								model.setTotalDamage(skill.getTotalDamage());
-							}
-						}
-						break;
-				}
-			}
-		}
-	}
-
-	public SkillModel getModel() {
-		return model;
-	}
-
-	public void setModel(SkillModel model) {
-		this.model = model;
-	}
-
-	public Hero getHero() {
-		return hero;
-	}
-
-	public void setHero(Hero hero) {
-		this.hero = hero;
 	}
 }

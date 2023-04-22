@@ -1,6 +1,8 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.dataMgr.StaticLimitMgr;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.p.Lord;
 import com.game.domain.s.StaticLimit;
@@ -26,7 +28,9 @@ import java.util.concurrent.TimeUnit;
  * @date 2021/6/25 10:00
  */
 @Component
-public class NickManager {
+@LoadData(name = "昵称管理", type = Loading.LOAD_USER_DB)
+public class NickManager extends BaseManager {
+
 	private static final int nickLenth = 5;
 
 	private BlockingQueue<String> nickMap = new ArrayBlockingQueue(5000);
@@ -39,9 +43,14 @@ public class NickManager {
 	@Autowired
 	private StaticLimitMgr staticLimitMgr;
 
-	public void init() {
+	@Override
+	public void load() throws Exception {
 		StaticLimit limit = staticLimitMgr.getStaticLimit();
 		HEAD = limit.getNickPrefix();
+	}
+
+	@Override
+	public void init() throws Exception {
 	}
 
 	public String getNewNick() {
@@ -64,8 +73,8 @@ public class NickManager {
 		if (StringUtil.isNullOrEmpty(newNick)) {
 			return;
 		}
-        String oldNick = lord.getNick();
-        lord.setNick(newNick);
+		String oldNick = lord.getNick();
+		lord.setNick(newNick);
 		Set<String> usedNames = playerManager.getUsedNames();
 		if (!StringUtil.isNullOrEmpty(oldNick)) {
 			usedNames.remove(oldNick);

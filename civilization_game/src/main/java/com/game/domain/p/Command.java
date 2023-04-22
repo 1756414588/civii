@@ -1,17 +1,12 @@
 package com.game.domain.p;
 
+import com.game.pb.CommonPb;
+import com.game.pb.CommonPb.CommandInfo;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-
-import com.game.constant.CityActionType;
-import com.game.domain.Player;
-import com.game.pb.BuildingPb;
-import com.game.pb.CommonPb;
-import com.game.pb.CommonPb.CommandInfo;
-import com.game.util.LogHelper;
-import com.game.util.SynHelper;
 
 /**
  * @author 司令部
@@ -90,21 +85,21 @@ public class Command implements Cloneable {
         setCollectTimes(commandInfo.getCollectTimes());
     }
 
-    public boolean isCityInfoOk(CityInfo info) {
-        if (info == null) {
-            return false;
-        }
-
-        if (info.getActionType() == CityActionType.HIRE_SOLDIER && info.getSoldierType() == 0) {
-            return false;
-        } else if (info.getActionType() == CityActionType.BUILDING_LEVEL_UP &&
-                (info.getBuildingId() == 0 || info.getBuildingLevel() == 0)) {
-            return false;
-        }
-
-        return true;
-
-    }
+    //public boolean isCityInfoOk(CityInfo info) {
+    //    if (info == null) {
+    //        return false;
+    //    }
+    //
+    //    if (info.getActionType() == CityActionType.HIRE_SOLDIER && info.getSoldierType() == 0) {
+    //        return false;
+    //    } else if (info.getActionType() == CityActionType.BUILDING_LEVEL_UP &&
+    //            (info.getBuildingId() == 0 || info.getBuildingLevel() == 0)) {
+    //        return false;
+    //    }
+    //
+    //    return true;
+    //
+    //}
 
     public int getLv() {
         return base.getLevel();
@@ -136,7 +131,7 @@ public class Command implements Cloneable {
             });
             command.setMilitaryInfo(map1);
 
-            Queue<CityInfo> list1 = new LinkedList<>();
+            //Queue<CityInfo> list1 = new LinkedList<>();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }

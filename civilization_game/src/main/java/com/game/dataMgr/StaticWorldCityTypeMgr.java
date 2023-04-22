@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticWorldCityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.Map;
  * @description
  */
 @Component
+@LoadData(name = "世界据点")
 public class StaticWorldCityTypeMgr extends BaseDataMgr {
 
     private Map<Integer, StaticWorldCityType> cityTypeMap = new HashMap<>();
@@ -21,8 +23,12 @@ public class StaticWorldCityTypeMgr extends BaseDataMgr {
     private StaticDataDao staticDataDao;
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         cityTypeMap = staticDataDao.selectStaticWorldCityType();
+    }
+
+    @Override
+    public void init() throws Exception{
     }
 
     public  StaticWorldCityType getStaticWorldCityType(int cityType){

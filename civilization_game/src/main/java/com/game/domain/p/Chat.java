@@ -15,7 +15,8 @@ public class Chat {
 	public static final int COUNTRYS = 2;
 	public static final int MAPCHAT = 3;
 	public static final int VIPCHAT = 4;
-	
+	public static final int GAME_CHAT = 5;
+
     private int style;           // 0.国家聊天 1.玩家喇叭 2.公告滚屏
     private long lordId;            // 角色ID
     private int country;            // 国家
@@ -33,8 +34,8 @@ public class Chat {
     private int gm;                // 0,false玩家 1,true.GM
     private int guider;            // 0,false玩家 1,true新手指导员
     private int officerId;        // 官职
-    private int type;        // 类型(1.world 2.countrys 3.mapChat 4.vipChat)
-    private int chatType;        //0.阵营聊天 1.区域聊天 2.私人聊天
+    private int type;        // 类型(1.world 2.countrys 3.mapChat 4.vipChat 5.gameChat)
+    private int chatType;        //0.阵营聊天 1.区域聊天 2.私人聊天 3.全服聊天
 
     public Chat(CommonPb.Chat chat) {
         this.style = chat.getStyle();           // 0.国家聊天 1.玩家喇叭 2.公告滚屏
@@ -49,7 +50,7 @@ public class Chat {
         this.msg = chat.getMsg();            // 内容
         this.time = chat.getTime();            // 发送时间
         this.chatId = chat.getChatId();            // s_chat表中的ID
-        this.chatType = chat.getChatType();            //0.阵营聊天 1.区域聊天 2.私人聊天
+        this.chatType = chat.getChatType();            //0.阵营聊天 1.区域聊天 2.私人聊天 3.全服聊天
 
         List<String> params = chat.getParamList();
         if (params.size() == 0) {

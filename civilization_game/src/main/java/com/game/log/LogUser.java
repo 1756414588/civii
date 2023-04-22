@@ -1490,6 +1490,14 @@ public class LogUser {
     }
 
     /**
+     * 沙盘演武日志
+     * @param log
+     */
+    public void manoeuvre_log(ManoeuvreLog log) {
+        LoggerFactory.getLogger(LogTable.manoeuvre_log.name()).info(log.toString());
+    }
+
+    /**
      * kafka报送日志接口
      *
      * @param table

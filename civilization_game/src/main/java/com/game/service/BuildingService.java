@@ -2,25 +2,7 @@ package com.game.service;
 
 import com.game.activity.ActivityEventManager;
 import com.game.activity.define.EventEnum;
-import com.game.constant.ActivityConst;
-import com.game.constant.AwardType;
-import com.game.constant.BeautySkillTypeNew;
-import com.game.constant.BuildingId;
-import com.game.constant.BuildingType;
-import com.game.constant.ConditionType;
-import com.game.constant.DailyTaskId;
-import com.game.constant.DevideFactor;
-import com.game.constant.GameError;
-import com.game.constant.ItemType;
-import com.game.constant.NineCellConst;
-import com.game.constant.OpenConsts;
-import com.game.constant.Quality;
-import com.game.constant.Reason;
-import com.game.constant.ResourceType;
-import com.game.constant.SoldierIndex;
-import com.game.constant.SoldierType;
-import com.game.constant.TaskType;
-import com.game.constant.TechEffectId;
+import com.game.constant.*;
 import com.game.dataMgr.StaticBuildingMgr;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticOpenManger;
@@ -114,8 +96,6 @@ import com.game.pb.BuildingPb.SynBuildingUpRq;
 import com.game.pb.BuildingPb.UpBuildingRq;
 import com.game.pb.BuildingPb.UpBuildingRs;
 import com.game.pb.CommonPb;
-import com.game.season.SeasonManager;
-import com.game.season.talent.entity.EffectType;
 import com.game.server.GameServer;
 import com.game.util.ArrayHelper;
 import com.game.util.GameHelper;
@@ -196,7 +176,8 @@ public class BuildingService {
 	private EventManager eventManager;
 	@Autowired
 	private BroodWarManager broodWarManager;
-
+	@Autowired
+	ActivityEventManager activityEventManager;
 	// 获取建筑信息
 	public void getBuildingRq(GetBuildingRq req, ClientHandler handler) {
 		Player player = playerManager.getPlayer(handler.getRoleId());
@@ -383,7 +364,7 @@ public class BuildingService {
 		handler.sendMsgToPlayer(DoResourceRs.ext, builder.build());
 
 		dailyTaskManager.record(DailyTaskId.IMPOSE, player, 1);
-		ActivityEventManager.getInst().activityTip(EventEnum.LEVY_RESOURCE, player, 1);
+		activityEventManager.activityTip(EventEnum.LEVY_RESOURCE, player, 1);
 //        activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.LEVY_RESOURCE, 1);
 	}
 
@@ -466,7 +447,7 @@ public class BuildingService {
 
 		dailyTaskManager.record(DailyTaskId.IMPOSE, player, collectTimes);
 		// 更新通行证活动进度
-		ActivityEventManager.getInst().activityTip(EventEnum.LEVY_RESOURCE, player, collectTimes);
+		activityEventManager.activityTip(EventEnum.LEVY_RESOURCE, player, collectTimes);
 //        activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.LEVY_RESOURCE, collectTimes);
 	}
 
@@ -535,7 +516,11 @@ public class BuildingService {
 		handler.sendMsgToPlayer(HireOfficerRs.ext, builder.build());
 
 		eventManager.hireOfficer(player, Lists.newArrayList(employee.getUseTimes() < freeTimes, staticEmployee.getLevel(), staticEmployee.getName(), staticEmployee.getEmployId()));
+		achievementService.addAndUpdate(player, AchiType.AT_49,1);
 	}
+
+	@Autowired
+	AchievementService achievementService;
 
 	// 1.当前是金币，招募的是金币，时间还没到，则不能招募
 	// 2.当前是金币，招募的是铁币，时间还没到，则不能招募
@@ -801,7 +786,7 @@ public class BuildingService {
 		builder.setResource(player.wrapResourcePb());
 		handler.sendMsgToPlayer(UpBuildingRs.ext, builder.build());
 //		activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.UP_BUILDING, 1);
-		ActivityEventManager.getInst().activityTip(EventEnum.BUILD_LEVEL_UP, player, 1, 0);
+		activityEventManager.activityTip(EventEnum.BUILD_LEVEL_UP, player, 1, 0);
 	}
 
 	// 美女对建筑升级加成
@@ -914,7 +899,7 @@ public class BuildingService {
 		}
 
 		// 升级
-		buildings.levelupBuilding(buildingType, buildingId);
+		buildings.levelupBuilding(buildingType, buildingId,player);
 		// 美女获取
 		beautyManager.levelUpBuildingGetBeauty(player, buildingId, 1);
 
@@ -955,6 +940,8 @@ public class BuildingService {
 		SynHelper.synMsgToPlayer(player, SynBuildingUpRq.EXT_FIELD_NUMBER, SynBuildingUpRq.ext, builder.build());
 		// TODO jyb 升级指挥中心 开放建筑
 		if (buildingType == BuildingType.COMMAND) {
+			//写入指挥部等级到lord
+			player.getLord().setCommandLevel(buildingLv);
 			buildingManager.synBuildingsByCommandlv(player);
 		}
 		if (buildingType == BuildingType.WARE) {
@@ -964,7 +951,7 @@ public class BuildingService {
 			player.getOnlineMessage().addBuild(CommonPb.ThreeInt.newBuilder().setV1(buildingId).setV2(currentLv).setV3(buildingLv).build());
 		}
 
-		ActivityEventManager.getInst().activityTip(EventEnum.BUILD_UP_FINISH, player, buildingType, buildingLv);
+		activityEventManager.activityTip(EventEnum.BUILD_UP_FINISH, player, buildingType, buildingLv);
 	}
 
 	public void triggerBuildingLvTask(int buildingId, int buildingLv, Player player) {
@@ -1200,8 +1187,7 @@ public class BuildingService {
 		handler.sendMsgToPlayer(BuyBuildQueCdRs.ext, builder.build());
 		eventManager.useSpeed(player, Lists.newArrayList("建筑升级", reduceMinutes, needGold, staticProp.getPropName()));
 	}
-	@Autowired
-	SeasonManager seasonManager;
+
 	// 免费秒cd
 	public void freeKillCd(Player player, ClientHandler handler, int buildingId) {
 		// 检测物品是否存在
@@ -1212,8 +1198,7 @@ public class BuildingService {
 		}
 		// 可以减少的分钟数(换成毫秒)
 		long reduceMinutes = staticVip.getFreeTime() * TimeHelper.SECOND_MS;
-		double seasonBuf = seasonManager.getSeasonBuf(player, EffectType.EFFECT_TYPE25);
-		reduceMinutes = (long) (reduceMinutes * (1 + seasonBuf));
+
 		// 建造队列剩余时间
 		BuildQue buildQue = player.getBuildQue(buildingId);
 		if (buildQue == null) {
@@ -1869,7 +1854,7 @@ public class BuildingService {
 		builder.setAutoBuildTimes(player.getAutoBuildTimes());
 		synAutoBuildToPlayer(player, builder);
 //		activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.UP_BUILDING, 1);
-		ActivityEventManager.getInst().activityTip(EventEnum.BUILD_LEVEL_UP, player, 1, 0);
+		activityEventManager.activityTip(EventEnum.BUILD_LEVEL_UP, player, 1, 0);
 		return true;
 	}
 
@@ -2493,7 +2478,7 @@ public class BuildingService {
 		playerManager.subAward(player, AwardType.GOLD, 0, needGold, Reason.LEVEL_UP_BUILDING);
 
 		// 升级
-		buildings.levelupBuilding(buildingType, buildingId);
+		buildings.levelupBuilding(buildingType, buildingId,player);
 		// 美女获取
 		beautyManager.levelUpBuildingGetBeauty(player, buildingId, 1);
 		// 开始升级建筑
@@ -2508,8 +2493,10 @@ public class BuildingService {
 
 		staticBuildingLv = staticBuildingMgr.getBuildingLv(buildingType, buildingLv);
 		Award award = new Award();
+		List<Integer> beautyAward=null;
 		if (staticBuildingLv != null) {
 			award = addBuildingLvAward(player, staticBuildingLv);
+			beautyAward = staticBuildingLv.getBeautyAward();
 		}
 		BuildingPb.BuyUpBuildQueRs.Builder builder = BuildingPb.BuyUpBuildQueRs.newBuilder();
 		builder.setResource(player.getResource().wrapPb());
@@ -2534,14 +2521,14 @@ public class BuildingService {
 			playerManager.synWareTimes(player);
 		}
 
-		List<Integer> beautyAward = staticBuildingLv.getBeautyAward();
+
 		if (null != beautyAward && beautyAward.size() > 0) {
 			playerManager.addAward(player, beautyAward.get(0), beautyAward.get(1), beautyAward.get(2), Reason.LEVEL_UP_BUILDING);
 		}
-		ActivityEventManager.getInst().activityTip(EventEnum.BUILD_LEVEL_UP, player, 1, 0);
+		activityEventManager.activityTip(EventEnum.BUILD_LEVEL_UP, player, 1, 0);
 //		activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.UP_BUILDING, 1);
 //		activityManager.checkHeroKowtow(player, TaskType.BUILDING_LEVELUP, 1);
-		ActivityEventManager.getInst().activityTip(EventEnum.BUILD_UP_FINISH, player, buildingType, buildingLv);
+		activityEventManager.activityTip(EventEnum.BUILD_UP_FINISH, player, buildingType, buildingLv);
 	}
 
 	public void gmUpBuildLevel(Player player, int buildingId, int level) {

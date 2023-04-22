@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticTechInfo;
 import com.game.domain.s.StaticTechType;
 import com.google.common.collect.HashBasedTable;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@LoadData(name = "科技配置模块")
 public class StaticTechMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -25,13 +27,16 @@ public class StaticTechMgr extends BaseDataMgr {
     private Map<Integer, List<Integer>> preTechs = new HashMap<Integer, List<Integer>>();
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         techTypeMap = staticDataDao.selectTechTypeMap();
         techLevelsMap = staticDataDao.selectTechLevelsMap();
         techInfoTable.clear();
         preTechs.clear();
         makeTechLvMap();
+    }
 
+    @Override
+    public void init() throws Exception{
     }
 
     public void makeTechLvMap() {
@@ -90,5 +95,13 @@ public class StaticTechMgr extends BaseDataMgr {
 
     public void setPreTechs (Map<Integer, List<Integer>> preTechs) {
         this.preTechs = preTechs;
+    }
+
+    public Map<Integer, StaticTechType> getTechTypeMap() {
+        return techTypeMap;
+    }
+
+    public void setTechTypeMap(Map<Integer, StaticTechType> techTypeMap) {
+        this.techTypeMap = techTypeMap;
     }
 }

@@ -1,8 +1,8 @@
 package com.game.manager;
 
 import com.game.define.LoadData;
-import com.game.domain.LoginAccount;
 import com.game.domain.Robot;
+import com.game.domain.p.RobotData;
 import com.game.load.ILoadData;
 import com.game.network.robot.RobotNet;
 import com.game.packet.Packet;
@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,9 +23,6 @@ public class RobotManager implements ILoadData {
 	@Getter
 	private Map<Integer, Robot> robotMap = new ConcurrentHashMap<>();
 
-	@Autowired
-	private LoginManager loginManager;
-
 	@Override
 	public void load() {
 	}
@@ -35,25 +31,26 @@ public class RobotManager implements ILoadData {
 	public void init() {
 	}
 
-	public void createRobot() {
-		Map<String, LoginAccount> loginAccountMap = loginManager.getLoginAccountMap();
-		loginAccountMap.forEach((account, loginAccount) -> {
-			Robot robot = new Robot(loginAccount);
+	public void createRobotThenLogin(RobotData robotData) {
+		Robot robot = new Robot(robotData);
 
-			// 创建机器人
-			RobotNet robotNet = new RobotNet(robot);
-			robot.setRobotNet(robotNet);
-			// 赋值数据
-			robotNet.initRobot();
-			// 记录
-			robotMap.put(loginAccount.getKeyId(), robot);
-			// 机器人启动
-			robotNet.startConnect();
-		});
+		// 创建机器人
+		RobotNet robotNet = new RobotNet(robot);
+		robot.setRobotNet(robotNet);
+		// 赋值数据
+		robotNet.initRobot();
+		// 记录
+		robotMap.put(robotData.getAccountKey(), robot);
+		// 机器人启动
+		robotNet.startConnect();
 
 		LogHelper.CHANNEL_LOGGER.info("RobotManager 初始化机器人数量 :{}", robotMap.size());
 	}
 
+	public void removeRobot(Robot robot) {
+
+		robotMap.remove(robot);
+	}
 
 	/**
 	 * 通过账号ID获取机器人
@@ -76,6 +73,4 @@ public class RobotManager implements ILoadData {
 			entry.getValue().listen(packet);
 		}
 	}
-
-
 }

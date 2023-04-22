@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.Award;
 import com.game.domain.s.StaticManoeuvreMatch;
 import com.game.domain.s.StaticManoeuvreRankAward;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
+@LoadData(name = "比武")
 public class StaticManoeuvreMgr extends BaseDataMgr {
 
 	@Autowired
@@ -35,7 +37,7 @@ public class StaticManoeuvreMgr extends BaseDataMgr {
 	private int max_person_killer = 0;
 
 	@Override
-	public void init() throws Exception {
+	public void load() throws Exception {
 		// 匹配
 		List<StaticManoeuvreMatch> matchList = staticDataDao.loadStaticManoeuvreMatch();
 		matchMap = matchList.stream().collect(Collectors.groupingBy(e -> e.getSort()));
@@ -48,6 +50,11 @@ public class StaticManoeuvreMgr extends BaseDataMgr {
 		List<StaticManoeuvreRankAward> staticManoeuvreRankAwardList = staticDataDao.loadStaticManoeuvreRankAward();
 		awardMap = staticManoeuvreRankAwardList.stream().collect(Collectors.groupingBy(e -> e.getType()));
 		initRankAward(staticManoeuvreRankAwardList);
+	}
+
+	@Override
+	public void init() throws Exception {
+
 	}
 
 	private void initRankAward(List<StaticManoeuvreRankAward> awardList) {

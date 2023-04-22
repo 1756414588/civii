@@ -2,9 +2,12 @@ package com.game.constant;
 
 public enum Country {
     //MONSTER(0, "虫族"),
-    FEDERAL(1, "联邦"),
-    EMPIRE(2, "帝国"),
-    REPUBLIC(3, "共和"),
+//    FEDERAL(1, "联邦"),
+//    EMPIRE(2, "帝国"),
+//    REPUBLIC(3, "共和"),
+    FEDERAL(1, "渔猎文明"),
+    EMPIRE(2, "农耕文明"),
+    REPUBLIC(3, "游牧文明"),
     ;
 
     Country(int key, String val) {

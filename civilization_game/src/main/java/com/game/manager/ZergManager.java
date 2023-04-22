@@ -1,5 +1,6 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.constant.BattleEntityType;
 import com.game.constant.ChatId;
 import com.game.constant.MailId;
@@ -10,6 +11,7 @@ import com.game.constant.WorldActivityConsts;
 import com.game.dataMgr.StaticWorldActPlanMgr;
 import com.game.dataMgr.StaticWorldMgr;
 import com.game.dataMgr.StaticZerglMgr;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.WorldData;
 import com.game.domain.p.BattleEntity;
@@ -52,7 +54,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ZergManager {
+@LoadData(name = "虫族主宰", type = Loading.LOAD_USER_DB, initSeq = 2000)
+public class ZergManager extends BaseManager {
 
 	@Autowired
 	private WorldManager worldManager;
@@ -75,44 +78,45 @@ public class ZergManager {
 	@Autowired
 	private WorldTargetManager worldTargetManager;
 
-    public void init() {
-        // 拉取最新的虫族主宰信息
-        WorldData worldData = worldManager.getWolrdInfo();
-        WorldActPlan worldActPlan = worldData.getWorldActPlans().get(WorldActivityConsts.ACTIVITY_13);
-        if (worldActPlan == null) {
-            LogHelper.CONFIG_LOGGER.info("【虫族主宰】 活动未配置");
-            return;
-        }
-        if (worldData.getZergData() == null) {
-            // 初始化活动开始时间
+	@Override
+	public void init() throws Exception {
+		// 拉取最新的虫族主宰信息
+		WorldData worldData = worldManager.getWolrdInfo();
+		WorldActPlan worldActPlan = worldData.getWorldActPlans().get(WorldActivityConsts.ACTIVITY_13);
+		if (worldActPlan == null) {
+			LogHelper.CONFIG_LOGGER.info("【虫族主宰】 活动未配置");
+			return;
+		}
+		if (worldData.getZergData() == null) {
+			// 初始化活动开始时间
 
-        }
-        LogHelper.GAME_LOGGER.info("【虫族主宰】 活动状态:{} 预热时间:{} 开启时间:{} 结束时间:{}", worldActPlan.getState(), DateHelper.getDate(worldActPlan.getPreheatTime()), DateHelper.getDate(worldActPlan.getOpenTime()), DateHelper.getDate(worldActPlan.getEndTime()));
-    }
+		}
+		LogHelper.GAME_LOGGER.info("【虫族主宰】 活动状态:{} 预热时间:{} 开启时间:{} 结束时间:{}", worldActPlan.getState(), DateHelper.getDate(worldActPlan.getPreheatTime()), DateHelper.getDate(worldActPlan.getOpenTime()), DateHelper.getDate(worldActPlan.getEndTime()));
+	}
 
 	/**
 	 * 定时维护
 	 *
 	 * @param worldActPlan
 	 */
-	public void checkZergWorldActPlan(WorldActPlan worldActPlan) {
+	public boolean checkZergWorldActPlan(WorldActPlan worldActPlan) {
 		if (!isFinsihCond(WorldActivityConsts.ACTIVITY_13)) {
-			return;
-        }
+			return false;
+		}
 
 		long currentTime = System.currentTimeMillis();
 		if (worldActPlan.getState() == WorldActPlanConsts.NOE_OPEN || worldActPlan.getState() == WorldActPlanConsts.END) {//没有开启
 			long preheat = worldActPlan.getPreheatTime();
 			if (preheat <= currentTime) {//开始预热
 				onStateChange(worldActPlan, WorldActPlanConsts.PREHEAT).thenAcceptAsync(e -> {// 预热阶段,初始化虫族主宰数据
-                    getZergData();
+					getZergData();
 					syncWorldActivityPlan();// 通知所有玩家活动预热
 					synActivityOpen();
 					LogHelper.GAME_LOGGER.info("【虫族主宰】 预热时间:{} 开启时间:{} 结束时间:{}", DateHelper.getDate(worldActPlan.getPreheatTime()), DateHelper.getDate(worldActPlan.getOpenTime()), DateHelper.getDate(worldActPlan.getEndTime()));
 				});
 			}
 		} else if (worldActPlan.getState() == WorldActPlanConsts.PREHEAT) {//预热阶段
-            getZergData();
+			getZergData();
 			if (worldActPlan.getOpenTime() <= currentTime) {// 活动开启
 				onStateChange(worldActPlan, WorldActPlanConsts.OPEN).thenAcceptAsync(e -> {
 					syncWorldActivityPlan();// 通知所有玩家活动开始
@@ -151,6 +155,7 @@ public class ZergManager {
 				LogHelper.GAME_LOGGER.info("【虫族主宰】 结算完毕");
 			});
 		}
+		return true;
 	}
 
 	public boolean isFinsihCond(int actId) {
@@ -203,16 +208,16 @@ public class ZergManager {
 //        return zergData;
 //    }
 
-    /**
-     * 切换战斗形态1.攻击 2.防守
-     */
-    public void checkRound(WorldActPlan worldActPlan) {
-        // 没有开启则不进行阶段转换
-        if (worldActPlan.getState() != WorldActPlanConsts.OPEN) {
-            return;
-        }
+	/**
+	 * 切换战斗形态1.攻击 2.防守
+	 */
+	public void checkRound(WorldActPlan worldActPlan) {
+		// 没有开启则不进行阶段转换
+		if (worldActPlan.getState() != WorldActPlanConsts.OPEN) {
+			return;
+		}
 
-        ZergData zergData = getZergData();
+		ZergData zergData = getZergData();
 
 		// 主宰已被击杀
 		if (!zergData.getTeam().isAlive()) {
@@ -222,43 +227,43 @@ public class ZergManager {
 		}
 
 		// 阶段未结束
-        long currentTime = System.currentTimeMillis();
+		long currentTime = System.currentTimeMillis();
 		if (zergData.getStepEndTime() > currentTime) {
 			return;
 		}
 
-        StaticZergRound currentZergRound = zergData.getStep() == ZergConst.STEP_INIT ? null : staticZerglMgr.getRound(zergData.getStep());
+		StaticZergRound currentZergRound = zergData.getStep() == ZergConst.STEP_INIT ? null : staticZerglMgr.getRound(zergData.getStep());
 
-        int finishId = currentZergRound != null ? currentZergRound.getRoundFinish() : 0;
-        int nextId = currentZergRound != null ? currentZergRound.getNextId() : 1;
+		int finishId = currentZergRound != null ? currentZergRound.getRoundFinish() : 0;
+		int nextId = currentZergRound != null ? currentZergRound.getNextId() : 1;
 
 //        LogHelper.GAME_LOGGER.info("【虫族主宰.回合】 step:{} stepFinish:{} 当前回合结束值:{} nextId:{}", zergData.getStep(), zergData.getStepFinish(), finishId, nextId);
 
-        if (zergData.getStepFinish() != finishId) {
-            return;
-        }
+		if (zergData.getStepFinish() != finishId) {
+			return;
+		}
 
-        // 开启下一阶段
-        StaticZergRound nextRound = staticZerglMgr.getRound(nextId);
-        if (nextRound == null) {// 当前阶段结束,没有下一阶段,活动结束
+		// 开启下一阶段
+		StaticZergRound nextRound = staticZerglMgr.getRound(nextId);
+		if (nextRound == null) {// 当前阶段结束,没有下一阶段,活动结束
 //            worldActPlan.setState(WorldActPlanConsts.DO_END);
-            return;
-        }
+			return;
+		}
 
-        // 阶段结束时间
-        long stepEndTime = zergData.getStartTime() + nextRound.getEndTime();
+		// 阶段结束时间
+		long stepEndTime = zergData.getStartTime() + nextRound.getEndTime();
 
-        zergData.setStep(nextRound.getId());
-        zergData.setStepEndTime(stepEndTime);
-        zergData.setRecordDate(TimeHelper.getCurrentDay());
+		zergData.setStep(nextRound.getId());
+		zergData.setStepEndTime(stepEndTime);
+		zergData.setRecordDate(TimeHelper.getCurrentDay());
 
-        if (nextRound.getType() == ZergConst.STEP_ATTACK) {// 进攻
+		if (nextRound.getType() == ZergConst.STEP_ATTACK) {// 进攻
 			doAttackStep(stepEndTime).thenAcceptAsync(e -> {
 				synAttackCityWarInfo(e);
 				LogHelper.GAME_LOGGER.info("【虫族主宰】 进攻阶段");
 			});
 		} else {// 防守
-            doDefendStep(nextRound, stepEndTime).thenAcceptAsync(e -> {
+			doDefendStep(nextRound, stepEndTime).thenAcceptAsync(e -> {
 				for (WarInfo warInfo : e) {
 					if (warInfo.getWarType() == WarType.DEFEND_ZERG) {
 						synDefenceWarInfo(warInfo);
@@ -287,7 +292,7 @@ public class ZergManager {
 	 */
 	public CompletableFuture<Integer> doEnd(WorldActPlan worldActPlan) {
 		int ret = ZergConst.NONE;
-        ZergData zergData = getZergData();
+		ZergData zergData = getZergData();
 
 		if (zergData.getStartTime() != worldActPlan.getOpenTime()) {
 			return CompletableFuture.completedFuture(ret);
@@ -344,42 +349,42 @@ public class ZergManager {
 	public ZergData getZergData() {
 		WorldData worldData = worldManager.getWolrdInfo();
 
-        WorldActPlan worldActPlan = worldData.getWorldActPlans().get(WorldActivityConsts.ACTIVITY_13);
-        if (worldActPlan == null) {
-            return null;
-        }
+		WorldActPlan worldActPlan = worldData.getWorldActPlans().get(WorldActivityConsts.ACTIVITY_13);
+		if (worldActPlan == null) {
+			return null;
+		}
 
-        if (worldData.getZergData() == null) {
-            worldData.setZergData(new ZergData());
-        }
+		if (worldData.getZergData() == null) {
+			worldData.setZergData(new ZergData());
+		}
 
-        ZergData zergData = worldData.getZergData();
+		ZergData zergData = worldData.getZergData();
 
-        // 记录数据为另外一次虫族主宰
-        if (zergData.getStartTime() != worldActPlan.getOpenTime()) {
+		// 记录数据为另外一次虫族主宰
+		if (zergData.getStartTime() != worldActPlan.getOpenTime()) {
 
-            StaticMonster staticMonster = staticZerglMgr.getShowMonster(ZergConst.STEP_ATTACK, 1);
-            Team team = createTeamMonsterId(staticMonster.getMonsterId());
+			StaticMonster staticMonster = staticZerglMgr.getShowMonster(ZergConst.STEP_ATTACK, 1);
+			Team team = createTeamMonsterId(staticMonster.getMonsterId());
 
-            zergData.setStartTime(worldActPlan.getOpenTime());
-            zergData.setEndTime(worldActPlan.getEndTime());
-            zergData.setMonsterId(staticMonster.getMonsterId());
-            zergData.setStatus(worldActPlan.getState());
-            zergData.setStep(ZergConst.STEP_INIT);// 初始化步骤
-            zergData.setStepFinish(0);
-            zergData.setStepEndTime(0);
-            zergData.setStepParam(new ArrayList<>());
-            zergData.setOpenTimes(zergData.getOpenTimes() + 1);
-            zergData.setTeam(team);
-            zergData.setStep(0);
+			zergData.setStartTime(worldActPlan.getOpenTime());
+			zergData.setEndTime(worldActPlan.getEndTime());
+			zergData.setMonsterId(staticMonster.getMonsterId());
+			zergData.setStatus(worldActPlan.getState());
+			zergData.setStep(ZergConst.STEP_INIT);// 初始化步骤
+			zergData.setStepFinish(0);
+			zergData.setStepEndTime(0);
+			zergData.setStepParam(new ArrayList<>());
+			zergData.setOpenTimes(zergData.getOpenTimes() + 1);
+			zergData.setTeam(team);
+			zergData.setStep(0);
 
-            // 虫族主宰城池
-            int cityId = cityManager.getSquareFortress().stream().filter(e -> cityManager.getCity(e).getCountry() == 0).findFirst().get();
-            zergData.setCityId(cityId);
-            LogHelper.GAME_LOGGER.info("【虫族主宰】初始化信息 城池ID:{} bossId:{} 开启时间:{}", zergData.getCityId(), zergData.getMonsterId(), DateHelper.getDate(zergData.getStartTime()));
-        }
-        return zergData;
-    }
+			// 虫族主宰城池
+			int cityId = cityManager.getSquareFortress().stream().filter(e -> cityManager.getCity(e).getCountry() == 0).findFirst().get();
+			zergData.setCityId(cityId);
+			LogHelper.GAME_LOGGER.info("【虫族主宰】初始化信息 城池ID:{} bossId:{} 开启时间:{}", zergData.getCityId(), zergData.getMonsterId(), DateHelper.getDate(zergData.getStartTime()));
+		}
+		return zergData;
+	}
 
 	public CompletableFuture<List<WarInfo>> doDefendStep(StaticZergRound staticZergRound, long stepEndTime) {
 		List<WarInfo> resultList = new ArrayList<>();
@@ -415,7 +420,7 @@ public class ZergManager {
 		return CompletableFuture.completedFuture(resultList);
 	}
 
-    public Team createTeamMonsterId(int showId) {
+	public Team createTeamMonsterId(int showId) {
 		StaticZergMonster staticZergMonster = staticZerglMgr.getShow(showId);
 		List<Integer> monsters = staticZergMonster.getMonsters();
 		Team team = new Team();

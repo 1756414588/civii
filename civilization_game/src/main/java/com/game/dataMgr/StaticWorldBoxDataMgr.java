@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticWorldBox;
 import com.game.domain.s.StaticWorldBoxCollect;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import java.util.Map;
  * @description
  */
 @Component
+@LoadData(name = "世界宝箱")
 public class StaticWorldBoxDataMgr extends BaseDataMgr {
 
     @Autowired
@@ -24,11 +26,15 @@ public class StaticWorldBoxDataMgr extends BaseDataMgr {
     private Map<Integer, StaticWorldBoxCollect> staticWorldBoxCollectMap;
 
     @Override
-    public void init()  throws Exception{
+    public void load() throws Exception {
         staticWorldBoxMap = new HashMap<>();
         staticWorldBoxMap = dataDao.loadStaticWorldBox();
         staticWorldBoxCollectMap = new HashMap<>();
         staticWorldBoxCollectMap = dataDao.loadStaticWorldBoxCollect();
+    }
+
+    @Override
+    public void init()  throws Exception{
     }
 
     public StaticWorldBox getStaticWorldBox(int boxId) {

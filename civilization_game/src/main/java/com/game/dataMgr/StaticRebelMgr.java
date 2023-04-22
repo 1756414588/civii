@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.Award;
 import com.game.domain.s.StaticRebelExchange;
 import com.game.domain.s.StaticRebelRankAward;
@@ -22,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @description
  */
 @Service
+@LoadData(name = "伏击叛军")
 public class StaticRebelMgr extends BaseDataMgr {
 
     @Autowired
@@ -44,10 +46,15 @@ public class StaticRebelMgr extends BaseDataMgr {
     private Map<Integer, StaticRebelZergDrop> rebelZergDrops = new ConcurrentHashMap<>();
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         exchanges = staticDataDao.selectStaticRebelExchange();
         rebelRankAwards = staticDataDao.selectStaticRebelRankAward();
         rebelZergDrops = staticDataDao.selectStaticRebelZergDrop();
+    }
+
+    @Override
+    public void init() throws Exception{
+
     }
 
 

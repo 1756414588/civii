@@ -1,6 +1,5 @@
 package com.game.acion.login;
 
-import com.game.acion.LoginAction;
 import com.game.acion.MessageEvent;
 import com.game.cache.ConfigCache;
 import com.game.domain.Robot;
@@ -14,13 +13,13 @@ import java.util.Random;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @Author 陈奎
  * @Description 创建角色
  * @Date 2022/9/19 10:50
  **/
 
 @Component
-public class CreateRoleAction extends LoginAction {
+public class CreateRoleAction extends EnterGameAction {
 
 	@Override
 	public void doAction(MessageEvent messageEvent, Robot robot) {
@@ -35,7 +34,7 @@ public class CreateRoleAction extends LoginAction {
 			country = Integer.valueOf(robotCounty.trim());
 		}
 
-		int serverId = robot.getLoginAccount().getServerId();
+		int serverId = robot.getData().getServerId();
 		CreateRoleRq.Builder builder = CreateRoleRq.newBuilder();
 		builder.setCountry(country);
 		builder.setNick("robot_" + serverId + "_" + robot.getId());

@@ -175,16 +175,9 @@ public class MailId {
     public static final int REMARK_MAIL_157= 157;
     public static final int REMARK_MAIL_158= 158;
 
-    public static final int SEASON_MAIL_159 = 159;
-    public static final int SEASON_MAIL_160 = 160;
-    public static final int SEASON_MAIL_161 = 161;
-    public static final int SEASON_MAIL_162 = 162;
-    public static final int SEASON_MAIL_163 = 163;
-    public static final int SEASON_MAIL_164 = 164;
-    public static final int SEASON_MAIL_165 = 165;
-    public static final int SEASON_MAIL_166 = 166;
-    public static final int SEASON_MAIL_167 = 167;
-    public static final int SEASON_MAIL_168 = 168;
-    public static final int SEASON_MAIL_169 = 169;
+
+
+    public static final int REBUILD_169= 169;
+
 
 }

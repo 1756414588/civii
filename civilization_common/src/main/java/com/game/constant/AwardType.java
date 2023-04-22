@@ -47,6 +47,6 @@ public interface AwardType {
     int MANOEUVRE_SCORE = 46; // 沙盘演武积分
 
 	int FLAME_SCORE = 48; // 战火燎原积分
-	int SEASON_SCORE = 49; // 赛季积分
+
 	int COUNTRY_POINT = 99; // 阵营经验
 }

@@ -22,7 +22,9 @@ public class ServerStart {
 	 * @Description: TODO
 	 */
 	public static void main(String[] args) {
+		LogHelper.GAME_LOGGER.error("begin redalert game server!!!");
 		SpringUtil.setApplicationContext(ac);
+		goodLuck();
 		new Thread(GameServer.getInstance()).start();
 		terminateForWindows();
 	}
@@ -40,4 +42,26 @@ public class ServerStart {
 		}
 	}
 
+	private static void goodLuck() {
+		System.out.println("////////////////////////////////////////////////////////////////////\n" +
+			"//                          _ooOoo_                               //\n" +
+			"//                         o8888888o                              //\n" +
+			"//                         88\" . \"88                              //\n" +
+			"//                         (| ^_^ |)                              //\n" +
+			"//                         O\\  =  /O                              //\n" +
+			"//                      ____/`---'\\____                           //\n" +
+			"//                    .'  \\\\|     |//  `.                         //\n" +
+			"//                   /  \\\\|||  :  |||//  \\                        //\n" +
+			"//                  /  _||||| -:- |||||-  \\                       //\n" +
+			"//                  |   | \\\\\\  -  /// |   |                       //\n" +
+			"//                  | \\_|  ''\\---/''  |   |                       //\n" +
+			"//                  \\  .-\\__  `-`  ___/-. /                       //\n" +
+			"//                ___`. .'  /--.--\\  `. . ___                     //\n" +
+			"//              .\"\" '<  `.___\\_<|>_/___.'  >'\"\".                  //\n" +
+			"//            | | :  `- \\`.;`\\ _ /`;.`/ - ` : | |                 //\n" +
+			"//            \\  \\ `-.   \\_ __\\ /__ _/   .-` /  /                 //\n" +
+			"//      ========`-.____`-.___\\_____/___.-`____.-'========         //\n" +
+			"//                           `=---='                              //\n" +
+			"////////////////////////////////////////////////////////////////////");
+	}
 }

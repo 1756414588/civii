@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.game.domain.s.StaticAwards;
 import com.game.util.RandomHelper;
 
 @Component
+@LoadData(name = "奖励配置")
 public class StaticAwardsMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -23,10 +25,13 @@ public class StaticAwardsMgr extends BaseDataMgr {
 
 
     @Override
-    public void init() throws Exception {
+    public void load() throws Exception{
         awardsMap = staticDataDao.selectAwardsMap();
-        checkConfig();
-        // testAward();
+        this.checkConfig();
+    }
+
+    @Override
+    public void init() throws Exception {
     }
 
     public void checkConfig() throws Exception {

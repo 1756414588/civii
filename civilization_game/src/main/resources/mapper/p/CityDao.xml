@@ -54,6 +54,7 @@
         	, flush = #{flush}
         	, exp = #{exp}
         	, cityName = #{cityName}
+        	, firstKill = #{firstKill}
         where cityId = #{cityId}
 	</update>
 

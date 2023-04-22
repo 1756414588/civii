@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.game.util.RandomHelper;
 import com.google.common.collect.HashBasedTable;
 
 @Component
+@LoadData(name = "技能")
 public class StaticSkillMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -36,7 +38,7 @@ public class StaticSkillMgr extends BaseDataMgr {
     private List<Integer> skillIds = new ArrayList<Integer>();
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         // s_skill_lv_rate
         skillMap = staticDataDao.selectSkillMap();
         washSkillList = staticDataDao.selectWashSkillRate();
@@ -46,6 +48,11 @@ public class StaticSkillMgr extends BaseDataMgr {
         skillIds.clear();
         makeWashMap();
         makeSkillIds();
+    }
+
+    @Override
+    public void init() throws Exception{
+
     }
 
     public Map<Integer, StaticSkill> getSkillMap() {

@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import com.game.dao.s.StaticDataDao;
 import com.game.domain.s.StaticMission;
 
 @Component
+@LoadData(name = "关卡")
 public class StaticMissionMgr extends BaseDataMgr {
 	@Autowired
 	private StaticDataDao staticDataDao;
@@ -21,12 +23,17 @@ public class StaticMissionMgr extends BaseDataMgr {
 	private Map<Integer, List<StaticMission>> missionMapIds = new HashMap<>();
 
 	@Override
-	public void init() throws Exception{
+	public void load() throws Exception {
 		missionMap.clear();
 		missionMapIds.clear();
 		missionMap = staticDataDao.selectMissionMap();
 		missionMapIds = missionMap.values().stream().collect(Collectors.groupingBy(StaticMission::getMapId));
 		checkConfig();
+	}
+
+	@Override
+	public void init() throws Exception{
+
 	}
 
 	public StaticMission getStaticMission(int missionId) {

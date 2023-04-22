@@ -6,26 +6,27 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
 import com.game.util.TimeHelper;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 
 /**
  * 基金活动领取奖励后红点消失
  */
+@Component
 public class GrowFootTipEvent extends BaseActivityEvent {
 
-	private static GrowFootTipEvent inst = new GrowFootTipEvent();
-
-	public static GrowFootTipEvent getInst() {
-		return inst;
-	}
+	//private static GrowFootTipEvent inst = new GrowFootTipEvent();
+	//
+	//public static GrowFootTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -42,8 +43,8 @@ public class GrowFootTipEvent extends BaseActivityEvent {
 			return;
 		}
 		int awardId = actRecord.getAwardId();
-		StaticActivityMgr mgr = SpringUtil.getBean(StaticActivityMgr.class);
-		List<StaticActAward> awardList = mgr.getActAwardById(awardId);
+		//StaticActivityMgr mgr = SpringUtil.getBean(StaticActivityMgr.class);
+		List<StaticActAward> awardList = staticActivityMgr.getActAwardById(awardId);
 
 		for (StaticActAward actAward : awardList) {
 			// 未购买
@@ -57,7 +58,7 @@ public class GrowFootTipEvent extends BaseActivityEvent {
 			}
 
 			long buyTime = actRecord.getStatus(1L);
-			int status = TimeHelper.passDay(buyTime) + 1;
+			int status = TimeHelper.equation(buyTime,TimeHelper.curentTime()) + 1;
 			if (status >= actAward.getCond()) {
 				actor.setResult(new ActivityEventResult(activityBase, SynEnum.ACT_TIP_DISAPEAR, true));
 				return;

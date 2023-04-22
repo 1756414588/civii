@@ -1,0 +1,12 @@
+package com.game.message.handler.cs;
+
+import com.game.message.handler.ClientHandler;
+import com.game.pb.ActivityPb;
+import com.game.service.AchievementService;
+
+public class AchievementDetailHandler extends ClientHandler {
+    @Override
+    public void action() {
+        getService(AchievementService.class).loadAchievementInfo(msg.getExtension(ActivityPb.AchievementInfoRq.ext),this);
+    }
+}

@@ -25,8 +25,7 @@ public class StaticHero {
 	private List<Integer> heroChip;
 	private int heroType;
 	private int talentType;
-	private int compseason;
-	private int compseasonSkill;
+	private int rareLevel;
 
 	public int getHeroId() {
 		return heroId;
@@ -204,19 +203,11 @@ public class StaticHero {
 		this.talentType = talentType;
 	}
 
-	public int getCompseason() {
-		return compseason;
+	public int getRareLevel() {
+		return rareLevel;
 	}
 
-	public void setCompseason(int compseason) {
-		this.compseason = compseason;
-	}
-
-	public int getCompseasonSkill() {
-		return compseasonSkill;
-	}
-
-	public void setCompseasonSkill(int compseasonSkill) {
-		this.compseasonSkill = compseasonSkill;
+	public void setRareLevel(int rareLevel) {
+		this.rareLevel = rareLevel;
 	}
 }

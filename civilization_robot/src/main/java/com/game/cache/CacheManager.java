@@ -1,11 +1,9 @@
 package com.game.cache;
 
-import com.game.acion.LoginAction;
-import com.game.acion.MessageEvent;
+import com.game.acion.login.EnterGameAction;
 import com.game.acion.login.GetMailLoginAction;
 import com.game.acion.login.GetMapLoginAction;
 import com.game.define.LoadData;
-import com.game.domain.Robot;
 import com.game.load.ILoadData;
 import com.game.packet.Packet;
 import com.game.packet.PacketCreator;
@@ -34,8 +32,6 @@ import com.game.pb.BroodWarPb.BroodWarInitRq;
 import com.game.pb.BroodWarPb.BroodWarInitRs;
 import com.game.pb.BuildingPb.GetBuildingRq;
 import com.game.pb.BuildingPb.GetBuildingRs;
-import com.game.pb.CastlePb.GetMeetingTaskRq;
-import com.game.pb.CastlePb.GetMeetingTaskRs;
 import com.game.pb.CastlePb.GetSoldierLineRq;
 import com.game.pb.CastlePb.GetSoldierLineRs;
 import com.game.pb.ChatPb.GetChatRq;
@@ -130,39 +126,33 @@ import com.game.pb.WorldPb.GetCityRq;
 import com.game.pb.WorldPb.GetCityRs;
 import com.game.pb.WorldPb.GetMapRq;
 import com.game.pb.WorldPb.GetMapRs;
-import com.game.pb.WorldPb.GetMarchRq;
-import com.game.pb.WorldPb.GetMarchRs;
 import com.game.pb.WorldPb.GetPvpCityRq;
 import com.game.pb.WorldPb.GetPvpCityRs;
 import com.game.pb.WorldPb.GetRebelWarRq;
 import com.game.pb.WorldPb.GetRebelWarRs;
 import com.game.pb.WorldPb.GetWorldBossInfoRq;
 import com.game.pb.WorldPb.GetWorldBossInfoRs;
-import com.game.pb.WorldPb.GetWorldCountryWarRq;
-import com.game.pb.WorldPb.GetWorldCountryWarRs;
 import com.game.pb.WorldPb.GetWorldTargetTaskRq;
 import com.game.pb.WorldPb.GetWorldTargetTaskRs;
 import com.game.pb.WorldPb.WorldActivityPlanRq;
 import com.game.pb.WorldPb.WorldActivityPlanRs;
 import com.game.util.BasePbHelper;
-import com.google.common.collect.HashBasedTable;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 @LoadData(name = "缓存请求", initSeq = 2000)
 @Component
 public class CacheManager implements ILoadData {
 
-	private List<LoginAction> loginActions = new ArrayList<>();
+	@Getter
+	private List<EnterGameAction> loginActions = new ArrayList<>();
 
 	// accountKey,登录编号,登录操作
 //	private Map<Integer, Map<Long, LoginAction>> robotLoginMap = new ConcurrentHashMap<>();
-	private Map<Integer, Map<Long, MessageEvent>> loginEventMap = new ConcurrentHashMap<>();
+//	private Map<Integer, Map<Long, MessageEvent>> loginEventMap = new ConcurrentHashMap<>();
 
 	@Override
 	public void load() {
@@ -173,56 +163,56 @@ public class CacheManager implements ILoadData {
 		initCache();
 	}
 
-	public void put(int accountKey, MessageEvent messageEvent) {
-		Map<Long, MessageEvent> map = loginEventMap.get(accountKey);
-		if (map == null) {
-			map = new ConcurrentHashMap<>();
-			loginEventMap.put(accountKey, map);
-		}
-		map.put(messageEvent.getEventId(), messageEvent);
-	}
-
-	public void remove(int accountKey, long eventId) {
-		if (!loginEventMap.containsKey(accountKey)) {
-			return;
-		}
-		Map<Long, MessageEvent> map = loginEventMap.get(accountKey);
-		map.remove(eventId);
-	}
-
-	public MessageEvent getLoginAction(int accountKey, Base base) {
-		if (!loginEventMap.containsKey(accountKey)) {
-			return null;
-		}
-		Map<Long, MessageEvent> map = loginEventMap.get(accountKey);
-		return map.get(base.getParam());
-	}
-
-	public boolean isContain(int accountKey) {
-		if (!loginEventMap.containsKey(accountKey)) {
-			return false;
-		}
-		Map<Long, MessageEvent> map = loginEventMap.get(accountKey);
-		if (map.isEmpty()) {
-			return false;
-		}
-		return true;
-	}
-
-	public void doLoginRequest(Robot robot) {
-		// 清除历史记录
-		loginEventMap.remove(robot.getId());
-		// 开始登录注册
-		loginActions.forEach(e -> {
-			e.registerEvent(robot);
-		});
-	}
+//	public void put(int accountKey, MessageEvent messageEvent) {
+//		Map<Long, MessageEvent> map = loginEventMap.get(accountKey);
+//		if (map == null) {
+//			map = new ConcurrentHashMap<>();
+//			loginEventMap.put(accountKey, map);
+//		}
+//		map.put(messageEvent.getEventId(), messageEvent);
+//	}
+//
+//	public void remove(int accountKey, long eventId) {
+//		if (!loginEventMap.containsKey(accountKey)) {
+//			return;
+//		}
+//		Map<Long, MessageEvent> map = loginEventMap.get(accountKey);
+//		map.remove(eventId);
+//	}
+//
+//	public MessageEvent getLoginAction(int accountKey, Base base) {
+//		if (!loginEventMap.containsKey(accountKey)) {
+//			return null;
+//		}
+//		Map<Long, MessageEvent> map = loginEventMap.get(accountKey);
+//		return map.get(base.getParam());
+//	}
+//
+//	public boolean isContain(int accountKey) {
+//		if (!loginEventMap.containsKey(accountKey)) {
+//			return false;
+//		}
+//		Map<Long, MessageEvent> map = loginEventMap.get(accountKey);
+//		if (map.isEmpty()) {
+//			return false;
+//		}
+//		return true;
+//	}
+//
+//	public void doLoginRequest(Robot robot) {
+//		// 清除历史记录
+//		loginEventMap.remove(robot.getId());
+//		// 开始登录注册
+//		loginActions.forEach(e -> {
+//			e.registerEvent(robot);
+//		});
+//	}
 
 
 	private <T> void createAction(int cmd, int response, GeneratedExtension<Base, T> ext, T msg) {
 		Base base = BasePbHelper.createRqBase(cmd, ext, msg).build();
 		Packet packet = PacketCreator.create(base);
-		LoginAction action = new LoginAction(response, packet);
+		EnterGameAction action = new EnterGameAction(response, packet);
 		loginActions.add(action);
 	}
 
@@ -538,11 +528,9 @@ public class CacheManager implements ILoadData {
 //		createAction(GetWorldCountryWarRq.EXT_FIELD_NUMBER, GetWorldCountryWarRs.EXT_FIELD_NUMBER, GetWorldCountryWarRq.ext, GetWorldCountryWarRq.newBuilder().build());
 		createAction(GetPvpCityRq.EXT_FIELD_NUMBER, GetPvpCityRs.EXT_FIELD_NUMBER, GetPvpCityRq.ext, GetPvpCityRq.newBuilder().build());
 		createAction(GetBigMonsterActivityRq.EXT_FIELD_NUMBER, GetBigMonsterActivityRs.EXT_FIELD_NUMBER, GetBigMonsterActivityRq.ext, GetBigMonsterActivityRq.newBuilder().build());
-		createAction(EnterGameRq.EXT_FIELD_NUMBER, EnterGameRs.EXT_FIELD_NUMBER, EnterGameRq.ext, EnterGameRq.newBuilder().build());
-		createAction(GetMarchRq.EXT_FIELD_NUMBER, GetMarchRs.EXT_FIELD_NUMBER, GetMarchRq.ext, GetMarchRq.newBuilder().build());
-		//拉取地图信息
-		createGetAction(GetMapRq.EXT_FIELD_NUMBER, GetMapRs.EXT_FIELD_NUMBER, GetMapRq.ext, GetMapRq.newBuilder().build());
 
+		// 通知服务器登录全部完成
+		createAction(EnterGameRq.EXT_FIELD_NUMBER, EnterGameRs.EXT_FIELD_NUMBER, EnterGameRq.ext, EnterGameRq.newBuilder().build());
 	}
 
 

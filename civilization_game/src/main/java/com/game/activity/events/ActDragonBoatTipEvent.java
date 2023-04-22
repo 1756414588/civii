@@ -6,24 +6,25 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActivityChrismasAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 端午/国庆活动
  */
+@Component
 public class ActDragonBoatTipEvent extends BaseActivityEvent {
 
-	private static ActDragonBoatTipEvent inst = new ActDragonBoatTipEvent();
-
-	public static ActDragonBoatTipEvent getInst() {
-		return inst;
-	}
+	//private static ActDragonBoatTipEvent inst = new ActDragonBoatTipEvent();
+	//
+	//public static ActDragonBoatTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -38,7 +39,6 @@ public class ActDragonBoatTipEvent extends BaseActivityEvent {
 		if (totalCost == null || totalCost == 0) {
 			return;
 		}
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActivityChrismasAward> list = new ArrayList<>(staticActivityMgr.getChrismasAwardMap().values());
 		for (StaticActivityChrismasAward award : list) {
 			if (totalCost >= award.getCost()) {

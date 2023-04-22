@@ -1,10 +1,12 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.constant.*;
 import com.game.dataMgr.StaticFirstBloodMgr;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticWorldActPlanMgr;
 import com.game.dataMgr.StaticWorldMgr;
+import com.game.define.LoadData;
 import com.game.domain.Award;
 import com.game.domain.Player;
 import com.game.domain.WorldData;
@@ -16,6 +18,7 @@ import com.game.log.domain.HatcheryLog;
 import com.game.pb.CommonPb;
 import com.game.pb.PvpBattlePb.SynPvpInfoRq;
 import com.game.server.GameServer;
+import com.game.service.AchievementService;
 import com.game.service.WorldActPlanService;
 import com.game.util.DateHelper;
 import com.game.util.LogHelper;
@@ -32,7 +35,8 @@ import java.util.*;
 
 
 @Component
-public class WorldPvpMgr {
+@LoadData(name = "皇城血战", type = Loading.LOAD_USER_DB,initSeq = 2000)
+public class WorldPvpMgr extends BaseManager{
 
 	@Autowired
 	private StaticLimitMgr staticLimitMgr;
@@ -67,6 +71,8 @@ public class WorldPvpMgr {
 	@Autowired
 	private PersonalityManager personalityManager;
 
+	@Autowired
+	AchievementService achievementService;
 
 	private LinkedList<PvpPkInfo> pvpPkInfos = new LinkedList<PvpPkInfo>();                   // pvp战斗信息
 	private int open;
@@ -79,7 +85,9 @@ public class WorldPvpMgr {
 
 	// 数据从WorldData里面取出, 所以init函数在序列化world数据之后才启动
 	// 累杀数=所有英雄杀兵总和, 连杀=英雄连续杀兵总和
-	public void initBattle() {
+
+	@Override
+	public void init() throws Exception{
 		setOpen(1);
 
 		// 初始化战斗实体
@@ -919,9 +927,11 @@ public class WorldPvpMgr {
 
 		if (attackerLost > 0) {
 			activityManager.updActPerson(attackPlayer, ActivityConst.ACT_SOILDER_RANK, attackerLost, 0);
+			achievementService.addAndUpdate(attackPlayer,AchiType.AT_25,attackerLost);
 		}
 		if (defencerLost > 0) {
 			activityManager.updActPerson(defencePlayer, ActivityConst.ACT_SOILDER_RANK, defencerLost, 0);
+			achievementService.addAndUpdate(defencePlayer,AchiType.AT_25,defencerLost);
 		}
 
 		handlePvpKill(attacker, defencerLost);

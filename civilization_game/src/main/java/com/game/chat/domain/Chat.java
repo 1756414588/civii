@@ -6,9 +6,9 @@ public abstract class Chat {
 
 	protected int style;
 
-	protected int chatType;
+	public int chatType;
 
-	abstract public CommonPb.Chat ser(int style, int officerId);
+	abstract public CommonPb.Chat ser(int style, int officerId, int targetCountry);
 
 
 }

@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticWorldActPlan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
  * @description
  */
 @Component
+@LoadData(name = "世界活动")
 public class StaticWorldActPlanMgr extends BaseDataMgr {
 
 
@@ -25,8 +27,12 @@ public class StaticWorldActPlanMgr extends BaseDataMgr {
     private StaticDataDao staticDataDao;
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         plans = staticDataDao.selectWorldActPlan();
+    }
+
+    @Override
+    public void init() throws Exception{
     }
 
     public StaticWorldActPlan get(int id) {

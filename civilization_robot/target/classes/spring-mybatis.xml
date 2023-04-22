@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" 
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:task="http://www.springframework.org/schema/task" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+				
+    <!-- 阿里 druid数据库连接池 -->
+	<bean id="gameDataSource" class="com.game.util.GameHikariDataSource">
+        <!-- 基本属性 -->
+        <property name="jdbcUrl" value="${jdbc.game.url}" />
+        <property name="username" value="${jdbc.game.user}" />
+        <property name="password" value="${jdbc.game.password}" />
+        <property name="driverClassName" value="${jdbc.game.driver}" />
+		<!-- 生效超时 -->
+        <property name="validationTimeout" value="3000" />
+        <!-- 连接只读数据库时配置为true， 保证安全 -->
+        <property name="readOnly" value="false" />
+        <!-- 等待连接池分配连接的最大时长（毫秒），超过这个时长还没可用的连接则发生SQLException， 缺省:30秒 -->
+        <property name="connectionTimeout" value="60000" />
+        <!-- 一个连接idle状态的最大时长（毫秒），超时则被释放（retired），缺省:10分钟 -->
+        <property name="idleTimeout" value="60000" />
+        <!-- 一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired），缺省:30分钟，建议设置比数据库超时时长少30秒，参考MySQL
+            wait_timeout参数（show variables like '%timeout%';） -->
+        <property name="maxLifetime" value="60000" />
+        <!-- 连接池中允许的最大连接数。缺省值：10；推荐的公式：((core_count * 2) + effective_spindle_count) -->
+        <property name="maximumPoolSize" value="10" />
+    </bean>
+	
+	<bean name="gameTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">   
+    	<property name="dataSource" ref="gameDataSource"></property>
+ 	</bean>
+	
+    <!-- 使用annotation定义事务 -->
+	<tx:annotation-driven transaction-manager="gameTransactionManager" proxy-target-class="true" />
+	
+	<!-- 配置myBatis -->
+    <bean id="accountSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="gameDataSource" />
+        <property name="configLocation" value="mybatis-config.xml" />
+        <!-- 扫描sqlMap 自动配置 -->
+        <property name="mapperLocations" value="classpath*:mapper/p/*Dao.xml" />
+    </bean>
+    
+    <!-- 自动注入dao -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.game.dao.p" />
+        <property name="sqlSessionFactoryBeanName" value="accountSqlSessionFactory"/>
+    </bean>
+    
+</beans>

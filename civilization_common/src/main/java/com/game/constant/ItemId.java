@@ -31,6 +31,6 @@ public interface ItemId {
 
     int QUICK_MONSTER =351 ;
 
-    int SEASON_DIAL = 341;// 赛季转盘
+
 
 }

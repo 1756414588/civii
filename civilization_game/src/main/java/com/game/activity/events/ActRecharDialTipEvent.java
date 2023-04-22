@@ -6,23 +6,24 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 /**
  * 充值转盘
  */
+@Component
 public class ActRecharDialTipEvent extends BaseActivityEvent {
 
-	private static ActRecharDialTipEvent inst = new ActRecharDialTipEvent();
-
-	public static ActRecharDialTipEvent getInst() {
-		return inst;
-	}
+	//private static ActRecharDialTipEvent inst = new ActRecharDialTipEvent();
+	//
+	//public static ActRecharDialTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -36,7 +37,6 @@ public class ActRecharDialTipEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 		//这个是总次数
 		int readyCount = actRecord.getCount() + actRecord.getRecord().size();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> actAwardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
 		//抽满了就不给了
 		if (readyCount >= actAwardList.size()) {

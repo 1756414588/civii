@@ -14,5 +14,10 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.quantum</groupId>
+			<artifactId>civilization_pb</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>

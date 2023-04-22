@@ -24,10 +24,6 @@ import com.game.manager.*;
 import com.game.message.handler.ClientHandler;
 import com.game.pb.SoldierPb;
 import com.game.pb.SoldierPb.*;
-import com.game.season.SeasonManager;
-import com.game.season.SeasonService;
-import com.game.season.grand.entity.GrandType;
-import com.game.season.talent.entity.EffectType;
 import com.game.util.GameHelper;
 import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
@@ -72,7 +68,9 @@ public class SoldierService {
 	@Autowired
 	private EventManager eventManager;
 	@Autowired
-	SeasonManager seasonManager;
+	AchievementService achievementService;
+	@Autowired
+	ActivityEventManager activityEventManager;
 
 	/**
 	 * Function: 获取士兵信息
@@ -334,8 +332,7 @@ public class SoldierService {
 
 		// soldierSpeed 表示当前的募兵加成
 		int count = (int) Math.floor(Math.ceil(baseSoldierSpeed * minutes * soldierSpeed * 10000) / 10000);
-		int buf = seasonManager.getBuf(player, EffectType.EFFECT_TYPE32, soldierType);
-		count += buf;
+
 		if (count < minSoldierCount || count > maxSoldierCount) {
 			handler.sendErrorMsgToPlayer(GameError.RECRUIT_SODIER_COUNT_ERROR);
 			return;
@@ -360,8 +357,6 @@ public class SoldierService {
 		if (techOil != 0) {
 			oilCost = techOil * count;
 		}
-		double seasonBuf = seasonManager.getSeasonBuf(player, EffectType.EFFECT_TYPE12);
-		oilCost = (int) (1 - seasonBuf) * oilCost;
 
 		if (player.getOil() < oilCost) {
 			handler.sendErrorMsgToPlayer(GameError.OIL_NOT_ENOUGH);
@@ -533,10 +528,9 @@ public class SoldierService {
 			playerManager.addAward(player, award, Reason.RECRUIT_SOLDIER);
 
 			// 更新通行证//日常训练活动进度
-			ActivityEventManager.getInst().activityTip(EventEnum.TRAINR, player, award.getCount());
+			activityEventManager.activityTip(EventEnum.TRAINR, player, award.getCount());
 //            activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.HIRE_FREE_SOLDIER_TIMES, award.getCount());
-			seasonService.addTreasuryScore(player, GrandType.TYPE_2, 1, award.getCount());// 募兵数量
-
+			achievementService.addAndUpdate(player,AchiType.AT_26,award.getCount());
 		}
 
 		// 完成招募士兵的任务
@@ -546,10 +540,6 @@ public class SoldierService {
 		handler.sendMsgToPlayer(SoldierPb.RecruitDoneRs.ext, builder.build());
 
 	}
-
-	@Autowired
-	SeasonService seasonService;
-
 
 	/**
 	 * Function: 招募取消
@@ -880,8 +870,8 @@ public class SoldierService {
 			WorkQue firstElem = workQues.getFirst();
 			if (firstElem != null) {
 				firstElem.setEndTime(now);
+				firstElem.setActivityDerateCD(0);
 			}
-			firstElem.setActivityDerateCD(0);
 			// 时间向前面挪
 			handleMoveTime(workQues);
 		}

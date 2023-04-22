@@ -23,15 +23,12 @@ import com.game.pb.CommonPb;
 import com.game.pb.CommonPb.TwoInt;
 import com.game.pb.DataPb;
 import com.game.pb.DataPb.MarchData;
-import com.game.pb.SeasonActivityPb;
 import com.game.pb.SerializePb;
 import com.game.pb.SerializePb.SerChatShowData;
 import com.game.pb.SerializePb.SerPvpBattleData;
 import com.game.pb.SerializePb.SerWorldBossData;
 import com.game.pb.SerializePb.SerWorldTargetData;
 import com.game.pb.SerializePb.SerZergRecord;
-import com.game.season.SeasonActivity;
-import com.game.season.SeasonManager;
 import com.game.server.GameServer;
 import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
@@ -740,16 +737,5 @@ public class WorldData {
 
     public Map<Integer, CityRemark> getCityRemarkMap() {
         return cityRemarkMap;
-    }
-
-    public byte[] seasonActDb() {
-        SeasonManager bean = SpringUtil.getBean(SeasonManager.class);
-        SeasonActivityPb.SeasonActPb.Builder builder = SeasonActivityPb.SeasonActPb.newBuilder();
-        Map<Integer, SeasonActivity> activityMap = bean.getActivityMap();
-        builder.setMergeNum(bean.getSeason());
-        activityMap.values().forEach(x -> {
-            builder.addInfo(x.encode());
-        });
-        return builder.build().toByteArray();
     }
 }

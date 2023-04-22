@@ -10,18 +10,20 @@ import com.game.domain.Player;
 import com.game.domain.s.ActivityBase;
 import com.game.pb.ActivityPb;
 import com.game.util.SynHelper;
+import org.springframework.stereotype.Component;
 
 
 /**
  * 领取后活动消失
  */
+@Component
 public class PayFristDisappearEvent extends BaseActivityEvent {
 
-	private static PayFristDisappearEvent inst = new PayFristDisappearEvent();
-
-	public static PayFristDisappearEvent getInst() {
-		return inst;
-	}
+	//private static PayFristDisappearEvent inst = new PayFristDisappearEvent();
+	//
+	//public static PayFristDisappearEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {

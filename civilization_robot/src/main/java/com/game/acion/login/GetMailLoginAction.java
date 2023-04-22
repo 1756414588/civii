@@ -1,6 +1,5 @@
 package com.game.acion.login;
 
-import com.game.acion.LoginAction;
 import com.game.acion.MessageEvent;
 import com.game.domain.Robot;
 import com.game.packet.Packet;
@@ -11,12 +10,12 @@ import com.game.util.BasePbHelper;
 import com.game.util.LogHelper;
 
 /**
- *
+ * @Author 陈奎
  * @Description
  * @Date 2022/9/16 17:42
  **/
 
-public class GetMailLoginAction extends LoginAction {
+public class GetMailLoginAction extends EnterGameAction {
 
 	public GetMailLoginAction(int respondCode, Packet packet) {
 		super(respondCode, packet);

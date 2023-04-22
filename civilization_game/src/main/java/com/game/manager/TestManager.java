@@ -575,80 +575,80 @@ public class TestManager {
 	}
 
 	// 自动执行所有的任务
-	public void doAutoTestNewTask(Player player) {
-        Map<Integer, Task> taskMap = player.getTaskMap();
-        TreeSet<Integer> finishedTask = player.getFinishedTask();
-        // 完成任务，开启任务,
-        Integer lastTask = 0;
-        while (finishedTask.size() < 483) {
-            Set<Integer> allTask = new HashSet<Integer>();
-            HashSet<Integer> record = new HashSet<Integer>();
-            for (Task task : taskMap.values()) {
-                if (task == null) {
-                    continue;
-                }
-                int taskId = task.getTaskId();
-                finishedTask.add(taskId);
-                StaticTask staticTask = staticTaskMgr.getStaticTask(taskId);
-                if (staticTask != null && staticTask.getType() == 1) {
-                    if (staticTask.getTaskId() > lastTask) {
-                        lastTask = staticTask.getTaskId();
-                    }
-                }
-                if (taskId == 483) {
-                    LogHelper.GAME_DEBUG.error("taskId = 483");
-                }
-                Set<Integer> openTask = taskManager.getMutiTriggerTask(taskId, player);
-                if (!openTask.isEmpty()) {
-                    allTask.addAll(openTask);
-                }
-
-                record.add(taskId);
-            }
-
-            if (allTask.isEmpty()) {
-                LogHelper.GAME_DEBUG.error("任务断掉了, task = " + record);
-                LogHelper.GAME_DEBUG.error("任务断掉了, 主线进行到 = " + lastTask);
-                break;
-            }
-
-            Iterator<Task> iterator = taskMap.values().iterator();
-            while (iterator.hasNext()) {
-                Task task = iterator.next();
-                if (task != null) {
-                    iterator.remove();
-                }
-            }
-
-            if (allTask != null) {
-                for (Integer openId : allTask) {
-                    List<Task> tasks = openTask(openId);
-                    for (Task task : tasks) {
-                        taskMap.put(task.getTaskId(), task);
-                    }
-                }
-            }
-
-        }
-
-        HashSet<Integer> nofinshed = new HashSet<Integer>();
-        for (StaticTask task : staticTaskMgr.getTaskMap().values()) {
-            if (task == null) {
-                continue;
-            }
-            if (!finishedTask.contains(task.getTaskId())) {
-                nofinshed.add(task.getTaskId());
-            }
-        }
-        LogHelper.GAME_DEBUG.error("最终完成的任务数:" + finishedTask.size());
-        LogHelper.GAME_DEBUG.error("最终完成的任务为:" + finishedTask);
-        LogHelper.GAME_DEBUG.error("最终完成的未任务为:" + nofinshed);
-        if (finishedTask.size() < 450) {
-            LogHelper.GAME_DEBUG.error("最终可能开启任务有bugs!" );
-
-        }
-
-    }
+	//public void doAutoTestNewTask(Player player) {
+    //    Map<Integer, Task> taskMap = player.getTaskMap();
+    //    TreeSet<Integer> finishedTask = player.getFinishedTask();
+    //    // 完成任务，开启任务,
+    //    Integer lastTask = 0;
+    //    while (finishedTask.size() < 483) {
+    //        Set<Integer> allTask = new HashSet<Integer>();
+    //        HashSet<Integer> record = new HashSet<Integer>();
+    //        for (Task task : taskMap.values()) {
+    //            if (task == null) {
+    //                continue;
+    //            }
+    //            int taskId = task.getTaskId();
+    //            finishedTask.add(taskId);
+    //            StaticTask staticTask = staticTaskMgr.getStaticTask(taskId);
+    //            if (staticTask != null && staticTask.getType() == 1) {
+    //                if (staticTask.getTaskId() > lastTask) {
+    //                    lastTask = staticTask.getTaskId();
+    //                }
+    //            }
+    //            if (taskId == 483) {
+    //                LogHelper.GAME_DEBUG.error("taskId = 483");
+    //            }
+    //            Set<Integer> openTask = taskManager.getMutiTriggerTask(taskId, player);
+    //            if (!openTask.isEmpty()) {
+    //                allTask.addAll(openTask);
+    //            }
+	//
+    //            record.add(taskId);
+    //        }
+	//
+    //        if (allTask.isEmpty()) {
+    //            LogHelper.GAME_DEBUG.error("任务断掉了, task = " + record);
+    //            LogHelper.GAME_DEBUG.error("任务断掉了, 主线进行到 = " + lastTask);
+    //            break;
+    //        }
+	//
+    //        Iterator<Task> iterator = taskMap.values().iterator();
+    //        while (iterator.hasNext()) {
+    //            Task task = iterator.next();
+    //            if (task != null) {
+    //                iterator.remove();
+    //            }
+    //        }
+	//
+    //        if (allTask != null) {
+    //            for (Integer openId : allTask) {
+    //                List<Task> tasks = openTask(openId);
+    //                for (Task task : tasks) {
+    //                    taskMap.put(task.getTaskId(), task);
+    //                }
+    //            }
+    //        }
+	//
+    //    }
+	//
+    //    HashSet<Integer> nofinshed = new HashSet<Integer>();
+    //    for (StaticTask task : staticTaskMgr.getTaskMap().values()) {
+    //        if (task == null) {
+    //            continue;
+    //        }
+    //        if (!finishedTask.contains(task.getTaskId())) {
+    //            nofinshed.add(task.getTaskId());
+    //        }
+    //    }
+    //    LogHelper.GAME_DEBUG.error("最终完成的任务数:" + finishedTask.size());
+    //    LogHelper.GAME_DEBUG.error("最终完成的任务为:" + finishedTask);
+    //    LogHelper.GAME_DEBUG.error("最终完成的未任务为:" + nofinshed);
+    //    if (finishedTask.size() < 450) {
+    //        LogHelper.GAME_DEBUG.error("最终可能开启任务有bugs!" );
+	//
+    //    }
+	//
+    //}
 
 	public void canCelSoldier() {
 		// 增加建造的队列不能取消
@@ -1149,19 +1149,19 @@ public class TestManager {
         LogHelper.GAME_DEBUG.error("最后一个主线任务为:" + lastMainTaskId);
     }
 
-    public void testTaskBreak() {
-	    // 做到任务Id = 39的时候断档了
-        Player player = new Player(new Lord(), 0);
-        TreeSet<Integer> finishedTask = player.getFinishedTask();
-        for (int i = 1; i <= 38; i++) {
-            finishedTask.add(i);
-        }
-        finishedTask.add(39);
-        // 玩家当前有38个任务, 实际第39个任务完成了, 没有记录到finishedTask, 然后39触发40的时候，没有触发成功
-        Set<Integer> openTask = taskManager.getMutiTriggerTask(39, player);
-        LogHelper.GAME_DEBUG.error("可以触发的任务为:" + openTask);
-
-    }
+    //public void testTaskBreak() {
+	//    // 做到任务Id = 39的时候断档了
+    //    Player player = new Player(new Lord(), 0);
+    //    TreeSet<Integer> finishedTask = player.getFinishedTask();
+    //    for (int i = 1; i <= 38; i++) {
+    //        finishedTask.add(i);
+    //    }
+    //    finishedTask.add(39);
+    //    // 玩家当前有38个任务, 实际第39个任务完成了, 没有记录到finishedTask, 然后39触发40的时候，没有触发成功
+    //    Set<Integer> openTask = taskManager.getMutiTriggerTask(39, player);
+    //    LogHelper.GAME_DEBUG.error("可以触发的任务为:" + openTask);
+	//
+    //}
 
     // 计算15-22号  任务taskID和流失人数的
     // 计算7-14号  任务taskID和流失人数的

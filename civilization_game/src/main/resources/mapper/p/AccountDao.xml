@@ -68,6 +68,9 @@
         , forbid = #{forbid}
         , lastLoginIp = #{lastLoginIp}
         , channelAccount =#{channelAccount}
+        , isGm =#{isGm}
+        , isGuider =#{isGuider}
+        , isDelete = #{isDelete}
         where keyId = #{keyId}
     </update>
 
@@ -78,4 +81,12 @@
     <update id="deleteIordId" parameterType="com.game.domain.p.Account">
         update p_account set isDelete = #{isDelete} where keyId = #{keyId}
     </update>
+
+    <update id="setIdentity" parameterType="com.game.domain.p.Account">
+        update p_account
+        set isGm =#{isGm}
+        , isGuider =#{isGuider}
+        where keyId = #{keyId}
+    </update>
+
 </mapper>

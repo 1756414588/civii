@@ -11,7 +11,7 @@ import com.game.log.constant.OilOperateType;
 import com.game.log.constant.StoneOperateType;
 import com.game.log.domain.RoleResourceChangeLog;
 import com.game.manager.PlayerManager;
-import com.game.manager.StaticCityGameManager;
+import com.game.dataMgr.StaticCityGameMgr;
 import com.game.message.handler.ClientHandler;
 import com.game.pb.BasePb;
 import com.game.pb.BuildingPb;
@@ -42,7 +42,7 @@ public class CityGameService {
     private PlayerManager playerManager;
     //
     @Autowired
-    private StaticCityGameManager cityGameManager;
+    private StaticCityGameMgr cityGameManager;
     @Autowired
     private StaticLimitMgr limitMgr;
 

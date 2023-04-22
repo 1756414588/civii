@@ -6,15 +6,13 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.manager.ActivityManager;
-import com.game.util.LogHelper;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,13 +20,14 @@ import java.util.Optional;
 /**
  * 按历史排名计算 ActivityConst.RANK_1
  */
+@Component
 public class RankHistoryTipEvent extends BaseActivityEvent {
 
-	private static RankHistoryTipEvent inst = new RankHistoryTipEvent();
-
-	public static RankHistoryTipEvent getInst() {
-		return inst;
-	}
+	//private static RankHistoryTipEvent inst = new RankHistoryTipEvent();
+	//
+	//public static RankHistoryTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -42,13 +41,14 @@ public class RankHistoryTipEvent extends BaseActivityEvent {
 		listenEvent(EventEnum.GET_ACTIVITY_AWARD_TIP, ActivityConst.ACT_BUILD_RANK, this::process);
 	}
 
+
 	@Override
 	public void process(EventEnum activityEnum, IActivityActor actor) {
 		ActivityBase activityBase = actor.getActivityBase();
 		Player player = actor.getPlayer();
 		ActRecord actRecord = actor.getActRecord();
 
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
+		//ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 
 		ActivityData activityData = activityManager.getActivity(activityBase);
 		if (activityData == null) {
@@ -61,7 +61,7 @@ public class RankHistoryTipEvent extends BaseActivityEvent {
 		}
 
 		// 奖励列表
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
+		//StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> awardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
 
 		// 领奖记录

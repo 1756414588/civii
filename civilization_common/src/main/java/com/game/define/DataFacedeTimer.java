@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
+ * @Author 陈奎
  * @Description 数据服务器接口定时器
  * @Date 2022/9/9 11:30
  **/

@@ -25,7 +25,6 @@ public class SynMarchHandler extends MessageHandler {
 				march.getHeroIdList().forEach(heroId -> {
 					robot.getCache().getHeroCache().getArmys().put(heroId, heroId);
 				});
-
 			}
 		}
 
@@ -40,6 +39,5 @@ public class SynMarchHandler extends MessageHandler {
 			}
 		}
 	}
-
 
 }

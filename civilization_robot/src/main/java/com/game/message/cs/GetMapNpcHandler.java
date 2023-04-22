@@ -23,6 +23,8 @@ public class GetMapNpcHandler extends MessageHandler {
 
 		Map<WorldPos, WorldPos> map = mapMonsterCache.getMapPos(msg.getMapId());
 
+		map.clear();
+
 		msg.getNpcListList().forEach(value -> {
 
 			int level = (int) (value / 1000000);

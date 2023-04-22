@@ -12,6 +12,7 @@ import com.game.network.INet;
 import com.game.packet.Packet;
 import com.game.pb.BasePb.Base;
 import com.game.pb.InnerPb.ListenEventRq;
+import com.game.pb.RolePb.EnterGameRq;
 import com.game.register.PBFile;
 import com.game.server.AppPropertes;
 import com.game.network.IPacketHandler;
@@ -81,6 +82,14 @@ public class ListenNetContext implements INetContext, IPacketHandler {
 
 			// 录入玩家的请求指令[录入消息]
 			if (appPropertes.isRecordCmd()) {
+				int command = base.getCommand();
+				if (command == EnterGameRq.EXT_FIELD_NUMBER) {
+					ChannelUtil.setAttribute(ctx, "ENTER_GAME", 1);
+				}
+				// 玩家进入游戏后开始录数据
+				if (ChannelUtil.getAttribute(ctx, "ENTER_GAME") == null) {
+					return;
+				}
 				SpringUtil.getBean(MessageManager.class).recordCmd(packet);
 				return;
 			}

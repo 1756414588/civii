@@ -1,12 +1,12 @@
 package com.game.service;
 
 import com.game.domain.Award;
+import com.game.domain.MapDistance;
 import com.game.log.LogUser;
-import com.game.season.SeasonManager;
-import com.game.season.talent.entity.EffectType;
 import com.game.server.exec.LoginExecutor;
 import com.game.spring.SpringUtil;
 import com.game.worldmap.fight.IWar;
+import com.game.worldmap.fight.war.BigMonsterWarInfo;
 import com.game.worldmap.fight.war.CountryCityWarInfo;
 import com.game.worldmap.fight.war.ZergWarInfo;
 
@@ -171,9 +171,6 @@ public class WorldService {
     private MarchManager marchManager;
     @Autowired
     private FlameWarManager flameWarManager;
-    @Autowired
-    SeasonManager seasonManager;
-
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -381,7 +378,7 @@ public class WorldService {
 
         monster.setStatus(1);
 
-        March march = worldManager.createRebelAndAssistMarch(player, null, heroIds, targetPos, marchType);
+        March march = worldManager.createMarch(player, heroIds, targetPos, marchType);
         march.setFightTime(march.getEndTime() + 1000L, MarchReason.KillRebel);
         march.setMarchType(marchType);
         // 添加行军到玩家身上
@@ -466,8 +463,14 @@ public class WorldService {
 
     public void flushPlayerMonster(Player player, int cellNum, HashBasedTable<Integer, Integer, Map<Integer, Integer>> monsterFlushNum, HashBasedTable<Integer, Integer, Map<Integer, Integer>> monsterFlushRate, int monsterNumRange, List<Entity> list) {
         // 当前地图Id
-        int mapId = worldManager.getMapId(player);
+        int mapId = player.getLord().getMapId();
         if (mapId <= 0) {
+            return;
+        }
+        // 当前地图类型
+        int areaType = worldManager.getMapAreaType(mapId);
+        // 皇城单独刷怪
+        if (areaType == 3) {
             return;
         }
         // 世界系统开放后初级区域即可生成叛军，每个区域生成叛军数量与玩家基地数量相对应，比例为4（叛军数量）：1（玩家基地数量）
@@ -484,14 +487,6 @@ public class WorldService {
             // 还没进入世界地图
             return;
         }
-
-        // 当前地图类型
-        int areaType = worldManager.getMapAreaType(mapId);
-        // 皇城单独刷怪
-        if (areaType == 3) {
-            return;
-        }
-
         // 当前玩家基地等级
         int commandLv = player.getCommandLv();
         // 当前玩家周围能生成的野怪的等级范围
@@ -553,23 +548,22 @@ public class WorldService {
                 }
                 if (mapInfo.getMonsterNum(i) >= integerIntegerMap.get(monsterLv)) {
                     // 如果达到上限，当前玩家随机到的数量减1
-                    leftNum--;
+                    //leftNum--;
                     break;
                 }
                 // 没有达到上限，则创建一个野怪
-                Pos monsterPos = worldManager.randPos(player, cellNum);
-                // 检查野怪是否正在被攻打,正在被攻打的野怪不能被刷新
-                if (!isMonsterPosOk(monsterPos, mapInfo)) {
-                    leftNum--;
+                Pos monsterPos = mapInfo.randPos(player, cellNum);
+                if (monsterPos.isError()) {
                     break;
                 }
-                // 创建一个野怪
                 Monster monster = worldManager.addMonster(monsterPos, 1000 + monsterLv, monsterLv, mapInfo, AddMonsterReason.ADD_PLAYER_MONSTER);
+                if (monster == null) {
+                    continue;
+                }
                 list.add(monster);
-                leftNum--;
-
                 break;
             }
+            leftNum--;
         } // end while
     }
 
@@ -698,22 +692,22 @@ public class WorldService {
 //        } // end while
 //    }
 
-    public boolean isMonsterPosOk(Pos monsterPos, MapInfo mapInfo) {
-        if (monsterPos.isError()) {
-            return false;
-        }
-
-        if (!mapInfo.isFreePos(monsterPos)) {
-            return false;
-        }
-
-        Entity entity = mapInfo.getEntity(monsterPos);
-        if (entity != null) {
-            return false;
-        }
-
-        return true;
-    }
+    //public boolean isMonsterPosOk(Pos monsterPos, MapInfo mapInfo) {
+    //    if (monsterPos.isError()) {
+    //        return false;
+    //    }
+    //
+    //    if (!mapInfo.isFreePos(monsterPos)) {
+    //        return false;
+    //    }
+    //
+    //    Entity entity = mapInfo.getEntity(monsterPos);
+    //    if (entity != null) {
+    //        return false;
+    //    }
+    //
+    //    return true;
+    //}
 
     // 刷新资源
     // 玩家周围3*3格子范围内刷新时不生成采集点, 皇城没有这个限制
@@ -763,8 +757,10 @@ public class WorldService {
                     continue;
                 }
 
-                worldManager.removeResPosOnly(mapInfo, r.getPos());
-                worldManager.synEntityRemove(r, mapInfo.getMapId(), r.getPos()); // 同步资源
+//                worldManager.removeResPosOnly(mapInfo, r.getPos());
+//                worldManager.synEntityRemove(r, mapInfo.getMapId(), r.getPos()); // 同步资源
+
+                mapInfo.clearPos(r.getPos());
                 iterator.remove();
             }
 
@@ -815,27 +811,28 @@ public class WorldService {
                     } else {
                         pos = mapInfo.randPickPos();
                     }
-                    if (pos.isError() || !mapInfo.isFreePos(pos)) {
-                        Entity entity = mapInfo.getEntity(pos);
-                        if (!(entity instanceof Resource)) {
-                            continue;
-                        }
-
-                        // 正在被采集的资源不被刷新
-                        Resource resource = (Resource) entity;
-                        if (resource.getStatus() == 1) {
-                            continue;
-                        }
-                    }
+                    //if (pos.isError() || !mapInfo.isFreePos(pos)) {
+                    //    Entity entity = mapInfo.getEntity(pos);
+                    //    if (!(entity instanceof Resource)) {
+                    //        continue;
+                    //    }
+                    //
+                    //    // 正在被采集的资源不被刷新
+                    //    Resource resource = (Resource) entity;
+                    //    if (resource.getStatus() == 1) {
+                    //        continue;
+                    //    }
+                    //}
 
                     // 创建一个资源点
                     Resource resource = worldManager.createResource(EntityType.Resource, staticWorldResNum.getType(), staticWorldResNum.getLevel());
                     if (resource != null) {
-                        mapInfo.addPos(pos, resource);
-                        playerManager.clearPos(pos);
-                        resourceMap.put(pos, resource);
-                        resource.setPos(pos);
-                        // LogHelper.GAME_DEBUG.error("刷新资源.....");
+                        boolean flag = mapInfo.addPos(pos, resource);
+                        if (flag) {// 刷新资源成功
+                            playerManager.clearPos(pos);
+                            resourceMap.put(pos, resource);
+                            resource.setPos(pos);
+                        }
                     }
 
                     Integer nowRes = currentRes.get(resType, resLv);
@@ -1064,18 +1061,14 @@ public class WorldService {
         // 检查类型
         int type = req.getType();
         int energyCost = worldManager.getEnergy(type);
-        int deleteEnergy = 0;
         // 国家官员则减少体力扣除
         CtyGovern govern = countryManager.getGovern(player);
         if (govern != null) {
             StaticCountryGovern staticCountryGovern = staticCountryMgr.getGovern(govern.getGovernId(), 2);
             if (staticCountryGovern != null) {
-                deleteEnergy = staticCountryGovern.getPower();
+                energyCost -= staticCountryGovern.getPower();
             }
         }
-        int buf = seasonManager.getBuf(player, EffectType.EFFECT_TYPE8);
-        deleteEnergy = deleteEnergy > buf ? deleteEnergy : buf;
-        energyCost -= deleteEnergy;
         energyCost = Math.max(0, energyCost);
         if (energyCost < 0) {
             handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);
@@ -1503,7 +1496,7 @@ public class WorldService {
 
         // 行军消耗
         // 出兵消耗
-        Pos targetPos = warInfo.getDefencerPos();
+        Pos targetPos = new Pos(warInfo.getDefencerPos().getX(), warInfo.getDefencerPos().getY());
 
         // 检查行军时间
         Pos playerPos = player.getPos();
@@ -1865,7 +1858,8 @@ public class WorldService {
         }
 
         // 生成行军
-        March march = worldManager.createMarch(player, heroIds, warInfo.getDefencerPos());
+        Pos targetPos = new Pos(warInfo.getDefencerPos().getX(), warInfo.getDefencerPos().getY());
+        March march = worldManager.createMarch(player, heroIds, targetPos);
         // 检查行军是否超过战斗时间
         if (!isMarchWarOk(march.getPeriod(), warInfo)) {
             handler.sendErrorMsgToPlayer(GameError.TO_LONG_MARCH);
@@ -2524,7 +2518,7 @@ public class WorldService {
         // 应该用玩家出战的英雄
         // 出战英雄的Id有没有重复
         Set<Integer> checkHeroSet = new HashSet<Integer>();
-        HashMap<Integer, Hero> heros = player.getHeros();
+        Map<Integer, Hero> heros = player.getHeros();
         // 检查出战的英雄Id的合法性
         for (Integer heroId : heroList) {
             Hero hero = heros.get(heroId);
@@ -3653,7 +3647,12 @@ public class WorldService {
         // 删除坐标
         // 更新playerCity
         Pos playerPos = player.getPos();
-        worldManager.changePlayerPos(player, mapInfo, pos);
+
+        PlayerCity playerCity = worldManager.changePlayerPos(player, pos);
+        if (playerCity == null) {
+            handler.sendErrorMsgToPlayer(GameError.SERVER_EXCEPTION);
+            return;
+        }
 
         WorldPb.MapMoveRs.Builder builder = WorldPb.MapMoveRs.newBuilder();
 
@@ -3675,7 +3674,6 @@ public class WorldService {
 
     public void handleMiddleMove(WorldPb.MapMoveRq req, ClientHandler handler, int price) {
         Player player = playerManager.getPlayer(handler.getRoleId());
-
         // 指定mapId随机
         CommonPb.Pos pos = req.getPos();
         int mapId = worldManager.getMapId(pos);
@@ -3692,35 +3690,26 @@ public class WorldService {
             default:
                 break;
         }
+        // 可以迁城
+        Pos playerPos = player.getPos();
+        // 新地图
+        MapInfo newMapInfo = worldManager.getMapInfo(mapId);
+
+        Pos randPos = worldManager.givePlayerPos(newMapInfo);
+        if (randPos.isError()) {
+            handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
+            return;
+        }
+        PlayerCity playerCity = worldManager.changePlayerPos(player, randPos);
+        if (playerCity == null) {
+            handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
+            return;
+        }
         if (price == 0) {
             int itemId = req.getPropId();
             playerManager.subAward(player, AwardType.PROP, itemId, 1L, Reason.MAP_MOVE);
         }
-        FlameMap flameMap = flameWarManager.getFlameMap();
-        // 可以迁城
-        Pos playerPos = player.getPos();
-        int currentMapId = worldManager.getMapId(player);
-        MapInfo mapInfo = worldManager.getMapInfo(currentMapId);
-        PlayerCity playerCity = worldManager.removePlayerCity(playerPos, mapInfo);
-        if (currentMapId == MapId.FIRE_MAP && playerCity != null) {
-            flameMap.removeNode(playerCity);
-        }
-        MapInfo newMapInfo = worldManager.getMapInfo(mapId);
-        Pos randPos = worldManager.givePlayerPos(newMapInfo);
-        if (currentMapId == MapId.FIRE_MAP) {
-            randPos = flameMap.getPos(0);
-        }
-        if (randPos.isError()) {
-            return;
-        }
-
-        playerManager.changePlayerPos(player, randPos);
-        PlayerCity playerCity1 = worldManager.addPlayerCity(randPos, newMapInfo, player);
-        if (currentMapId == MapId.FIRE_MAP) {
-            flameMap.addNode(playerCity1);
-        }
         WorldPb.MapMoveRs.Builder builder = WorldPb.MapMoveRs.newBuilder();
-
         playerManager.subGoldOk(player, price, Reason.MAP_MOVE);
         builder.setGold(player.getGold());
         builder.setPos(randPos.wrapPb());
@@ -3811,22 +3800,20 @@ public class WorldService {
         }
         // 可以迁城
         Pos playerPos = player.getPos();
-        // LogHelper.GAME_DEBUG.error("playerPos = " + targetPos);
 
         // 当前玩家的地图
         int currentMapId = worldManager.getMapId(player);
-
         MapInfo currentMapInfo = worldManager.getMapInfo(currentMapId);
-        PlayerCity playerCity = worldManager.removePlayerCity(playerPos, currentMapInfo);
-        if (currentMapId == MapId.FIRE_MAP && playerCity != null) {
-            flameMap.removeNode(playerCity);
-        }
-        playerManager.changePlayerPos(player, targetPos);
+        PlayerCity playerCity = worldManager.changePlayerPos(player, targetPos);
 
-        PlayerCity playerCity1 = worldManager.addPlayerCity(targetPos, mapInfo, player);
-        if (currentMapId == MapId.FIRE_MAP) {
-            flameMap.addNode(playerCity1);
+        //PlayerCity playerCity = worldManager.addPlayerCity(targetPos, mapInfo, player);
+        if (playerCity == null) {
+            handler.sendErrorMsgToPlayer(GameError.POS_IS_TAKEN);
+            return;
         }
+
+        //worldManager.removePlayerCity(playerPos, currentMapInfo);
+        //playerManager.changePlayerPos(player, targetPos);
 
         WorldPb.MapMoveRs.Builder builder = WorldPb.MapMoveRs.newBuilder();
 
@@ -3866,7 +3853,7 @@ public class WorldService {
         }
 
         // 如果采集点有初级采集点,则将初级采集点重新随机位置
-        Entity entity = mapInfo.getEntity(targetPos);
+        //Entity entity = mapInfo.getEntity(targetPos);
 
         if (!mapInfo.isFreePos(targetPos)) {
             handler.sendErrorMsgToPlayer(GameError.POS_IS_TAKEN);
@@ -3879,9 +3866,10 @@ public class WorldService {
         // 当前玩家的地图
         int currentMapId = worldManager.getMapId(player);
         MapInfo currentMapInfo = worldManager.getMapInfo(currentMapId);
-        worldManager.removePlayerCity(playerPos, currentMapInfo);
-        playerManager.changePlayerPos(player, targetPos);
-        worldManager.addPlayerCity(targetPos, mapInfo, player);
+        //worldManager.removePlayerCity(playerPos, currentMapInfo);
+        //playerManager.changePlayerPos(player, targetPos);
+        //worldManager.addPlayerCity(targetPos, mapInfo, player);
+        worldManager.changePlayerPos(player, targetPos);
         WorldPb.MapMoveRs.Builder builder = WorldPb.MapMoveRs.newBuilder();
         builder.setGold(player.getGold());
         builder.setPos(targetPos.wrapPb());
@@ -4402,6 +4390,12 @@ public class WorldService {
         WorldPb.MarchCancelRs.Builder builder = WorldPb.MarchCancelRs.newBuilder();
         builder.setMarch(worldManager.wrapMarchPb(march));
         handler.sendMsgToPlayer(WorldPb.MarchCancelRs.ext, builder.build());
+
+        if (war.getAttacker().getMarchList().isEmpty()) {
+            BigMonsterWarInfo warInfo = (BigMonsterWarInfo) war;
+            worldManager.flushWar(warInfo, false, warInfo.getAttackerCountry());
+            warInfo.setEnd(true);
+        }
     }
 
     public Resource handleMarchResource(Player player, March march) {
@@ -4431,8 +4425,10 @@ public class WorldService {
         Award award = worldManager.caculateResCount(march, resource, collectTime, player, true);
         march.addAwards(award);
         if (resource.getCount() <= 0) {
-            worldManager.clearResourcePos(mapInfo, march.getEndPos());
-            worldManager.synEntityRemove(resource, mapId, resource.getPos());
+//            worldManager.clearResourcePos(mapInfo, march.getEndPos());
+//            worldManager.synEntityRemove(resource, mapId, resource.getPos());
+            mapInfo.clearPos(resource.getPos());
+
         }
 
         // 采集完成
@@ -4824,6 +4820,18 @@ public class WorldService {
         Pos pos = new Pos(req.getPos().getX(), req.getPos().getY());
         int mapId = worldManager.getMapId(pos);
 
+        int isFound = player.isMapCanMoves(mapId);
+        switch (isFound) {
+            case 1:
+                handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
+                return;
+            case 2:
+                handler.sendErrorMsgToPlayer(GameError.CANT_MOVE);
+                return;
+            default:
+                break;
+        }
+
         MapInfo newMapInfo = worldManager.getMapInfo(mapId);
         if (newMapInfo == null) {
             handler.sendErrorMsgToPlayer(GameError.SERVER_EXCEPTION);
@@ -4835,7 +4843,6 @@ public class WorldService {
             handler.sendErrorMsgToPlayer(GameError.NO_TRANSFER);
             return;
         }
-
         long callEndTime = city.getCallEndTime();
         long currentTime = System.currentTimeMillis();
         if (currentTime >= callEndTime) {
@@ -4849,58 +4856,30 @@ public class WorldService {
             handler.sendErrorMsgToPlayer(GameError.NO_TRANSFER);
             return;
         }
-
-        int currentMapId = worldManager.getMapId(player);
-        MapInfo mapInfo = worldManager.getMapInfo(currentMapId);
-
+        MapInfo mapInfo = worldManager.getMapInfo(player.getLord().getMapId());
         Pos playerPos = player.getPos();
-
         // 目标城池周围活动一个随机坐标
-        Pos randPos = worldManager.randPos(city.getPlayer(), 5);
-        if (randPos.isError() || !newMapInfo.isFreePos(randPos)) {
-            LogHelper.CONFIG_LOGGER.error("rand Pos is error!");
-            handler.sendErrorMsgToPlayer(GameError.RAND_POS_ERR);
-            return;
-        }
-
-        int isFound = player.isMapCanMoves(mapId);
-//        Map<Integer, MapStatus> mapStatuses = player.getMapStatusMap();
-//        for (MapStatus status : mapStatuses.values()) {
-//            if (status.getMapId() == mapId && status.getStatus() == 2) {
-//                isFound = true;
-//            }
-//        }
-
-        // bugs here
-//        if (!isFound) {
-//            handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
-//            return;
-//        }
-
-        switch (isFound) {
-            case 1:
-                handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
-                return;
-            case 2:
-                handler.sendErrorMsgToPlayer(GameError.CANT_MOVE);
-                return;
-            default:
-                break;
-        }
+        Pos randPos = newMapInfo.randPos(city.getPlayer(), 5);
+        //if (randPos.isError() || !newMapInfo.isFreePos(randPos)) {
+        //    LogHelper.CONFIG_LOGGER.error("rand Pos is error!");
+        //    handler.sendErrorMsgToPlayer(GameError.RAND_POS_ERR);
+        //    return;
+        //}
 
         Player target = playerManager.getPlayer(city.getLordId());
 
         city.setCallReply(callReply + 1);
         target.getLord().setCallReply(callReply + 1);
-
+        //PlayerCity playerCity = worldManager.addPlayerCity(randPos, newMapInfo, player);
+        PlayerCity playerCity = worldManager.changePlayerPos(player, randPos);
+        if (playerCity == null) {
+            handler.sendErrorMsgToPlayer(GameError.SERVER_EXCEPTION);
+            return;
+        }
         // 可以迁城,先移除原来的城池
-        // 更改城池坐标
-        worldManager.removePlayerCity(playerPos, mapInfo);
-
-        playerManager.changePlayerPos(player, randPos);
-
-        worldManager.addPlayerCity(randPos.clone(), newMapInfo, player);
-
+        //// 更改城池坐标
+        //worldManager.removePlayerCity(playerPos, mapInfo);
+        //playerManager.changePlayerPos(player, randPos);
         // 驻防武将回城
         worldManager.handleWallFriendReturn(player);
         // 先通知玩家返程
@@ -4939,7 +4918,7 @@ public class WorldService {
             handler.sendErrorMsgToPlayer(GameError.SERVER_EXCEPTION);
             return;
         }
-        HashMap<Integer, WallFriend> wallFriends = wall.getWallFriends();
+        Map<Integer, WallFriend> wallFriends = wall.getWallFriends();
         WorldPb.GetDefenceInfoRs.Builder builder = WorldPb.GetDefenceInfoRs.newBuilder();
         for (WallFriend wallFriend : wallFriends.values()) {
             builder.addFriend(playerManager.wrapWallFriend(wallFriend));
@@ -5034,35 +5013,27 @@ public class WorldService {
         long marchId = march.getKeyId();
         long lordId = march.getLordId();
 
-//		Map<Long, WarInfo> countryWarMap = mapInfo.getCountryWarMap();
-//		WarInfo countryWar = countryWarMap.get(warId);
         IWar war = mapInfo.getWar(warId);
-        if (war != null && war instanceof CountryCityWarInfo) {
-            removeMarch((CountryCityWarInfo) war, marchId, lordId);
-            // 同步国战兵力
-            warManager.synWarInfo(war, war.getAttacker().getCountry(), war.getDefencer().getCountry());
-            GameServer.getInstance().mainLogicServer.addCommand(() -> {
-                worldManager.sendWar(player);
-            });
-        }
+        if (war == null) {
+            return;
+        } else if (war instanceof CountryCityWarInfo) {
 
-//		Map<Long, WarInfo> zergWarMap = mapInfo.getZergWarMap();
-//		WarInfo zergWar = zergWarMap.get(warId);
-        if (war != null && war instanceof ZergWarInfo) {
+            CountryCityWarInfo countryCityWarInfo = (CountryCityWarInfo) war;
+            removeMarch(countryCityWarInfo, marchId, lordId);
+
+            worldManager.sendWar(player);
+
+        } else if (war instanceof ZergWarInfo) {
+
             zergManager.cannelZergMarch(march);
+
+        } else if (war instanceof WarInfo) {// 常规战斗
+
+            removeMarch((WarInfo) war, marchId, lordId);
+            worldManager.sendWar(player);
         }
 
-//		WarInfo pvpWarInfo = worldManager.getPvpWarInfo(mapInfo, warId);
-        if (war != null && war instanceof WarInfo) {
-            removeMarch((WarInfo) war, marchId, lordId);
-            warManager.synWarInfo(war);
-            GameServer.getInstance().mainLogicServer.addCommand(() -> {
-                worldManager.sendWar(player);
-            });
-        }
-        if (war != null) {
-            warManager.synWarInfo(war);
-        }
+        warManager.synWarInfo(war);
     }
 
     public void handleRemoveRebelMarch(March march) {
@@ -5488,107 +5459,50 @@ public class WorldService {
             LogHelper.CONFIG_LOGGER.error("mapInfo is null, mapId = " + mapId);
             return;
         }
-
         Map<Integer, Integer> monsterLimit = new HashMap<Integer, Integer>();
-        int monsterLv;
-        int monsterNum;
-
-        int rangeX1;
-        int rangeX2;
-        int rangeY1;
-        int rangeY2;
         Map<Pos, Monster> monsterMap = mapInfo.getMonsterMap();
         for (Integer cityId : allCity) {
             City city = cityManager.getCity(cityId);
             if (city == null) {
                 continue;
             }
-
-            // LogHelper.GAME_DEBUG.error("cityId = " + city.getCityId());
             monsterLimit.clear();
             StaticWorldCity worldCity = staticWorldMgr.getCity(cityId);
-            rangeX1 = worldCity.getRangex1();
-            rangeX2 = worldCity.getRangex2();
-            rangeY1 = worldCity.getRangey1();
-            rangeY2 = worldCity.getRangey2();
-
+            int rangeX1 = worldCity.getRangex1();
+            int rangeX2 = worldCity.getRangex2();
+            int rangeY1 = worldCity.getRangey1();
+            int rangeY2 = worldCity.getRangey2();
             // 先找到这个区块所有的怪物
-
             for (Monster monster : monsterMap.values()) {
-                if (monster == null) {
-                    continue;
-                }
                 Pos pos = monster.getPos();
                 if (pos.getX() >= rangeX1 && pos.getX() <= rangeX2 && pos.getY() >= rangeY1 && pos.getY() <= rangeY2) {
-                    Integer num = monsterLimit.get(monster.getLevel());
-                    if (num == null) {
-                        monsterLimit.put(monster.getLevel(), 1);
-                    } else {
-                        monsterLimit.put(monster.getLevel(), num + 1);
-                    }
-                }
-            }
-
-            // LogHelper.GAME_DEBUG.error("monsterCount = " + monsterCount);
-
-            Map<Pos, Boolean> freePos = new HashMap<Pos, Boolean>();
-            for (int x = rangeX1; x <= rangeX2; x++) {
-                for (int y = rangeY1; y <= rangeY2; y++) {
-                    Pos pos = new Pos(x, y);
-                    if (mapInfo.isFreePos(new Pos(x, y))) {
-                        freePos.put(pos, true);
-                    }
+                    monsterLimit.merge(monster.getLevel(), 1, (a, b) -> a + b);
                 }
             }
             // 刷每个区块的野怪
-            Random random = new Random(System.nanoTime());
             List<Entity> list = new ArrayList<>();
             for (Map.Entry<Integer, Integer> monsterInfo : fortressMonsterConfig.entrySet()) {
-                monsterLv = monsterInfo.getKey();
-                monsterNum = monsterInfo.getValue();
+                int monsterLv = monsterInfo.getKey();
+                int monsterNum = monsterInfo.getValue();
                 for (int i = 1; i <= monsterNum; i++) {
-                    Integer currentNum = monsterLimit.get(monsterLv);
-                    if (currentNum == null) {
-                        currentNum = 0;
-                    }
-
+                    int currentNum = monsterLimit.getOrDefault(monsterLv, 0);
                     if (currentNum >= monsterNum) {
                         continue;
                     }
-
-                    if (freePos.isEmpty()) {
+                    Pos randomPos = mapInfo.getRandomCityPos(worldCity);
+                    if (randomPos.isError()) {
                         continue;
                     }
-
-                    List<Pos> keys = new ArrayList<Pos>(freePos.keySet());
-                    if (keys.isEmpty()) {
-                        continue;
-                    }
-                    Pos randomPos = keys.get(random.nextInt(keys.size()));
-
-                    if (randomPos.isError() || !mapInfo.isFreePos(randomPos)) {
-                        continue;
-                    }
-
                     Monster monster = worldManager.addMonster(randomPos, 1000 + monsterLv, monsterLv, mapInfo, AddMonsterReason.ADD_FORTRESS_MONSTER);
-                    list.add(monster);
-
-                    monsterLimit.put(monsterLv, currentNum + 1);
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if (monster == null) {
+                        continue;
                     }
+                    list.add(monster);
+                    monsterLimit.put(monsterLv, currentNum + 1);
                 }
             }
             worldManager.synEntityAddRq(list);
-
-            // LogHelper.GAME_DEBUG.error("monsterLimit = " + monsterLimit);
-
         }
-
-        // LogHelper.GAME_DEBUG.error("monsterMap size = " + monsterMap.size());
-
     }
 
     public void flushFortressResource() {
@@ -5609,7 +5523,6 @@ public class WorldService {
         float actFactor = activityManager.actDouble(ActivityConst.ACT_IMPERIAL_MINE_COUNT);
         float lastFactor = 1 + actFactor;
         HashBasedTable<Integer, Integer, Integer> resourceLimit = HashBasedTable.create();
-
         int rangeX1;
         int rangeX2;
         int rangeY1;
@@ -5658,12 +5571,11 @@ public class WorldService {
                 if (left > staticLimitMgr.getCenterResFactor()) {
                     continue;
                 }
-                worldManager.removeResPosOnly(mapInfo, r.getPos());
-                worldManager.synEntityRemove(r, mapInfo.getMapId(), r.getPos()); // 同步资源
+//                worldManager.removeResPosOnly(mapInfo, r.getPos());
+//                worldManager.synEntityRemove(r, mapInfo.getMapId(), r.getPos()); // 同步资源
+                mapInfo.clearPos(r.getPos());
                 iterator.remove();
             }
-
-            int cityResNum = 0;
             for (Resource resource : resourceMap.values()) {
                 if (resource == null) {
                     continue;
@@ -5678,37 +5590,19 @@ public class WorldService {
                     }
 
                     int type = worldResource.getType();
-
                     if (resource.getLevel() < 7 || resource.getLevel() > 10) {
                         LogHelper.CONFIG_LOGGER.error("error resLv = " + resource.getLevel());
                     }
-
                     Integer num = resourceLimit.get(type, resource.getLevel());
                     if (num == null) {
                         resourceLimit.put(type, resource.getLevel(), 1);
                     } else {
                         resourceLimit.put(type, resource.getLevel(), num + 1);
                     }
-                    ++cityResNum;
-                }
-            }
-
-//             LogHelper.GAME_DEBUG.error("cityId = " + cityId +
-//             ", cityResNum = " + cityResNum);
-//             LogHelper.GAME_DEBUG.error("before resourceLimit = " +
-//             resourceLimit);
-            Map<Pos, Boolean> freePos = new HashMap<Pos, Boolean>();
-            for (int x = rangeX1; x <= rangeX2; x++) {
-                for (int y = rangeY1; y <= rangeY2; y++) {
-                    Pos pos = new Pos(x, y);
-                    if (mapInfo.isFreePos(new Pos(x, y))) {
-                        freePos.put(pos, true);
-                    }
                 }
             }
 
             // 刷每个区块的资源
-            Random random = new Random(System.nanoTime());
             // 类型、等级、数量
             int configNum = 0;
             List<Entity> list = new ArrayList<>();
@@ -5728,27 +5622,12 @@ public class WorldService {
                         if (currentNum >= lastNum) {
                             continue;
                         }
-
-                        if (freePos.isEmpty()) {
-                            continue;
-                        }
-
-                        List<Pos> keys = new ArrayList<Pos>(freePos.keySet());
-                        if (keys.isEmpty()) {
-                            continue;
-                        }
-
-                        Pos randomPos = keys.get(random.nextInt(keys.size()));
-                        if (randomPos.isError() || !mapInfo.isFreePos(randomPos)) {
-                            continue;
-                        }
-
+                        Pos randomPos = mapInfo.getRandomCityPos(worldCity);
                         Resource resource = worldManager.addResource(randomPos, resLv, resType, mapInfo);
-
-                        // LogHelper.GAME_DEBUG.error(index + ".resourcePos = "
-                        // + randomPos);
+                        if (resource == null) {
+                            continue;
+                        }
                         list.add(resource);
-
                         resourceLimit.put(resType, resLv, currentNum + 1);
                         try {
                             Thread.sleep(1);
@@ -5759,16 +5638,7 @@ public class WorldService {
                 }
             }
             worldManager.synEntityAddRq(list);
-//             LogHelper.GAME_DEBUG.error("resourceLimit = " + resourceLimit);
-//             LogHelper.GAME_DEBUG.error(" ------------------------------------"
-//             );
         }
-
-//         LogHelper.GAME_DEBUG.error("after resourceMap.size = " +
-//         resourceMap.size());
-//         LogHelper.GAME_DEBUG.error("resourceMap size = " +
-//         resourceMap.size());
-
     }
 
     // 获取资源信息
@@ -6290,15 +6160,16 @@ public class WorldService {
 
         // 可以迁城
         MapInfo mapInfo = worldManager.getMapInfo(currentMapId);
-        worldManager.removePlayerCity(pos, mapInfo);
+        //worldManager.removePlayerCity(pos, mapInfo);
         MapInfo newMapInfo = worldManager.getMapInfo(mapId);
         Pos randPos = worldManager.givePlayerPos(newMapInfo);
-        if (randPos.isError() || !newMapInfo.isFreePos(randPos)) {
-            handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
-            return;
-        }
-        playerManager.changePlayerPos(player, randPos);
-        worldManager.addPlayerCity(randPos, newMapInfo, player);
+        //if (randPos.isError() || !newMapInfo.isFreePos(randPos)) {
+        //    handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
+        //    return;
+        //}
+        PlayerCity playerCity = worldManager.changePlayerPos(player, randPos);
+        //playerManager.changePlayerPos(player, randPos);
+        //worldManager.addPlayerCity(randPos, newMapInfo, player);
         if (price > 0) {
             // 扣钻石
             playerManager.subGoldOk(player, price, Reason.MAP_MOVE);
@@ -6454,29 +6325,34 @@ public class WorldService {
                     return;
                 }
 
-                March march = worldManager.createMarch(player, heroIds, targetPos);
-                march.setPeriod(1000L);
-                march.setEndTime(System.currentTimeMillis() + 10000L);
-                march.setFightTime(march.getEndTime() + 10000L, MarchReason.KillRebel);
-                march.setMarchType(MarchType.BigWar);
-                mapInfo.addMarch(march);
-                worldManager.synMarch(mapId, march);
                 Optional<StaticGiantZerg> op = staticWorldMgr.getGiantZergMap().values().stream().filter(e -> e.getType() == 1 && e.getLevel() == lv).findAny();
                 if (op.isPresent()) {
                     StaticGiantZerg staticGiantZerg = op.get();
-
-                    BigMonster bigMonster = worldManager.addBigMonster(targetPos, staticGiantZerg.getId(), staticGiantZerg.getLevel(), mapInfo, AddMonsterReason.ADD_BIG_MONSTER);
-
-                    bigMonster.setMapId(mapInfo.getMapId());
-                    bigMonster.setLeaveTime(march.getFightTime() + 120000);
-                    bigMonster.setState(EntityState.SURVIVAL.get());
-                    bigMonster.setSoldierType(staticGiantZerg.getSoldierType());
 
                     StaticWorldMonster staticWorldMonster = staticWorldMgr.getMonster(Long.valueOf(staticGiantZerg.getId()).intValue());
                     if (staticWorldMonster == null) {
                         LogHelper.CONFIG_LOGGER.error("staticGiantZerg error->[{}]", staticGiantZerg.getId());
                         return;
                     }
+
+                    BigMonster bigMonster = worldManager.addBigMonster(targetPos, staticGiantZerg.getId(), staticGiantZerg.getLevel(), mapInfo, AddMonsterReason.ADD_BIG_MONSTER);
+                    if (bigMonster == null) {
+                        return;
+                    }
+
+                    March march = worldManager.createMarch(player, heroIds, targetPos);
+                    march.setPeriod(1000L);
+                    march.setEndTime(System.currentTimeMillis() + 10000L);
+                    march.setFightTime(march.getEndTime() + 10000L, MarchReason.KillRebel);
+                    march.setMarchType(MarchType.BigWar);
+                    mapInfo.addMarch(march);
+                    worldManager.synMarch(mapId, march);
+
+                    bigMonster.setMapId(mapInfo.getMapId());
+                    bigMonster.setLeaveTime(march.getFightTime() + 120000);
+                    bigMonster.setState(EntityState.SURVIVAL.get());
+                    bigMonster.setSoldierType(staticGiantZerg.getSoldierType());
+
                     List<Entity> monsterList = new ArrayList<>();
                     Team monsterTeam = battleMgr.initMonsterTeam(staticWorldMonster.getMonsterIds(), BattleEntityType.BIG_MONSTER);
                     bigMonster.setTeam(monsterTeam);
@@ -6698,7 +6574,10 @@ public class WorldService {
                     Pos pos = kv.getKey();
                     StaticSuperRes sSm = staticSuperResMgr.getSuperMineRandom();
                     SuperResource resource = new SuperResource(pos, sSm, kv.getValue(), city.getCountry());
-                    worldManager.addSuperResource(mapInfo, pos, resource);// 添加到地图
+                    resource = worldManager.addSuperResource(mapInfo, pos, resource);// 添加到地图
+                    if (resource == null) {
+                        continue;
+                    }
                     superResources.add(resource);// 添加到阵营
                     list.add(resource);
                 }
@@ -6972,94 +6851,54 @@ public class WorldService {
             clientHandler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
             return;
         }
-        Entity entity = null;
+//		Entity entity = null;
+
+        Pos pos = player.getPos();
+        MapDistance mapDistance = new MapDistance(pos);
+
         SimpleData simpleData = player.getSimpleData();
         List<Pos> searchPos = simpleData.getSearchPos();
+        List<Entity> list = new ArrayList<>();
         try {
             int entityType = rq.getEntityType();
             int level = rq.getLevel();
             int resourceType = rq.getResourceType();
             MapInfo mapInfo = worldManager.getMapInfo(player.getLord().getMapId());
 
-            Pos pos = player.getPos();
             switch (entityType) {
                 case EntityType.Monster:
                     Collection<Monster> values = mapInfo.getMonsterMap().values();
-
-                    List<Monster> collect = values.stream().filter(monster -> monster.getLevel() == level && !searchPos.contains(monster.getPos()) && mapInfo.getMarchByPos(monster.getPos()) == null).collect(Collectors.toList());
-                    Iterator<Monster> iterator = collect.iterator();
-                    while (iterator.hasNext()) {
-                        Monster next = iterator.next();
-                        next.setDistance(pos);
-                        if (entity == null) {
-                            entity = next;
-                        } else {
-                            if (next.getDistance() < entity.getDistance()) {
-                                entity = next;
-                            }
-                        }
-                    }
+                    list = values.stream().filter(monster -> monster.getLevel() == level && !searchPos.contains(monster.getPos()) && mapInfo.getMarchByPos(monster.getPos()) == null).collect(Collectors.toList());
                     break;
                 case EntityType.Resource:
-                    Collection<Resource> values1 = mapInfo.getResourceMap().values();
-                    List<Resource> collect1 = values1.stream().filter(resource -> resource.getType() == resourceType && resource.getLevel() == level && resource.getPlayer() == null && !searchPos.contains(resource.getPos())).collect(Collectors.toList());
-                    Iterator<Resource> iterator1 = collect1.iterator();
-                    while (iterator1.hasNext()) {
-                        Resource next = iterator1.next();
-                        next.setDistance(pos);
-                        if (entity == null) {
-                            entity = next;
-                        } else {
-                            if (next.getDistance() < entity.getDistance()) {
-                                entity = next;
-                            }
-                        }
-                    }
+                    list = mapInfo.getResourceMap().values().stream().filter(resource -> resource.getType() == resourceType && resource.getLevel() == level && resource.getPlayer() == null && !searchPos.contains(resource.getPos())).collect(Collectors.toList());
                     break;
                 case EntityType.BIG_RESOURCE:
                     List<SuperResource> superResources = mapInfo.getSuperResMap().get(player.getCountry());
                     if (superResources != null) {
-                        List<SuperResource> collect2 = superResources.stream().filter(resource -> resource.getState() == SuperResource.STATE_PRODUCED && resource.getResType() == resourceType && resource.getCollectArmy().size() < 4 && !searchPos.contains(resource.getPos())).collect(Collectors.toList());
-                        Iterator<SuperResource> iterator3 = collect2.iterator();
-                        while (iterator3.hasNext()) {
-                            SuperResource next = iterator3.next();
-                            next.setDistance(pos);
-                            if (entity == null) {
-                                entity = next;
-                            } else {
-                                if (next.getDistance() < entity.getDistance()) {
-                                    entity = next;
-                                }
-                            }
-                        }
+                        list = superResources.stream().filter(resource -> resource.getState() == SuperResource.STATE_PRODUCED && resource.getResType() == resourceType && resource.getCollectArmy().size() < 4 && !searchPos.contains(resource.getPos())).collect(Collectors.toList());
                     }
                     break;
                 case EntityType.BIG_MONSTER:
-                    List<BigMonster> collect3 = mapInfo.getBigMonsterMap().values().stream().filter(bigMonster -> bigMonster.getLevel() == level && !searchPos.contains(bigMonster.getPos())).collect(Collectors.toList());
-                    Iterator<BigMonster> iterator4 = collect3.iterator();
-                    while (iterator4.hasNext()) {
-                        BigMonster next = iterator4.next();
-                        next.setDistance(pos);
-                        if (entity == null) {
-                            entity = next;
-                        } else {
-                            if (next.getDistance() < entity.getDistance()) {
-                                entity = next;
-                            }
-                        }
-                    }
+                    list = mapInfo.getBigMonsterMap().values().stream().filter(bigMonster -> bigMonster.getLevel() == level && !searchPos.contains(bigMonster.getPos())).collect(Collectors.toList());
                     break;
             }
         } catch (Exception e) {
 
         } finally {
+            Iterator<Entity> iterator4 = list.iterator();
+            while (iterator4.hasNext()) {
+                Entity next = iterator4.next();
+                // 查找最近的目标
+                mapDistance.findNearestEntity(next);
+            }
             WorldPb.SearchEntityRs.Builder builder = WorldPb.SearchEntityRs.newBuilder();
             CommonPb.Pos.Builder builder1 = CommonPb.Pos.newBuilder();
-            if (entity != null) {
-                builder1.setX(entity.getPos().getX());
-                builder1.setY(entity.getPos().getY());
+            if (mapDistance.getNearest() != null) {
+                builder1.setX(mapDistance.getNearest().getPos().getX());
+                builder1.setY(mapDistance.getNearest().getPos().getY());
                 builder.setPos(builder1);
-                simpleData.getSearchPos().add(entity.getPos());
+                simpleData.getSearchPos().add(mapDistance.getNearest().getPos());
             }
             clientHandler.sendMsgToPlayer(WorldPb.SearchEntityRs.ext, builder.build());
             if (TimeHelper.curentTime() - simpleData.getSearchTime() > 10000) {
@@ -7093,32 +6932,33 @@ public class WorldService {
         int itemId = req.getPropId();
         boolean b = flameWarManager.subProp(flamePlayer, itemId, 1);
         if (!b) {
+            handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
             return;
         }
-        FlameMap flameMap = flameWarManager.getFlameMap();
+
         // 可以迁城
         Pos playerPos = player.getPos();
         int currentMapId = worldManager.getMapId(player);
         MapInfo mapInfo = worldManager.getMapInfo(currentMapId);
-        PlayerCity playerCity = worldManager.removePlayerCity(playerPos, mapInfo);
-        if (currentMapId == MapId.FIRE_MAP && playerCity != null) {
-            flameMap.removeNode(playerCity);
-        }
+
         MapInfo newMapInfo = worldManager.getMapInfo(mapId);
+
         Pos randPos = worldManager.givePlayerPos(newMapInfo);
-        if (currentMapId == MapId.FIRE_MAP) {
-            randPos = flameMap.getPos(0);
-        }
         if (randPos.isError()) {
+            handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
             return;
         }
-        playerManager.changePlayerPos(player, randPos);
-        PlayerCity playerCity1 = worldManager.addPlayerCity(randPos, newMapInfo, player);
-        if (currentMapId == MapId.FIRE_MAP) {
-            flameMap.addNode(playerCity1);
+
+        PlayerCity playerCity = worldManager.changePlayerPos(player, randPos);
+        if (playerCity == null) {
+            handler.sendErrorMsgToPlayer(GameError.CANNOT_MAP_MOVE);
+            return;
         }
+
+        //worldManager.removePlayerCity(playerPos, mapInfo);
+        //playerManager.changePlayerPos(player, randPos);
+
         WorldPb.MapMoveRs.Builder builder = WorldPb.MapMoveRs.newBuilder();
-        // playerManager.subGoldOk(player, price, Reason.MAP_MOVE);
         builder.setGold(player.getGold());
         builder.setPos(randPos.wrapPb());
         Item item = player.getItem(req.getPropId());
@@ -7193,25 +7033,22 @@ public class WorldService {
         }
         // 可以迁城
         Pos playerPos = player.getPos();
-        // LogHelper.GAME_DEBUG.error("playerPos = " + targetPos);
 
         // 当前玩家的地图
         int currentMapId = worldManager.getMapId(player);
         MapInfo currentMapInfo = worldManager.getMapInfo(currentMapId);
-        PlayerCity playerCity = worldManager.removePlayerCity(playerPos, currentMapInfo);
-        if (currentMapId == MapId.FIRE_MAP && playerCity != null) {
-            flameMap.removeNode(playerCity);
-        }
-        playerManager.changePlayerPos(player, targetPos);
 
-        PlayerCity playerCity1 = worldManager.addPlayerCity(targetPos, mapInfo, player);
-        if (currentMapId == MapId.FIRE_MAP) {
-            flameMap.addNode(playerCity1);
+        PlayerCity playerCity = worldManager.changePlayerPos(player, targetPos);
+        if (playerCity == null) {
+            handler.sendErrorMsgToPlayer(GameError.POS_IS_TAKEN);
+            return;
         }
+        //
+        //worldManager.removePlayerCity(playerPos, currentMapInfo);
+        //playerManager.changePlayerPos(player, targetPos);
 
         WorldPb.MapMoveRs.Builder builder = WorldPb.MapMoveRs.newBuilder();
 
-        // playerManager.subGoldOk(player, price, Reason.MAP_MOVE);
         builder.setGold(player.getGold());
         builder.setPos(targetPos.wrapPb());
         Item item = player.getItem(req.getPropId());

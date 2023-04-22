@@ -7,15 +7,13 @@ import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActSevenConst;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActSeven;
-import com.game.manager.ActivityManager;
 import com.game.util.DateHelper;
-import com.game.spring.SpringUtil;
 import com.game.util.TimeHelper;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -27,13 +25,14 @@ import java.util.stream.Collectors;
  * @author zcp
  * @date 2021/8/30 9:53
  */
+@Component
 public class ActSevenTipEvent extends BaseActivityEvent {
 
-	private static ActSevenTipEvent inst = new ActSevenTipEvent();
-
-	public static ActSevenTipEvent getInst() {
-		return inst;
-	}
+	//private static ActSevenTipEvent inst = new ActSevenTipEvent();
+	//
+	//public static ActSevenTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -70,7 +69,6 @@ public class ActSevenTipEvent extends BaseActivityEvent {
 		if (beforeCheck(actor)) {
 			return;
 		}
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 		ActivityBase activityBase = activityManager.getActivityBase(ActivityConst.ACT_SEVEN);
 		if (activityBase == null || activityBase.getStep() != ActivityConst.ACTIVITY_BEGIN) {
 			return;
@@ -85,7 +83,6 @@ public class ActSevenTipEvent extends BaseActivityEvent {
 
 		int day = checkDay(player.account.getCreateDate());
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		// 筛选装备拥有
 		List<StaticActSeven> list = staticActivityMgr.getSevens().values().stream().filter(e -> e.getType() == 3 && e.getSortId() / 1000 == 8 && e.getDay() <= day).collect(Collectors.toList());
 		for (StaticActSeven e : list) {
@@ -114,7 +111,6 @@ public class ActSevenTipEvent extends BaseActivityEvent {
 		if (actor.getParam2() >= 6 && actor.getParam2() <= 10) {
 			killRebel = calcuProgress(actor, ActSevenConst.KILL_REBEL);
 		}
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		boolean flag = false;
 		for (StaticActSeven config : staticActivityMgr.getSevens().values()) {
 			if (config.getSortId() == ActSevenConst.KILL_REBEL_NEW && config.getDay() <= day) {
@@ -145,7 +141,6 @@ public class ActSevenTipEvent extends BaseActivityEvent {
 		// 获取玩家角色创建日期与当前的时间差
 		Date createDate = actor.getPlayer().account.getCreateDate();
 		int day = checkDay(createDate);
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		boolean flag = false;
 		for (StaticActSeven config : staticActivityMgr.getSevens().values()) {
 			if (config.getSortId() == taskType && config.getDay() <= day) {

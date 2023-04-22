@@ -83,8 +83,9 @@ public class BigMonsterProcess extends FightProcess {
 			if (size < 2) {
 				march.setEndTime(march.getFightTime() + 1000L);
 				warInfo.getAttackMarches().add(march);
-
-				if (size >= 1) {// 新增之后人数大于等于二，可开战
+				march.setWarId(warInfo.getWarId());
+				size = warInfo.getAttackMarches().stream().collect(Collectors.groupingBy(e -> e.getLordId())).size();
+				if (size > 1) {// 新增之后人数大于等于二，可开战
 					warInfo.setState(WarState.Fighting);
 				}
 			}
@@ -99,6 +100,7 @@ public class BigMonsterProcess extends FightProcess {
 				BigMonsterWarInfo bigMonsterWarInfo = warManager.createBigMonsterWar(player.getLord().getLordId(), player.getCountry(), staticWorldMonster.getId(), player.getPos(), new Pos(march.getEndPos().getX(), march.getEndPos().getY()), WarType.BIGMONSTER_WAR, mapInfo);
 				march.setState(MarchState.Waiting);
 				march.setEndTime(march.getFightTime() + 1000L);
+				march.setWarId(bigMonsterWarInfo.getWarId());
 				bigMonsterWarInfo.getAttackMarches().add(march);
 				worldManager.synMarch(mapInfo.getMapId(), march);
 				LogHelper.MESSAGE_LOGGER.info("巨型虫族--行军首次抵达 战斗ID：{} 战斗状态:{} endTime:{}", bigMonsterWarInfo.getWarId(), bigMonsterWarInfo.getState(), bigMonsterWarInfo.getEndTime());
@@ -117,21 +119,31 @@ public class BigMonsterProcess extends FightProcess {
 		//bigMonster 为null说明该虫族已被消灭
 
 		// 未到开战时间
-		if (bigMonster != null && war.getEndTime() > System.currentTimeMillis()) {
-			return;
+		if ( war.getEndTime() < System.currentTimeMillis()) {
+			if (!war.getAttacker().getMarchList().isEmpty()) {
+				war.getAttacker().getMarchList().forEach(e -> {
+					marchManager.handleMarchReturn(e, Reason.KILL_WORLD_MONSTER);
+					worldManager.synMarch(mapInfo.getMapId(), e);
+				});
+			}
+			BigMonsterWarInfo warInfo = (BigMonsterWarInfo) war;
+			worldManager.flushWar(warInfo, false, warInfo.getAttackerCountry());
+			warInfo.setEnd(true);
 		}
 		//遣返部队
-		if (!war.getAttacker().getMarchList().isEmpty()) {
-			war.getAttacker().getMarchList().forEach(e -> {
-				marchManager.handleMarchReturn(e, Reason.KILL_WORLD_MONSTER);
-				worldManager.synMarch(mapInfo.getMapId(), e);
-			});
-		}
+		//if (!war.getAttacker().getMarchList().isEmpty()) {
+		//	war.getAttacker().getMarchList().forEach(e -> {
+		//		marchManager.handleMarchReturn(e, Reason.KILL_WORLD_MONSTER);
+		//		worldManager.synMarch(mapInfo.getMapId(), e);
+		//	});
+		//}
 
 		// 战斗结束
-		BigMonsterWarInfo warInfo = (BigMonsterWarInfo) war;
-		worldManager.flushWar(warInfo, false, warInfo.getAttackerCountry());
-		warInfo.setEnd(true);
+		//if(war.getAttacker().getMarchList().isEmpty()){
+		//	BigMonsterWarInfo warInfo = (BigMonsterWarInfo) war;
+		//	worldManager.flushWar(warInfo, false, warInfo.getAttackerCountry());
+		//	warInfo.setEnd(true);
+		//}
 	}
 
 	private void warFinish(MapInfo mapInfo, IWar war) {

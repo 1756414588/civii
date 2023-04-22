@@ -6,23 +6,24 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 
 /**
  * 七日充值
  */
+@Component
 public class ActSevenRechargeTipEvent extends BaseActivityEvent {
-
-	private static ActSevenRechargeTipEvent inst = new ActSevenRechargeTipEvent();
-
-	public static ActSevenRechargeTipEvent getInst() {
-		return inst;
-	}
+	//
+	//private static ActSevenRechargeTipEvent inst = new ActSevenRechargeTipEvent();
+	//
+	//public static ActSevenRechargeTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -34,7 +35,6 @@ public class ActSevenRechargeTipEvent extends BaseActivityEvent {
 	public void process(EventEnum activityEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		if (null == condList || condList.size() == 0) {
 			return;
@@ -53,7 +53,6 @@ public class ActSevenRechargeTipEvent extends BaseActivityEvent {
 	public void reward(EventEnum activityEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		if (null == condList || condList.size() == 0) {
 			return;

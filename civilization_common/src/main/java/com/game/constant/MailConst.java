@@ -2,7 +2,7 @@ package com.game.constant;
 
 /**
  * @filename
- *
+ * @author 陈奎
  * @version 1.0
  * @time 2017-3-16 下午5:13:07
  * @describe

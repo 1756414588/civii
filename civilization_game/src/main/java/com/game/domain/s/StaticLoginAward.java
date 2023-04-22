@@ -6,7 +6,7 @@ import com.game.pb.CommonPb;
 
 /**
  * @filename
- *
+ * @author 陈奎
  * @version 1.0
  * @time 2017-3-21 下午8:14:09
  * @describe

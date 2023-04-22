@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import com.game.domain.s.*;
 import com.google.common.collect.HashBasedTable;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@LoadData(name = "Limit配置")
 public class StaticLimitMgr extends BaseDataMgr {
     final static public int SECOND_MS = 1000;
 
@@ -36,7 +38,7 @@ public class StaticLimitMgr extends BaseDataMgr {
 
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         staticLimit = staticDataDao.selectLimit();
         if (staticLimit == null) {
             throw new NullPointerException("staticLimit is null!");
@@ -53,6 +55,11 @@ public class StaticLimitMgr extends BaseDataMgr {
         makeResourceLimit();
         initStaticMailAward();
         initGroup();
+    }
+
+    @Override
+    public void init() throws Exception{
+
     }
 
     private void initStaticMailAward(){

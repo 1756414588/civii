@@ -17,5 +17,6 @@ public class RobotMessage {
 	private int parentId;
 	private int remainTime;
 	private long createTime;
+	private int diffHour;
 
 }

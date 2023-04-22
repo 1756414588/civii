@@ -47,8 +47,9 @@ public class BuildingBase implements Cloneable {
         this.level = level;
     }
 
-    public void incrementLevel() {
+    public int incrementLevel() {
         level += 1;
+        return level;
     }
 
     public DataPb.BuildingData.Builder readData() {

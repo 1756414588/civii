@@ -6,23 +6,23 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticLimitMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
 
 /**
  * 金币转盘
  *
  * @author cpz
  */
+@Component
 public class ActTurntableTipEvent extends BaseActivityEvent {
-
-    private static ActTurntableTipEvent inst = new ActTurntableTipEvent();
-
-    public static ActTurntableTipEvent getInst() {
-        return inst;
-    }
+    //
+    //private static ActTurntableTipEvent inst = new ActTurntableTipEvent();
+    //
+    //public static ActTurntableTipEvent getInst() {
+    //    return inst;
+    //}
 
     @Override
     public void listen() {
@@ -33,7 +33,7 @@ public class ActTurntableTipEvent extends BaseActivityEvent {
     }
 
     public void subGold(EventEnum activityEnum, IActivityActor actor) {
-        StaticLimitMgr limitMgr = SpringUtil.getBean(StaticLimitMgr.class);
+
         ActivityBase activityBase = actor.getActivityBase();
         ActRecord activity = actor.getActRecord();
 
@@ -41,7 +41,7 @@ public class ActTurntableTipEvent extends BaseActivityEvent {
         state = state + actor.getChange();
         activity.putRecord(0, state);
 
-        int onePrice = activityBase.getActivityId() == ActivityConst.ACT_CRYSTAL_DIAL ? limitMgr.getNum(230) : limitMgr.getNum(246);
+        int onePrice = activityBase.getActivityId() == ActivityConst.ACT_CRYSTAL_DIAL ? staticLimitMgr.getNum(230) : staticLimitMgr.getNum(246);
         int dialCount = activity.getRecord(1);
         int freeCount = state / onePrice - dialCount;
         freeCount = freeCount < 0 ? 0 : freeCount;

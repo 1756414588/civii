@@ -7,12 +7,11 @@ import com.game.constant.ActivityConst;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
-import com.game.manager.ActivityManager;
-import com.game.manager.PlayerManager;
 import com.game.pb.ActivityPb;
 import com.game.pb.ActivityPb.SynActivityDisappearRq;
-import com.game.spring.SpringUtil;
 import com.game.util.SynHelper;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,13 +21,14 @@ import java.util.function.Function;
 /**
  * 到点活动结束
  */
+@Component
 public class ActCloseByTimeEvent extends BaseActivityEvent {
-
-	private static ActCloseByTimeEvent inst = new ActCloseByTimeEvent();
-
-	public static ActCloseByTimeEvent getInst() {
-		return inst;
-	}
+	//
+	//private static ActCloseByTimeEvent inst = new ActCloseByTimeEvent();
+	//
+	//public static ActCloseByTimeEvent getInst() {
+	//	return inst;
+	//}
 
 	private List<Function<Player, Integer>> actPlayerTimerList = new ArrayList<>();
 	Map<Integer, Function<Integer, Integer>> actServerTimer = new HashMap<>();
@@ -60,7 +60,6 @@ public class ActCloseByTimeEvent extends BaseActivityEvent {
 
 	@Override
 	public void process(EventEnum activityEnum, IActivityActor actor) {
-		PlayerManager playerManager = SpringUtil.getBean(PlayerManager.class);
 		List<Integer> paramList = new ArrayList<>();
 
 		// 全服统一关闭活动，到点结束
@@ -104,7 +103,6 @@ public class ActCloseByTimeEvent extends BaseActivityEvent {
 			}
 			return 0;
 		}
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 		ActivityBase activityBase = activityManager.getActivityBase(activityId);
 		if (activityBase == null) {
 			return 0;
@@ -121,7 +119,6 @@ public class ActCloseByTimeEvent extends BaseActivityEvent {
 	 * 惊喜礼包
 	 */
 	public int actSuripriseGift(Player player) {
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 		ActivityBase activityBase = activityManager.getActivityBase(ActivityConst.ACT_SURIPRISE_GIFT);
 		if (activityBase == null) {
 			return 0;

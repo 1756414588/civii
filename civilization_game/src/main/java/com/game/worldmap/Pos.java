@@ -125,24 +125,8 @@ public class Pos {
 		return x == pos.getX() && y == pos.getY();
 	}
 
-	public Pos clone() {
-		Pos pos = new Pos();
-		pos.setX(x);
-		pos.setY(y);
-		return pos;
-	}
-
 	public String toPosStr() {
 		return x + "," + y;
 	}
 
-	private int distance;
-
-	public int getDistance() {
-		return distance;
-	}
-
-	public void setDistance(Pos pos) {
-		this.distance = Math.abs(pos.getX() - this.x) + Math.abs(pos.getY() - this.y);
-	}
 }

@@ -1056,8 +1056,8 @@ public class EventManager {
 			baseProperties.setEventName(EventName.online_user_amount.name());
 			if (loggerConsumer != null) {
 				loggerConsumer.track(baseProperties);
-				xinkuaiManager.pushXinkuai(baseProperties, EventType.TRACK.getType());
 			}
+			xinkuaiManager.pushXinkuai(baseProperties, EventType.TRACK.getType());
 			 
 		});
 	}

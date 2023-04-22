@@ -45,9 +45,6 @@ public class EndlessTDRank {
 		return builder;
 	}
 	public EndlessTDInfo getEndlessTDInfo() {
-		if(player==null){
-			System.err.println(lordId);
-		}
 		return player.getEndlessTDInfo();
 	}
 }

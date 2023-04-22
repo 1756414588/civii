@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import com.game.domain.s.StaticVip;
 import com.game.domain.s.StaticVipBuy;
 
 @Component
+@LoadData(name = "VIP模块")
 public class StaticVipMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -33,13 +35,8 @@ public class StaticVipMgr extends BaseDataMgr {
 
     private HashBasedTable<Integer,Integer,StaticPayPoint> payPointTable = HashBasedTable.create();
 
-    /**
-     * Overriding: init
-     *
-     * @see com.game.dataMgr.BaseDataMgr#init()
-     */
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         // TODO Auto-generated method stub
         vipMap = new HashMap<>();
         vipBuyMaps = new HashMap<>();
@@ -54,6 +51,16 @@ public class StaticVipMgr extends BaseDataMgr {
                 PayMap.put(staticPay.getPayId(), staticPay);
             }
         }
+    }
+
+    /**
+     * Overriding: init
+     *
+     * @see com.game.dataMgr.BaseDataMgr#init()
+     */
+    @Override
+    public void init() throws Exception{
+
     }
 
     private void initVip() {

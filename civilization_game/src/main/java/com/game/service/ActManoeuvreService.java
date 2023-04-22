@@ -16,6 +16,7 @@ import com.game.domain.p.WorldActPlan;
 import com.game.domain.s.StaticBeautyBase;
 import com.game.domain.s.StaticManoeuvreShop;
 import com.game.domain.s.StaticWorldActPlan;
+import com.game.log.domain.ManoeuvreLog;
 import com.game.manager.ActManoeuvreManager;
 import com.game.manager.BeautyManager;
 import com.game.manager.HeroManager;
@@ -49,8 +50,7 @@ import com.game.pb.CommonPb.ManoeuvreScoreGroupPB;
 import com.game.pb.CommonPb.ManoeuvreScorePB;
 import com.game.pb.CommonPb.ManoeuvreShopPB;
 import com.game.pb.CommonPb.TwoInt;
-import com.game.season.SeasonService;
-import com.game.season.grand.entity.GrandType;
+import com.game.spring.SpringUtil;
 import com.game.util.LogHelper;
 import com.game.util.Pair;
 import com.game.util.PbHelper;
@@ -73,7 +73,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *
+ * @author 陈奎
  * @version 创建时间：2021-12-20 下午17:36:23
  * @declare
  */
@@ -221,12 +221,7 @@ public class ActManoeuvreService {
 
 		ActManoeuvreSignUpRs.Builder builder = ActManoeuvreSignUpRs.newBuilder();
 		handler.sendMsgToPlayer(ActManoeuvreSignUpRs.ext, builder.build());
-		seasonService.addTreasuryScore(player, GrandType.TYPE_3, 1, 1);
 	}
-
-	@Autowired
-	SeasonService seasonService;
-
 
 	public void actManoeuvreApplyLineRq(ActManoeuvreApplyLineRq req, ClientHandler handler) {
 		ManoeuvreData manoeuvreData = actManoeuvreManager.getManoeuvreData();
@@ -706,6 +701,23 @@ public class ActManoeuvreService {
 			shopPb.setMaxCount(e.getLimitCount());
 			builder.addShop(shopPb.build());
 		});
+
+//		LogHelper.GAME_LOGGER.info("兑换 {} {} {}",player.getNick(),shop.getPrice(),itemId);
+		// 日志记录 消耗积分
+		SpringUtil.getBean(com.game.log.LogUser.class).manoeuvre_log(
+				ManoeuvreLog.builder()
+						.roleId(player.roleId)
+						.nick(player.getNick())
+						.level(player.getLevel())
+						.vipLevel(player.getVip())
+						.changePoint(shop.getPrice())
+						.itemId(itemId)
+						.itemNum(itemCount)
+						.source(0)   // 消耗积分记为0
+						.type(1)    // type=1 为消耗积分
+						.point(simpleData.getManoeuvreScore())
+						.build()
+		);
 
 		handler.sendMsgToPlayer(ActManoeuvreBuyShopRs.ext, builder.build());
 //		LogHelper.MESSAGE_LOGGER.info("ActManoeuvreBuyShopRs:{}", builder.build());

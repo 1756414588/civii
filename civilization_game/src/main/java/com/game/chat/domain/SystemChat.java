@@ -51,7 +51,7 @@ public class SystemChat extends Chat {
 	}
 
 	@Override
-	public com.game.pb.CommonPb.Chat ser(int style, int officerId) {
+	public com.game.pb.CommonPb.Chat ser(int style, int officerId, int targetCountry) {
 		CommonPb.Chat.Builder builder = CommonPb.Chat.newBuilder();
 		builder.setStyle(this.style);
 		builder.setChatType(this.chatType);

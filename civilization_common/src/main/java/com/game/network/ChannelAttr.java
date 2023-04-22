@@ -3,7 +3,7 @@ package com.game.network;
 import io.netty.util.AttributeKey;
 
 /**
- *
+ * @Author 陈奎
  * @Description 连接属性
  * @Date 2022/9/9 11:30
  **/

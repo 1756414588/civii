@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@LoadData(name = "机器人配置缓存", initSeq = 100)
+@LoadData(name = "Equip配置缓存", initSeq = 100)
 public class StaticEquipCache implements ILoadData {
 
 	private Map<Integer, StaticEquip> staticEquipMap = new HashMap<>();

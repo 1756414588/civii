@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import com.game.dao.s.StaticDataDao;
 import com.game.domain.s.StaticLordLv;
 
 @Component
+@LoadData(name = "角色相关配置")
 public class StaticLordDataMgr extends BaseDataMgr {
 	@Autowired
 	private StaticDataDao staticDataDao;
@@ -21,8 +23,13 @@ public class StaticLordDataMgr extends BaseDataMgr {
 
 
 	@Override
-	public void init() throws Exception{
+	public void load() throws Exception {
 		lordLvMap = staticDataDao.selectLordLv();
+	}
+
+	@Override
+	public void init() throws Exception{
+
         //setLostList(staticDataDao.selectStaticLost());
 	}
 

@@ -15,6 +15,7 @@ import com.game.dataMgr.StaticMonsterMgr;
 import com.game.dataMgr.StaticZerglMgr;
 import com.game.define.Fight;
 import com.game.define.WorldActCmd;
+import com.game.domain.MapDistance;
 import com.game.domain.Player;
 import com.game.domain.WorldData;
 import com.game.domain.p.BattleEntity;
@@ -107,9 +108,12 @@ public class ZergProcess extends FightProcess {
 	public void doWorldActPlan(WorldActPlan worldActPlan) {
 		try {
 			// 更改worldActPlan状态，是否开启活动
-			zergManager.checkZergWorldActPlan(worldActPlan);
+			boolean b = zergManager.checkZergWorldActPlan(worldActPlan);
 			// 如果活动开启则进行轮询
-			zergManager.checkRound(worldActPlan);
+			if(b){
+				zergManager.checkRound(worldActPlan);
+			}
+
 		} catch (Exception e) {
 			LogHelper.ERROR_LOGGER.error(e.getMessage(), e);
 		}
@@ -211,9 +215,10 @@ public class ZergProcess extends FightProcess {
 		Team playerTeam = battleMgr.initBigMonsterWarTeam(readyList, true);
 
 		// 防守怪物阵容
+//		MapDistance mapDistance = new MapDistance();
 		Monster bigMonster = new Monster();
 		bigMonster.setId(warInfo.getDefencerId());
-		bigMonster.setDistance(warInfo.getDefencerPos());
+//		bigMonster.setDistance(warInfo.getDefencerPos());
 		bigMonster.setEntityType(EntityType.BIG_MONSTER);
 		bigMonster.setLevel(120);
 

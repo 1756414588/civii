@@ -6,23 +6,24 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 
 /**
  * 充值有礼-个人
  */
+@Component
 public class ActTopupPersonTipEvent extends BaseActivityEvent {
 
-	private static ActTopupPersonTipEvent inst = new ActTopupPersonTipEvent();
-
-	public static ActTopupPersonTipEvent getInst() {
-		return inst;
-	}
+	//private static ActTopupPersonTipEvent inst = new ActTopupPersonTipEvent();
+	//
+	//public static ActTopupPersonTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -34,7 +35,6 @@ public class ActTopupPersonTipEvent extends BaseActivityEvent {
 	public void process(EventEnum activityEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		if (null == condList || condList.size() == 0) {
 			return;
@@ -53,7 +53,6 @@ public class ActTopupPersonTipEvent extends BaseActivityEvent {
 	public void reward(EventEnum activityEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		if (null == condList || condList.size() == 0) {
 			return;

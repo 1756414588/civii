@@ -1,14 +1,14 @@
 package com.game.acion;
 
-import com.game.domain.Record;
 import com.game.domain.Robot;
+import com.game.domain.p.RobotData;
 import com.game.domain.p.RobotMessage;
 import com.game.manager.MessageEventManager;
 import com.game.server.TimerServer;
 import com.game.spring.SpringUtil;
 
 /**
- *
+ * @Author 陈奎
  * @Description消息行为
  * @Date 2022/9/9 17:50
  **/
@@ -43,10 +43,10 @@ public abstract class MessageAction implements IAction {
 
 	@Override
 	public boolean isCompalte(Robot robot) {
-		if (robot.getRecord().getRecordId() != id) {
+		if (robot.getGuildId() != id) {
 			return false;
 		}
-		return robot.getRecord().getState() > 0;
+		return robot.getGuildState() > 0;
 	}
 
 	@Override
@@ -55,10 +55,9 @@ public abstract class MessageAction implements IAction {
 		SpringUtil.getBean(MessageEventManager.class).registerEvent(robot, messageEvent.getEventId(), messageEvent);
 
 		// 记录
-		Record record = robot.getRecord();
-		record.setRecordId(id);
-		record.setState(0);
-		record.setCreateTime(System.currentTimeMillis());
+		RobotData data = robot.getData();
+		data.setGuildId(id);
+		data.setGuildState(0);
 		TimerServer.getInst().addDelayEvent(messageEvent);
 	}
 
@@ -91,7 +90,12 @@ public abstract class MessageAction implements IAction {
 	}
 
 	@Override
-	public RobotMessage getRobotMessage() {
-		return robotMessage;
+	public byte[] getMessage() {
+		return robotMessage.getContent();
+	}
+
+	@Override
+	public int getGroup() {
+		return robotMessage.getDiffHour();
 	}
 }

@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import com.game.domain.s.StaticOmament;
  * @CaoBing halo_game StaticOmTypeMgr.java
  **/
 @Component
+@LoadData(name = "饰品配置表")
 public class StaticOmamentMgr extends BaseDataMgr {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
@@ -39,10 +41,15 @@ public class StaticOmamentMgr extends BaseDataMgr {
 	// 配饰类型:列表
 	private Map<Integer, List<StaticOmament>> typeOmamentMap = new HashMap<>();
 
-    @Override
+	@Override
+	public void load() throws Exception {
+		initOmament();
+		initOmamentType();
+	}
+
+	@Override
     public void init() throws Exception {
-        initOmament();
-        initOmamentType();
+
     }
 
 	// 初始化美女的基础配置信息

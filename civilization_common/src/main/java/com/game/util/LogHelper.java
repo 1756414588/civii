@@ -22,4 +22,5 @@ public class LogHelper {
     public static Logger PAY_LOGGER = LoggerFactory.getLogger("pay");
     public static Logger CHANNEL_LOGGER = LoggerFactory.getLogger("CHANNEL");
     public static Logger PACKET_LOGGER = LoggerFactory.getLogger("PACKET");
+    public static Logger START_LOGGER = LoggerFactory.getLogger("START");
 }

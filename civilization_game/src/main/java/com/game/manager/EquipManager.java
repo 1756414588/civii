@@ -64,7 +64,8 @@ public class EquipManager {
     private PlayerManager playerManager;
     @Autowired
     ChatManager chatManager;
-
+    @Autowired
+    ActivityEventManager activityEventManager;
     // 添加装备,需要同步物品和背包格数到客户端[背包格子数已+1]
     public Equip addEquip(Player player, int equipId, int reason) {
         // 检查是否背包已满
@@ -133,7 +134,7 @@ public class EquipManager {
         ));
 
         if (staticEquip.getQuality() >= Quality.BLUE.get()) {
-            ActivityEventManager.getInst().updateActivityHandler(EventEnum.EQUIP_ADD, new EquipAddActor(player, staticEquip));
+            activityEventManager.updateActivityHandler(EventEnum.EQUIP_ADD, new EquipAddActor(player, staticEquip));
         }
 
         return equip;
@@ -349,7 +350,7 @@ public class EquipManager {
     }
 
     public void checkHeroEquip(Player player) {
-        HashMap<Integer, Hero> heroHashMap = player.getHeros();
+        Map<Integer, Hero> heroHashMap = player.getHeros();
         for (Hero hero : heroHashMap.values()) {
             ArrayList<HeroEquip> heroEquips = hero.getHeroEquips();
             for (HeroEquip heroEquip : heroEquips) {

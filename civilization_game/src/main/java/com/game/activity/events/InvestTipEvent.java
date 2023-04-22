@@ -6,25 +6,26 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 
 /**
  * 成长基金
  */
+@Component
 public class InvestTipEvent extends BaseActivityEvent {
 
-	private static InvestTipEvent inst = new InvestTipEvent();
-
-	public static InvestTipEvent getInst() {
-		return inst;
-	}
+	//private static InvestTipEvent inst = new InvestTipEvent();
+	//
+	//public static InvestTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -48,7 +49,7 @@ public class InvestTipEvent extends BaseActivityEvent {
 			return;
 		}
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
+		//StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 
 		// 活动奖励列表
 		List<StaticActAward> actAwardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
@@ -76,7 +77,7 @@ public class InvestTipEvent extends BaseActivityEvent {
 			}
 			return;
 		}
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
+		//StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 
 		// 活动奖励列表
 		List<StaticActAward> actAwardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());

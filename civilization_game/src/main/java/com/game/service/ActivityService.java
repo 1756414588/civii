@@ -5,28 +5,12 @@ import com.game.activity.actor.CommonTipActor;
 import com.game.activity.actor.RankActor;
 import com.game.activity.actor.TdActor;
 import com.game.activity.define.EventEnum;
-import com.game.constant.ActMonthlyCard;
-import com.game.constant.ActWorldBattleConst;
-import com.game.constant.ActivityConst;
-import com.game.constant.AwardType;
-import com.game.constant.BeautyId;
-import com.game.constant.ChatId;
-import com.game.constant.DailyTaskId;
-import com.game.constant.GameError;
-import com.game.constant.ItemId;
-import com.game.constant.MailId;
-import com.game.constant.Reason;
-import com.game.constant.ResourceType;
-import com.game.constant.SimpleId;
-import com.game.constant.SpringType;
-import com.game.constant.SuripriseId;
-import com.game.constant.TaskType;
-import com.game.constant.WorldActPlanConsts;
-import com.game.constant.WorldActivityConsts;
+import com.game.constant.*;
 import com.game.dataMgr.StaticActivityMgr;
 import com.game.dataMgr.StaticEquipDataMgr;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticPropMgr;
+import com.game.dataMgr.StaticTDTaskMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.CountryData;
 import com.game.domain.Player;
@@ -377,6 +361,10 @@ public class ActivityService {
 	private ServerManager serverManager;
 	@Autowired
 	private EventManager eventManager;
+	@Autowired
+	private ActivityEventManager activityEventManager;
+	@Autowired
+	private StaticTDTaskMgr staticTDTaskMgr;
 
 	private Map<Integer, AfterActivity> afterActivityMap;
 
@@ -721,7 +709,7 @@ public class ActivityService {
 			if (actRecord == null) {
 				continue;
 			}
-			ActivityEventManager.getInst().addTipsSyn(eventEnum, new RankActor(player, actRecord, activityBase, activityData));
+			activityEventManager.addTipsSyn(eventEnum, new RankActor(player, actRecord, activityBase, activityData));
 		}
 	}
 
@@ -1658,7 +1646,7 @@ public class ActivityService {
 		// 客户端没做缓存,只能服务器推送
 
 		// 同步后端红点
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 
 		SpringUtil.getBean(EventManager.class).join_activity(player, activityId, activityBase.getStaticActivity().getName(), activityId);
 		SpringUtil.getBean(EventManager.class).complete_activity(player, activityId, activityBase.getStaticActivity().getName(), activityId, activityBase.getBeginTime(), awardList);
@@ -1797,7 +1785,7 @@ public class ActivityService {
 			}
 		}
 		handler.sendMsgToPlayer(ActInvestRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -1843,7 +1831,7 @@ public class ActivityService {
 		builder.setGold(player.getGold());
 		handler.sendMsgToPlayer(DoInvestRs.ext, builder.build());
 		ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_INVEST);
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 		eventManager.join_activity(player, ActivityConst.ACT_INVEST, activityBase.getStaticActivity().getName(), ActivityConst.ACT_INVEST);
 	}
 
@@ -3395,7 +3383,7 @@ public class ActivityService {
 			time = activityBase.getBeginTime();
 		}
 
-		ActivityEventManager.getInst().activityTip(player, act, activityBase);
+		activityEventManager.activityTip(player, act, activityBase);
 		SpringUtil.getBean(EventManager.class).join_activity(player, ActivityConst.ACT_PAY_FIRST, name, ActivityConst.ACT_PAY_FIRST);
 		SpringUtil.getBean(EventManager.class).complete_activity(player, ActivityConst.ACT_PAY_FIRST, name, ActivityConst.ACT_PAY_FIRST, time, awardList);
 		SpringUtil.getBean(LogUser.class).activity_log(ActivityLog.builder().activityId(ActivityConst.ACT_PAY_FIRST).isAward(true).awardId(actFirstPay.getFirstPay()).giftName(name).roleId(player.roleId).vip(player.getVip()).costGold(0).channel(player.account.getChannel()).build());
@@ -4736,7 +4724,7 @@ public class ActivityService {
 		actRecord.getReceived().put(actAward.getKeyId(), 1);
 		builder.setGold(player.getGold());
 		handler.sendMsgToPlayer(GetActPowerRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -5153,7 +5141,7 @@ public class ActivityService {
 			}
 			handler.sendMsgToPlayer(GetMonthCardAwardRs.ext, builder.build());
 
-			ActivityEventManager.getInst().activityTip(EventEnum.GET_CARD_AWARD, player, 1, 0);
+			activityEventManager.activityTip(EventEnum.GET_CARD_AWARD, player, 1, 0);
 //            activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.GET_CARD_AWARD, 1);
 
 			dailyTaskManager.record(DailyTaskId.MONTH_CARD, player, 1);
@@ -5434,7 +5422,7 @@ public class ActivityService {
 //        if (!tips) {
 //
 //        }
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	public void sendSevenOffAward(ActivityBase activityBase, ActivityData activityData) {
@@ -5542,20 +5530,20 @@ public class ActivityService {
 			return false;
 		}
 
-		// 30日签到tips
-		if (activityBase.getActivityId() == ActivityConst.ACT_DAILY_CHECKIN) {
-			int day;
-			if (actRecord.getRecord().containsKey(0)) {
-				day = actRecord.getRecord().get(0);
-			} else {
-				actRecord.getRecord().put(0, 1);
-				day = actRecord.getRecord().get(0);
-			}
-			if (!actRecord.getReceived().containsKey(day)) {
-				return true;
-			}
-			return false;
-		}
+        // 30日签到tips
+        if (activityBase.getActivityId() == ActivityConst.ACT_DAILY_CHECKIN) {
+            //int day;
+            //if (actRecord.getRecord().containsKey(0)) {
+            //    day = actRecord.getRecord().get(0);
+            //} else {
+            //    actRecord.getRecord().put(0, 1);
+            //    day = actRecord.getRecord().get(0);
+            //}
+            if (!actRecord.getReceived().containsKey(actRecord.getCount())) {
+                return true;
+            }
+            return false;
+        }
 
 		// 七日狂欢tips
 		if (activityBase.getActivityId() == ActivityConst.ACT_SEVEN) {
@@ -5857,7 +5845,7 @@ public class ActivityService {
 				return false;
 			}
 			ActivityData activityData = activityManager.getActivity(activityBase);
-			ActivityEventManager.getInst().addTipsSyn(EventEnum.GET_ACTIVITY_AWARD_TIP, new TdActor(player, actRecord, activityData, activityBase));
+			activityEventManager.addTipsSyn(EventEnum.GET_ACTIVITY_AWARD_TIP, new TdActor(player, actRecord, activityData, activityBase));
 			return activityManager.refreshTDTaskTips(player, actRecord);
 		}
 
@@ -6193,7 +6181,7 @@ public class ActivityService {
 			if (buyTime == 0L) {
 				return 0;
 			} else {
-				return TimeHelper.passDay(buyTime) + 1;
+				return TimeHelper.equation(buyTime, TimeHelper.curentTime()) + 1;
 			}
 		}
 		case ActivityConst.ACT_POWER: {// 体力盛宴
@@ -6349,7 +6337,7 @@ public class ActivityService {
 			if (buyTime == 0L) {
 				return 0;
 			} else {
-				return TimeHelper.passDay(buyTime) + 1;
+                return TimeHelper.equation(buyTime, TimeHelper.curentTime()) + 1;
 			}
 		}
 		case ActivityConst.ACT_DAYLY_EXPEDITION: {// 每日远征
@@ -7510,197 +7498,162 @@ public class ActivityService {
 		handler.sendMsgToPlayer(ActFlashGiftRs.ext, builder.build());
 	}
 
-	/**
-	 * 30日签到
-	 *
-	 * @param handler
-	 */
-	public void actCheckInRq(ClientHandler handler) {
-		Player player = playerManager.getPlayer(handler.getRoleId());
-		if (player == null) {
-			handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
-			return;
-		}
+    /**
+     * 30日签到
+     *
+     * @param handler
+     */
+    public void actCheckInRq(ClientHandler handler) {
+        Player player = playerManager.getPlayer(handler.getRoleId());
+        if (player == null) {
+            handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
+            return;
+        }
 
-		ActRecord actRecord = activityManager.getActivityInfo(player, ActivityConst.ACT_DAILY_CHECKIN);
-		if (actRecord == null) {
-			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
-			return;
-		}
+        ActRecord actRecord = activityManager.getActivityInfo(player, ActivityConst.ACT_DAILY_CHECKIN);
+        if (actRecord == null) {
+            handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
+            return;
+        }
+        ActDailyCheckInRs.Builder builder = ActDailyCheckInRs.newBuilder();
+        Map<Integer, StaticDailyCheckin> condList = staticActivityMgr.getDailyCheckinAwards();
+        if (condList == null || condList.size() == 0) {
+            handler.sendErrorMsgToPlayer(GameError.CONFIG_ERROR);
+            return;
+        }
+        ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_DAILY_CHECKIN);
+        if (activityBase == null) {
+            handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
+            return;
+        }
+        long currentTime = TimeHelper.curentTime();
+        //int count = actRecord.getCount();
+        long status = actRecord.getStatus(0L);
+        if (status == 0 || !TimeHelper.isSameDay(status)) {
+            actRecord.addCount();
+            actRecord.putState(0L, currentTime);
+            if (actRecord.getCount() > condList.size()) {
+                actRecord.setCount(1);
+                actRecord.getStatus().clear();
+                actRecord.getRecord().clear();
+                actRecord.getReceived().clear();
+            }
+        }
+        int day = actRecord.getCount();
+        actRecord.putRecord(day, day);//记录第几天 只要这天登录了就记录一下
+        boolean b = actRecord.getReceived().containsKey(actRecord.getCount());
+        builder.setLoginDay(day);
+        builder.setCanAward(!b);
+        for (StaticDailyCheckin e : condList.values()) {
+            int param = 0;
+            int isAward = 0;
+            int keyId = e.getId();
+            if (keyId < day) {
+                if (actRecord.getReceived().containsKey(keyId)) {// 已领取奖励
+                    int received = actRecord.getReceived(keyId);
+                    if (received > 0) {
+                        param = 4;
+                    } else {
+                        param = 3;
+                    }
+                    isAward = 1;
+                } else {
+                    if (actRecord.getRecord().containsKey(keyId)) {
+                        param = 2;
+                    } else {
+                        param = 1;
+                    }
+                }
+            } else if (keyId > day) {
+                param = 0;
+            } else {
+                if (b) {
+                    param = 3;
+                    isAward = 1;
+                }
+            }
+            builder.addActivityCond(PbHelper.createDailyCheckinCondPb(e, isAward, param));
+        }
+        handler.sendMsgToPlayer(ActDailyCheckInRs.ext, builder.build());
+    }
 
-		ActDailyCheckInRs.Builder builder = ActDailyCheckInRs.newBuilder();
-		Map<Integer, StaticDailyCheckin> condList = staticActivityMgr.getDailyCheckinAwards();
-		if (condList == null || condList.size() == 0) {
-			handler.sendErrorMsgToPlayer(GameError.CONFIG_ERROR);
-			return;
-		}
-		ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_DAILY_CHECKIN);
-		if (activityBase == null) {
-			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
-			return;
-		}
+    /**
+     * 30日签到领奖
+     *
+     * @param handler
+     */
+    public void doCheckInRq(DoDailyCheckInRq req, ClientHandler handler) {
+        Player player = playerManager.getPlayer(handler.getRoleId());
+        if (player == null) {
+            handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
+            return;
+        }
 
-		int day = 1;// 第几次领奖
-		int clean = staticLimitMgr.getNum(237);
-		long currentTime = System.currentTimeMillis();
-		long timeKey = 0;
-		long beginKey = 1;
-		if (!actRecord.getStatus().containsKey(timeKey)) {
-			actRecord.putState(timeKey, currentTime);
-		}
-		if (!actRecord.getRecord().containsKey(0)) {
-			actRecord.getRecord().put(0, 1);
-		}
-		Date now = new Date();
-		Date pre = new Date();
-		pre.setTime(actRecord.getStatus(timeKey));
-		int maxKey = condList.size();
+        ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_DAILY_CHECKIN);
+        if (activityBase == null) {
+            handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
+            return;
+        }
 
-		Date toBegin = player.account.getCreateDate();
-		Date begin = new Date();
-		begin.setTime(toBegin.getTime());
-		if (!actRecord.getStatus().containsKey(beginKey)) {
-			actRecord.putState(beginKey, begin.getTime());
-		} else {
-			begin.setTime(actRecord.getStatus(beginKey));
-		}
-		int whichDay = TimeHelper.whichDay(clean, now, begin);
+        ActRecord actRecord = activityManager.getActivityInfo(player, activityBase);
+        if (actRecord == null) {
+            handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
+            return;
+        }
+        DoDailyCheckInRs.Builder builder = DoDailyCheckInRs.newBuilder();
 
-		while (whichDay > maxKey) {
-			long nextBegin = TimeHelper.addDay(actRecord.getStatus(beginKey), maxKey);
-			begin.setTime(nextBegin);
-			whichDay = TimeHelper.whichDay(clean, now, begin);
-			if (whichDay <= maxKey) {
-				actRecord.getStatus().clear();
-				actRecord.getRecord().clear();
-				actRecord.getReceived().clear();
-				actRecord.getShops().clear();
-			}
-			actRecord.putState(beginKey, nextBegin);
-		}
+        StaticDailyCheckin staticDailyCheckin = staticActivityMgr.getDailyCheckinAwards().get(req.getKeyId());
+        if (staticDailyCheckin == null) {
+            handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);
+            return;
+        }
+        if (actRecord.getReceived().containsKey(req.getKeyId())) {// 已领取奖励
+            handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_FINISH);
+            return;
+        }
+        int day = actRecord.getCount();
+        actRecord.getReceived().put(req.getKeyId(), 0);// 记录奖励
 
-		// 判断是否跨天
-		if (TimeHelper.isNextDay(clean, now, pre)) {
-			actRecord.putRecord(0, actRecord.getRecord(0) + 1);
-			actRecord.putState(timeKey, now.getTime());
-		}
-		if (actRecord.getRecord().containsKey(0)) {
-			day = actRecord.getRecord().get(0);
-		} else {
-			actRecord.getRecord().put(0, 1);
-			day = actRecord.getRecord().get(0);
-		}
-		int param = 0;
-		int dayCount = day;
-		if (actRecord.getReceived().containsKey(day)) {
-			builder.setCanAward(false);
-		} else {
-			dayCount--;
-			builder.setCanAward(true);
-		}
-		for (StaticDailyCheckin e : condList.values()) {
-			if (e == null) {
-				continue;
-			}
-			int keyId = e.getId();
-			if (day > keyId) {
-				param = 1;
-			} else {
-				param = 0;
-			}
-			if (actRecord.getReceived().containsKey(keyId)) {// 已领取奖励
-				builder.addActivityCond(PbHelper.createDailyCheckinCondPb(e, 1, 0));
-			} else {// 未领取奖励
-				builder.addActivityCond(PbHelper.createDailyCheckinCondPb(e, 0, param));
-				if (param == 1) {
-					dayCount--;
-				}
-			}
-		}
-		builder.setLoginDay(day);
-		builder.setState(dayCount);
-		handler.sendMsgToPlayer(ActDailyCheckInRs.ext, builder.build());
-	}
+        if (req.getKeyId() != day) {
+            if (!actRecord.getRecord().containsKey(day)) {
+                handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_FINISH);
+                return;
+            }
+            int num = staticLimitMgr.getNum(379);
+            if (player.getGold() < num) {
+                handler.sendErrorMsgToPlayer(GameError.NOT_ENOUGH_COUNT);
+                return;
+            }
+            playerManager.subGold(player, num, Reason.ACT_AWARD);
+            actRecord.getReceived().put(req.getKeyId(), req.getKeyId());// 记录奖励
 
-	/**
-	 * 30日签到领奖
-	 *
-	 * @param handler
-	 */
-	public void doCheckInRq(DoDailyCheckInRq req, ClientHandler handler) {
-		Player player = playerManager.getPlayer(handler.getRoleId());
-		if (player == null) {
-			handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
-			return;
-		}
+        }
+        int vip = player.getVip();
+        List<Integer> award = staticDailyCheckin.getAward();
+        if (null == award || award.size() == 0) {
+            handler.sendErrorMsgToPlayer(GameError.CONFIG_ERROR);
+            return;
+        }
 
-		ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_DAILY_CHECKIN);
-		if (activityBase == null) {
-			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
-			return;
-		}
+        int type = award.get(0);
+        int id = award.get(1);
+        int count = award.get(2);
+        count = (staticDailyCheckin.getCritical() != 0) && (vip >= staticDailyCheckin.getCritical()) ? (count * 2) : count;
+        int kid = playerManager.addAward(player, type, id, count, Reason.ACT_DAILY_CHECKIN);
+        builder.addAward(PbHelper.createAward(player, type, id, count, kid));
 
-		ActRecord actRecord = activityManager.getActivityInfo(player, activityBase);
-		if (actRecord == null) {
-			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
-			return;
-		}
-		DoDailyCheckInRs.Builder builder = DoDailyCheckInRs.newBuilder();
+        handler.sendMsgToPlayer(DoDailyCheckInRs.ext, builder.build());
 
-		StaticDailyCheckin staticDailyCheckin = staticActivityMgr.getDailyCheckinAwards().get(req.getKeyId());
-		if (staticDailyCheckin == null) {
-			handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);
-			return;
-		}
-
-		if (actRecord.getReceived().containsKey(req.getKeyId())) {// 已领取奖励
-			// handler.sendErrorMsgToPlayer(GameError.AWARD_HAD_GOT);
-			return;
-		}
-
-		int vip = player.getVip();
-
-		int day = 1;// 第几次领奖
-		if (actRecord.getRecord().containsKey(0)) {
-			day = actRecord.getRecord().get(0);
-		} else {
-			actRecord.getRecord().put(0, 1);
-			day = actRecord.getRecord().get(0);
-		}
-
-		boolean cond = true;
-		if (day == req.getKeyId()) {
-			cond = false;
-		}
-		if (cond) {
-			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_FINISH);
-			return;
-		}
-
-		List<Integer> award = staticDailyCheckin.getAward();
-		if (null == award || award.size() == 0) {
-			handler.sendErrorMsgToPlayer(GameError.CONFIG_ERROR);
-			return;
-		}
-
-		actRecord.getReceived().put(req.getKeyId(), 1);// 记录奖励
-		int type = award.get(0);
-		int id = award.get(1);
-		int count = award.get(2);
-		count = (staticDailyCheckin.getCritical() != 0) && (vip >= staticDailyCheckin.getCritical()) ? (count * 2) : count;
-		int kid = playerManager.addAward(player, type, id, count, Reason.ACT_DAILY_CHECKIN);
-		builder.addAward(PbHelper.createAward(player, type, id, count, kid));
-
-		handler.sendMsgToPlayer(DoDailyCheckInRs.ext, builder.build());
-
-		// 领取奖励后红点消失
-		ActivityEventManager.getInst().activityTip(EventEnum.GET_ACTIVITY_AWARD_TIP, new CommonTipActor(player, actRecord, activityBase));
+        // 领取奖励后红点消失
+        activityEventManager.activityTip(EventEnum.GET_ACTIVITY_AWARD_TIP, new CommonTipActor(player, actRecord, activityBase));
 
 		SpringUtil.getBean(EventManager.class).join_activity(player, ActivityConst.ACT_DAILY_CHECKIN, activityBase.getStaticActivity().getName(), ActivityConst.ACT_DAILY_CHECKIN);
 		SpringUtil.getBean(EventManager.class).complete_activity(player, ActivityConst.ACT_DAILY_CHECKIN, activityBase.getStaticActivity().getName(), ActivityConst.ACT_DAILY_CHECKIN, activityBase.getBeginTime(), award);
 		SpringUtil.getBean(LogUser.class).activity_log(ActivityLog.builder().activityId(ActivityConst.ACT_DAILY_CHECKIN).isAward(true).awardId(staticDailyCheckin.getAwardId()).giftName(activityBase.getStaticActivity().getName()).roleId(player.roleId).vip(player.getVip()).costGold(0).channel(player.account.getChannel()).build());
+		achievementService.addAndUpdate(player, AchiType.AT_55,1);
 	}
-
+	@Autowired
+	AchievementService achievementService;
 	/**
 	 * 世界征战
 	 *
@@ -7909,7 +7862,7 @@ public class ActivityService {
 			name = activityBase.getStaticActivity().getName();
 		}
 
-		ActivityEventManager.getInst().activityTip(EventEnum.BUY_PAY_ARMS, new CommonTipActor(player, actRecord, activityBase));
+		activityEventManager.activityTip(EventEnum.BUY_PAY_ARMS, new CommonTipActor(player, actRecord, activityBase));
 
 		SpringUtil.getBean(EventManager.class).join_activity(player, ActivityConst.ACT_ARMS_PAY, name, staticActPayArms.getPayArmsId());
 		SpringUtil.getBean(EventManager.class).complete_activity(player, ActivityConst.ACT_ARMS_PAY, name, staticActPayArms.getPayArmsId(), new Date(), sellList);
@@ -8001,7 +7954,7 @@ public class ActivityService {
 		}
 		handler.sendMsgToPlayer(DoPayArmsAwardRs.ext, builder.build());
 
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	private CommonPb.ArmsPayAward.Builder getArmsPayAward(Player player, ActivityData activityData, ActRecord actRecord) {
@@ -8080,7 +8033,7 @@ public class ActivityService {
 		if (!actRecord.getStatus().containsKey(timeKey)) {
 			actRecord.putState(timeKey, (System.currentTimeMillis() + configNum * TimeHelper.MINUTE_MS));
 			// 推送双卡大礼包
-			ActivityEventManager.getInst().activityTip(EventEnum.SYN_ACTIVITY_AND_DISAPPERAR, new CommonTipActor(player, actRecord, activityBase));
+			activityEventManager.activityTip(EventEnum.SYN_ACTIVITY_AND_DISAPPERAR, new CommonTipActor(player, actRecord, activityBase));
 		}
 		for (StaticActPayGift e : payGiftList) {
 
@@ -8106,7 +8059,7 @@ public class ActivityService {
 			}
 		}
 		handler.sendMsgToPlayer(ActMonthGiftRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -8209,7 +8162,7 @@ public class ActivityService {
 			chatManager.sendWorldChat(ChatId.ACT_HOPE, player.getNick(), String.valueOf(got));
 		}
 		handler.sendMsgToPlayer(DoHopeRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 		SpringUtil.getBean(EventManager.class).act_Hope(player, Lists.newArrayList(staticActHope.getCost(), got));
 		SpringUtil.getBean(LogUser.class).act_hope_log(ActHopeLog.builder().channelId(player.account.getChannel()).serverId(player.account.getServerId()).level(staticActHope.getLevel()).lordId(player.roleId).costGold(staticActHope.getCost()).getGold(got).startTime(new Date()).vip(player.getVip()).build());
 	}
@@ -8338,7 +8291,7 @@ public class ActivityService {
 		}
 
 		handler.sendMsgToPlayer(ActivityPb.ActPassPortRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 //		com.game.util.LogHelper.MESSAGE_LOGGER.info("拉取通行证协议");
 	}
 
@@ -8408,7 +8361,7 @@ public class ActivityService {
 		if (activityBase != null) {
 			name = activityBase.getStaticActivity().getName();
 		}
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 		SpringUtil.getBean(EventManager.class).join_activity(player, ActivityConst.ACT_WASH_EQUIP, name, staticActEquipUpdate.getKeyId());
 		SpringUtil.getBean(EventManager.class).complete_activity(player, ActivityConst.ACT_WASH_EQUIP, name, staticActEquipUpdate.getKeyId(), new Date(), staticActEquipUpdate.getAwardList());
 	}
@@ -8505,7 +8458,7 @@ public class ActivityService {
 		}
 
 		handler.sendMsgToPlayer(getBuildGiftRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -8648,7 +8601,7 @@ public class ActivityService {
 		}
 		doPassPortAward.setFirstReceive(flag);
 		handler.sendMsgToPlayer(ActivityPb.DoPassPortAwardRs.ext, doPassPortAward.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/***
@@ -8958,7 +8911,7 @@ public class ActivityService {
 			builder.addGrowFoot(footBuilder.build());
 		}
 		handler.sendMsgToPlayer(ActZeroGiftRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -9016,7 +8969,7 @@ public class ActivityService {
 
 		handler.sendMsgToPlayer(DoActZeroGiftRs.ext, builder.build());
 
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -9289,7 +9242,7 @@ public class ActivityService {
 		list = list.stream().sorted(Comparator.comparing(CommonPb.ActRank::getRank)).collect(Collectors.toList());
 		builder.addAllActRank(list);
 		handler.sendMsgToPlayer(ActMasterRankRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -9357,119 +9310,112 @@ public class ActivityService {
 		handler.sendMsgToPlayer(ActOpenBuildGiftRs.ext, builder.build());
 	}
 
-	/**
-	 * 0元礼包
-	 *
-	 * @param activityBase
-	 */
-	public void sendActZeroMail(ActivityBase activityBase) {
+    /**
+     * 0元礼包
+     *
+     * @param activityBase
+     */
+    public void sendActZeroMail(ActivityBase activityBase) {
 //        long zero = TimeHelper.getZeroTimeMs();
-		// 未开始不处理
-		Date now = new Date();
-		if (now.before(activityBase.getBeginTime())) {
-			return;
-		}
+        // 未开始不处理
+        Date now = new Date();
+        if (now.before(activityBase.getBeginTime())) {
+            return;
+        }
+        List<StaticActAward> condList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
+        // 根据天数分组
+        Map<Integer, List<StaticActAward>> map = condList.stream().collect(Collectors.groupingBy(StaticActAward::getSortId));
+        playerManager.getPlayers().values().forEach(e -> {
+            // 限制了活动是否开启
+            ActRecord actRecord = activityManager.getActivityInfo(e, activityBase);
+            if (actRecord != null) {
+                List<StaticActFreeBuy> footList = staticActivityMgr.getActFreeBuy(activityBase.getAwardId());
+                for (StaticActFreeBuy foot : footList) {
+                    if (null == foot) {
+                        continue;
+                    }
+                    int sortId = foot.getSortId();
+                    // 0.未购买 1-N购买后的第几天
+                    int state = currentActivity(e, activityManager.getActivityInfo(e, activityBase), sortId);
+                    if (state != 0) {
+                        // 这个奖励买过了 看下奖励最多几天
+                        List<StaticActAward> awards = map.get(sortId);
+                        int days = awards.size();
+                        long footId = sortId * 1000;
+                        // 过了对应天数了
+                        if (state > days && !actRecord.getStatus().containsKey(footId)) {
+                            sendActZeroGold(activityBase, e, foot, awards);
+                        }
+                    }
+                }
+            }
+        });
+    }
 
-		List<Player> players = Lists.newArrayList(playerManager.getPlayers().values());
-		List<StaticActAward> condList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
-		// 根据天数分组
-		Map<Integer, List<StaticActAward>> map = condList.stream().collect(Collectors.groupingBy(StaticActAward::getSortId));
-		players.forEach(e -> {
-			// 限制了活动是否开启
-			ActRecord actRecord = activityManager.getActivityInfo(e, activityBase);
-			if (actRecord != null) {
-				List<StaticActFreeBuy> footList = staticActivityMgr.getActFreeBuy(activityBase.getAwardId());
-				for (StaticActFreeBuy foot : footList) {
-					if (null == foot) {
-						continue;
-					}
-					int sortId = foot.getSortId();
-					// 0.未购买 1-N购买后的第几天
-					int state = currentActivity(e, activityManager.getActivityInfo(e, activityBase), sortId);
-					if (state != 0) {
-						// 这个奖励买过了 看下奖励最多几天
-						List<StaticActAward> awards = map.get(sortId);
-						int days = awards.size();
-						// 过了对应天数了
-						if (state > days) {
-							sendActZeroGold(activityBase, e);
-						}
-					}
-				}
-			}
-		});
-	}
+    /**
+     * 0元礼包
+     *
+     * @param activityBase
+     */
+    public boolean sendActZeroGold(ActivityBase activityBase, Player target, StaticActFreeBuy actFoot, List<StaticActAward> footList) {
+        ActRecord actRecord = target.activitys.get(activityBase.getActivityId());
+        if (actRecord == null) {
+            return true;
+        }
+        Map<Long, Long> status = actRecord.getStatus();
+        List<CommonPb.Award> awardList = new ArrayList<CommonPb.Award>();
+        Date now = new Date();
+        boolean result = true;
+        boolean sendGold = false;
+        int costGold = 0;
+        String giftName = "";
+        boolean canAward = true;
+        long sortId = actFoot.getSortId();
+        if (!status.containsKey(sortId)) {
+            return false;
+        }
+        Date beginTime = new Date(actRecord.getStatus(actFoot.getSortId()));
+        int days = TimeHelper.whichDay(0, now, beginTime);
+        int size = footList.size();
+        if (days >= size + 1) {
+            for (StaticActAward e : footList) {
+                if (!actRecord.getReceived().containsKey(e.getKeyId())) {
+                    canAward = false;
+                    actRecord.getReceived().put(e.getKeyId(), 1);
+                    awardList.addAll(e.getAwardPbList());
+                }
+            }
+            if (canAward) {
+                long footId = sortId * 1000;
+                if (null != actFoot && status.containsKey(sortId) && !status.containsKey(footId)) {
+                    status.put(footId, 1L);
+                    awardList.add(PbHelper.createAward(AwardType.GOLD, 0, actFoot.getPrice()).build());
+                    sendGold = true;
+                    costGold = actFoot.getPrice();
+                    giftName = actFoot.getName();
+                }
+            } else {
+                result = false;
+            }
+        }
 
-	/**
-	 * 0元礼包
-	 *
-	 * @param activityBase
-	 */
-	public boolean sendActZeroGold(ActivityBase activityBase, Player target) {
-		int awardId = activityBase.getAwardId();
-		List<StaticActFreeBuy> footList = staticActivityMgr.getActFreeBuy(awardId);
-		if (null == footList || footList.size() == 0) {
-			return true;
-		}
-		if (target == null) {
-			return true;
-		}
-		ActRecord actRecord = target.activitys.get(activityBase.getActivityId());
-		if (actRecord == null) {
-			return true;
-		}
+        //for (StaticActFreeBuy actFoot : footList) {
+        //
+        //
+        //
+        //    List<StaticActAward> condList = staticActivityMgr.getActAwardById(awardId, actFoot.getSortId());
+        //
+        //}
+        if (!awardList.isEmpty()) {
 
-		Map<Long, Long> status = actRecord.getStatus();
-		List<CommonPb.Award> awardList = new ArrayList<CommonPb.Award>();
-		Date now = new Date();
-		boolean result = true;
-		boolean sendGold = false;
-		int costGold = 0;
-		String giftName = "";
-		for (StaticActFreeBuy actFoot : footList) {
-			boolean canAward = true;
-			if (null == actFoot) {
-				continue;
-			}
-			long sortId = (long) actFoot.getSortId();
-			if (!status.containsKey(sortId)) {
-				continue;
-			}
-			Date beginTime = new Date(actRecord.getStatus(actFoot.getSortId()));
-			int days = TimeHelper.whichDay(0, now, beginTime);
-			List<StaticActAward> condList = staticActivityMgr.getActAwardById(awardId, actFoot.getSortId());
-			int size = condList.size();
-			if (days >= size + 1) {
-				for (StaticActAward e : condList) {
-					if (!actRecord.getReceived().containsKey(e.getKeyId())) {
-						canAward = false;
-						actRecord.getReceived().put(e.getKeyId(), 1);
-						awardList.addAll(e.getAwardPbList());
-					}
-				}
-				if (canAward) {
-					long footId = sortId * 1000;
-					if (null != actFoot && status.containsKey(sortId) && !status.containsKey(footId)) {
-						status.put(footId, 1L);
-						awardList.add(PbHelper.createAward(AwardType.GOLD, 0, actFoot.getPrice()).build());
-						sendGold = true;
-						costGold = actFoot.getPrice();
-						giftName = actFoot.getName();
-					}
-				} else {
-					result = false;
-				}
-			}
-		}
-		if (!awardList.isEmpty()) {
-			if (sendGold) {
-				playerManager.sendAttachMail(target, PbHelper.finilAward(awardList), MailId.ACTIVITY_RTN_GOLD, activityBase.getStaticActivity().getName(), costGold + "", giftName);
-			} else {
-				playerManager.sendAttachMail(target, PbHelper.finilAward(awardList), MailId.ACTIVITY_MAIL_AWARD, activityBase.getStaticActivity().getName());
-			}
-		}
-		return result;
-	}
+            if (sendGold) {
+                playerManager.sendAttachMail(target, PbHelper.finilAward(awardList), MailId.ACTIVITY_RTN_GOLD, activityBase.getStaticActivity().getName(), costGold + "", giftName);
+            } else {
+                playerManager.sendAttachMail(target, PbHelper.finilAward(awardList), MailId.ACTIVITY_MAIL_AWARD, activityBase.getStaticActivity().getName());
+            }
+        }
+        return result;
+    }
 
 	/**
 	 * 双旦活动
@@ -9517,7 +9463,7 @@ public class ActivityService {
 		}
 		handler.sendMsgToPlayer(ActDoubleEggRs.ext, builder.build());
 
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -9580,7 +9526,7 @@ public class ActivityService {
 		if (!needPush) {
 			playerManager.synActivity(player, activityBase.getActivityId());
 		}
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -9647,208 +9593,208 @@ public class ActivityService {
 		}
 	}
 
-	/**
-	 * 双旦礼包
-	 */
-	public void actChrismasRq(ActChrismasRq rq, ClientHandler handler) {
-		Player player = playerManager.getPlayer(handler.getRoleId());
-		if (player == null) {
-			handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
-			return;
-		}
-		int activityId = rq.getActivityId();
+    /**
+     * 双旦礼包
+     */
+    public void actChrismasRq(ActChrismasRq rq, ClientHandler handler) {
+        Player player = playerManager.getPlayer(handler.getRoleId());
+        if (player == null) {
+            handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
+            return;
+        }
+        int activityId = rq.getActivityId();
 
-		ActRecord actRecord = activityManager.getActivityInfo(player, activityId);
-		if (actRecord == null) {
-			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
-			return;
-		}
-		ActChrismasRs.Builder builder = ActChrismasRs.newBuilder();
-		builder.setTotalCost(actRecord.getRecord(-1));
-		final ActRecord finalRecord = actRecord;
-		// 超值特惠
-		List<StaticActivityChrismas> activityAwards = staticActivityMgr.getChrismasMap().values().stream().filter(e -> e.getAwardId() == actRecord.getAwardId()).collect(Collectors.toList());
-		activityAwards.forEach(staticActChrisms -> {
-			List<CommonPb.Award> awards = new ArrayList<>();
-			staticActChrisms.getAward().forEach(e -> {
-				awards.add(PbHelper.createAward(e.get(0), e.get(1), e.get(2)).build());
-			});
-			Integer count = finalRecord.getRecord(staticActChrisms.getKeyId());
-			builder.addPreference(CommonPb.ActivityCond.newBuilder().setKeyId(staticActChrisms.getKeyId()) // 奖励
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setCond(staticActChrisms.getCost()) // 花费钻石
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.addAllAward(awards) // 奖励内容
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setChangeNum(staticActChrisms.getCanBuy()) // 可购买次数
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setIsAward(count == null ? 0
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	: count.intValue()) // 已购买次数
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setDesc(staticActChrisms.getDesc() == null ? ""
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	: staticActChrisms.getDesc())
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.build());
-		});
-		// 奖励的
-		List<StaticActivityChrismasAward> actChrismasAwards = staticActivityMgr.getChrismasAwardMap().values().stream().filter(e -> e.getAwardId() == actRecord.getAwardId()).collect(Collectors.toList());
-		actChrismasAwards.forEach(statiAward -> {
-			List<CommonPb.Award> awards = new ArrayList<>();
-			statiAward.getAward().forEach(e -> {
-				awards.add(PbHelper.createAward(e.get(0), e.get(1), e.get(2)).build());
-			});
-			Integer count = finalRecord.getReceived().get(statiAward.getKeyId());
-			builder.addAwards(CommonPb.ActivityCond.newBuilder().setKeyId(statiAward.getKeyId()) // 奖励
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setCond(statiAward.getCost()) // 达成条件
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.addAllAward(awards) // 奖励内容
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setIsAward(count == null ? 0
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	: count.intValue())// 领取状态
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setDesc(statiAward.getDesc() == null ? ""
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	: statiAward.getDesc())
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.build());
-		});
+        ActRecord actRecord = activityManager.getActivityInfo(player, activityId);
+        if (actRecord == null) {
+            handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
+            return;
+        }
+        ActChrismasRs.Builder builder = ActChrismasRs.newBuilder();
+        builder.setTotalCost(actRecord.getRecord(-1));
+        final ActRecord finalRecord = actRecord;
+        // 超值特惠
+        List<StaticActivityChrismas> activityAwards = staticActivityMgr.getChrismasMap().values().stream().filter(e -> e.getAwardId() == actRecord.getAwardId()).collect(Collectors.toList());
+        activityAwards.forEach(staticActChrisms -> {
+            List<CommonPb.Award> awards = new ArrayList<>();
+            staticActChrisms.getAward().forEach(e -> {
+                awards.add(PbHelper.createAward(e.get(0), e.get(1), e.get(2)).build());
+            });
+            Integer count = finalRecord.getRecord(staticActChrisms.getKeyId());
+            builder.addPreference(CommonPb.ActivityCond.newBuilder().setKeyId(staticActChrisms.getKeyId()) // 奖励
+                    .setCond(staticActChrisms.getCost()) // 花费钻石
+                    .addAllAward(awards) // 奖励内容
+                    .setChangeNum(staticActChrisms.getCanBuy()) // 可购买次数
+                    .setIsAward(count == null ? 0
+                            : count.intValue()) // 已购买次数
+                    .setDesc(staticActChrisms.getDesc() == null ? ""
+                            : staticActChrisms.getDesc())
+                    .build());
+        });
+        // 奖励的
+        List<StaticActivityChrismasAward> actChrismasAwards = staticActivityMgr.getChrismasAwardMap().values().stream().filter(e -> e.getAwardId() == actRecord.getAwardId()).collect(Collectors.toList());
+        actChrismasAwards.forEach(statiAward -> {
+            List<CommonPb.Award> awards = new ArrayList<>();
+            statiAward.getAward().forEach(e -> {
+                awards.add(PbHelper.createAward(e.get(0), e.get(1), e.get(2)).build());
+            });
+            Integer count = finalRecord.getReceived().get(statiAward.getKeyId());
+            builder.addAwards(CommonPb.ActivityCond.newBuilder().setKeyId(statiAward.getKeyId()) // 奖励
+                    .setCond(statiAward.getCost()) // 达成条件
+                    .addAllAward(awards) // 奖励内容
+                    .setIsAward(count == null ? 0
+                            : count.intValue())// 领取状态
+                    .setDesc(statiAward.getDesc() == null ? ""
+                            : statiAward.getDesc())
+                    .build());
+        });
 
-		handler.sendMsgToPlayer(ActChrismasRs.ext, builder.build());
-	}
+        handler.sendMsgToPlayer(ActChrismasRs.ext, builder.build());
+    }
 
-	/**
-	 * 双旦礼包购买
-	 *
-	 * @param handler
-	 */
-	public void actChrismasBuyRq(ActChrismasBuyRq rq, ClientHandler handler) {
-		Player player = playerManager.getPlayer(handler.getRoleId());
-		if (player == null) {
-			handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
-			return;
-		}
-		int activityId = rq.getActivityId();
-		ActRecord actRecord = activityManager.getActivityInfo(player, activityId);
-		if (actRecord == null) {
-			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
-			return;
-		}
-		int keyId = rq.getKeyId();
-		StaticActivityChrismas chrismas = staticActivityMgr.getChrismasMap().get(keyId);
-		if (chrismas == null) {
-			handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);
-			return;
-		}
-		int costGold = chrismas.getCost();
-		if (player.getGold() < costGold) {
-			handler.sendErrorMsgToPlayer(GameError.NOT_ENOUGH_GOLD);
-			return;
-		}
-		int buyCount = actRecord.getRecord(keyId);
-		if (buyCount >= chrismas.getCanBuy()) {
-			handler.sendErrorMsgToPlayer(GameError.COUNT_ERROR);
-			return;
-		}
-		playerManager.subGold(player, chrismas.getCost(), Reason.ACT_DOUBLE_EGG);
-		ActChrismasBuyRs.Builder builder = ActChrismasBuyRs.newBuilder();
-		chrismas.getAward().forEach(e -> {
-			int type = e.get(0);
-			int id = e.get(1);
-			int count = e.get(2);
-			int tkey = playerManager.addAward(player, type, id, count, Reason.ACT_DOUBLE_EGG);
-			builder.addAward(PbHelper.createAward(player, type, id, count, tkey));
-		});
-		builder.setGold(player.getGold());
-		actRecord.addRecord(keyId, 1);
-		// 记录钻石消费数据
-		actRecord.addRecord(-1, chrismas.getCost());
-		// 超值特惠
-		final ActRecord finalRecord = actRecord;
-		List<StaticActivityChrismas> activityAwards = staticActivityMgr.getChrismasMap().values().stream().filter(e -> e.getAwardId() == actRecord.getAwardId()).collect(Collectors.toList());
-		activityAwards.forEach(staticActChrisms -> {
-			List<CommonPb.Award> tawards = new ArrayList<>();
-			staticActChrisms.getAward().forEach(e -> {
-				tawards.add(PbHelper.createAward(e.get(0), e.get(1), e.get(2)).build());
-			});
-			Integer tcount = finalRecord.getRecord(staticActChrisms.getKeyId());
-			builder.addPreference(CommonPb.ActivityCond.newBuilder().setKeyId(staticActChrisms.getKeyId()) // 奖励
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setCond(staticActChrisms.getCost()) // 花费钻石
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.addAllAward(tawards) // 奖励内容
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setChangeNum(staticActChrisms.getCanBuy()) // 可购买次数
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setIsAward(tcount == null ? 0
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	: tcount.intValue()) // 已购买次数
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setDesc(staticActChrisms.getDesc() == null ? ""
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	: staticActChrisms.getDesc())
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.build());
-		});
-		handler.sendMsgToPlayer(ActChrismasBuyRs.ext, builder.build());
-		ActivityBase activityBase = staticActivityMgr.getActivityById(activityId);
-		String name = "";
-		if (activityBase != null) {
-			name = activityBase.getStaticActivity().getName();
-		}
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
-		SpringUtil.getBean(EventManager.class).join_activity(player, activityId, name, chrismas.getKeyId() + 90000);
-		SpringUtil.getBean(EventManager.class).complete_activity(player, activityId, name, chrismas.getKeyId() + 90000, new Date(), builder.getAwardList());
-		SpringUtil.getBean(LogUser.class).activity_log(ActivityLog.builder().activityId(activityId).isAward(false).awardId(chrismas.getKeyId()).giftName(chrismas.getDesc()).roleId(player.roleId).channel(player.account.getChannel()).build());
-	}
+    /**
+     * 双旦礼包购买
+     *
+     * @param handler
+     */
+    public void actChrismasBuyRq(ActChrismasBuyRq rq, ClientHandler handler) {
+        Player player = playerManager.getPlayer(handler.getRoleId());
+        if (player == null) {
+            handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
+            return;
+        }
+        int activityId = rq.getActivityId();
+        ActRecord actRecord = activityManager.getActivityInfo(player, activityId);
+        if (actRecord == null) {
+            handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
+            return;
+        }
+        int keyId = rq.getKeyId();
+        StaticActivityChrismas chrismas = staticActivityMgr.getChrismasMap().get(keyId);
+        if (chrismas == null) {
+            handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);
+            return;
+        }
+        int costGold = chrismas.getCost();
+        if (player.getGold() < costGold) {
+            handler.sendErrorMsgToPlayer(GameError.NOT_ENOUGH_GOLD);
+            return;
+        }
+        int buyCount = actRecord.getRecord(keyId);
+        if (buyCount >= chrismas.getCanBuy()) {
+            handler.sendErrorMsgToPlayer(GameError.COUNT_ERROR);
+            return;
+        }
+        playerManager.subGold(player, chrismas.getCost(), Reason.ACT_DOUBLE_EGG);
+        ActChrismasBuyRs.Builder builder = ActChrismasBuyRs.newBuilder();
+        chrismas.getAward().forEach(e -> {
+            int type = e.get(0);
+            int id = e.get(1);
+            int count = e.get(2);
+            int tkey = playerManager.addAward(player, type, id, count, Reason.ACT_DOUBLE_EGG);
+            builder.addAward(PbHelper.createAward(player, type, id, count, tkey));
+        });
+        builder.setGold(player.getGold());
+        actRecord.addRecord(keyId, 1);
+        // 记录钻石消费数据
+        actRecord.addRecord(-1, chrismas.getCost());
+        // 超值特惠
+        final ActRecord finalRecord = actRecord;
+        List<StaticActivityChrismas> activityAwards = staticActivityMgr.getChrismasMap().values().stream().filter(e -> e.getAwardId() == actRecord.getAwardId()).collect(Collectors.toList());
+        activityAwards.forEach(staticActChrisms -> {
+            List<CommonPb.Award> tawards = new ArrayList<>();
+            staticActChrisms.getAward().forEach(e -> {
+                tawards.add(PbHelper.createAward(e.get(0), e.get(1), e.get(2)).build());
+            });
+            Integer tcount = finalRecord.getRecord(staticActChrisms.getKeyId());
+            builder.addPreference(CommonPb.ActivityCond.newBuilder().setKeyId(staticActChrisms.getKeyId()) // 奖励
+                    .setCond(staticActChrisms.getCost()) // 花费钻石
+                    .addAllAward(tawards) // 奖励内容
+                    .setChangeNum(staticActChrisms.getCanBuy()) // 可购买次数
+                    .setIsAward(tcount == null ? 0
+                            : tcount.intValue()) // 已购买次数
+                    .setDesc(staticActChrisms.getDesc() == null ? ""
+                            : staticActChrisms.getDesc())
+                    .build());
+        });
+        handler.sendMsgToPlayer(ActChrismasBuyRs.ext, builder.build());
+        ActivityBase activityBase = staticActivityMgr.getActivityById(activityId);
+        String name = "";
+        if (activityBase != null) {
+            name = activityBase.getStaticActivity().getName();
+        }
+        activityEventManager.activityTip(player, actRecord, activityBase);
+        SpringUtil.getBean(EventManager.class).join_activity(player, activityId, name, chrismas.getKeyId() + 90000);
+        SpringUtil.getBean(EventManager.class).complete_activity(player, activityId, name, chrismas.getKeyId() + 90000, new Date(), builder.getAwardList());
+        SpringUtil.getBean(LogUser.class).activity_log(ActivityLog.builder().activityId(activityId).isAward(false).awardId(chrismas.getKeyId()).giftName(chrismas.getDesc()).roleId(player.roleId).channel(player.account.getChannel()).build());
+    }
 
-	/**
-	 * 双旦礼包购买
-	 *
-	 * @param handler
-	 */
-	public void actChrismasRewardRq(ActChrismasRewardRq rq, ClientHandler handler) {
-		Player player = playerManager.getPlayer(handler.getRoleId());
-		if (player == null) {
-			handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
-			return;
-		}
-		int activityId = rq.getActivityId();
-		ActRecord actRecord = activityManager.getActivityInfo(player, activityId);
-		if (actRecord == null) {
-			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
-			return;
-		}
-		int keyId = rq.getKeyId();
-		StaticActivityChrismasAward chrismas = staticActivityMgr.getChrismasAwardMap().get(keyId);
-		if (chrismas == null) {
-			handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);
-			return;
-		}
-		int costConfig = chrismas.getCost();
-		int cost = actRecord.getRecord(-1);
-		if (cost < costConfig) {
-			handler.sendErrorMsgToPlayer(GameError.COST_TYPE_ERROR);
-			return;
-		}
-		ActChrismasRewardRs.Builder builder = ActChrismasRewardRs.newBuilder();
-		chrismas.getAward().forEach(e -> {
-			int type = e.get(0);
-			int id = e.get(1);
-			int count = e.get(2);
-			int tkeyId = playerManager.addAward(player, type, id, count, Reason.ACT_DOUBLE_EGG);
-			builder.addAward(PbHelper.createAward(player, type, id, count, tkeyId));
-		});
-		actRecord.getReceived().put(keyId, 1);
-		// 奖励的
-		final ActRecord finalRecord = actRecord;
-		List<StaticActivityChrismasAward> actChrismasAwards = staticActivityMgr.getChrismasAwardMap().values().stream().filter(e -> e.getAwardId() == actRecord.getAwardId()).collect(Collectors.toList());
-		actChrismasAwards.forEach(statiAward -> {
-			List<CommonPb.Award> tawards = new ArrayList<>();
-			statiAward.getAward().forEach(e -> {
-				tawards.add(PbHelper.createAward(e.get(0), e.get(1), e.get(2)).build());
-			});
-			Integer tcount = finalRecord.getReceived().get(statiAward.getKeyId());
-			builder.addAwards(CommonPb.ActivityCond.newBuilder().setKeyId(statiAward.getKeyId()) // 奖励
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setCond(statiAward.getCost()) // 达成条件
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.addAllAward(tawards) // 奖励内容
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setIsAward(tcount == null ? 0
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	: tcount.intValue())// 领取状态
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.setDesc(statiAward.getDesc() == null ? ""
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	: statiAward.getDesc())
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																										.build());
-		});
-		handler.sendMsgToPlayer(ActChrismasRewardRs.ext, builder.build());
-		ActivityBase activityBase = staticActivityMgr.getActivityById(activityId);
-		String name = "";
-		if (activityBase != null) {
-			name = activityBase.getStaticActivity().getName();
-		}
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
-		SpringUtil.getBean(EventManager.class).join_activity(player, activityId, name, chrismas.getKeyId());
-		SpringUtil.getBean(EventManager.class).complete_activity(player, activityId, name, chrismas.getKeyId(), new Date(), builder.getAwardList());
-		SpringUtil.getBean(LogUser.class).activity_log(ActivityLog.builder().activityId(activityId).isAward(true).awardId(chrismas.getKeyId()).giftName(chrismas.getDesc()).roleId(player.roleId).vip(player.getVip()).channel(player.account.getChannel()).build());
-	}
+    /**
+     * 双旦礼包购买
+     *
+     * @param handler
+     */
+    public void actChrismasRewardRq(ActChrismasRewardRq rq, ClientHandler handler) {
+        Player player = playerManager.getPlayer(handler.getRoleId());
+        if (player == null) {
+            handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
+            return;
+        }
+        int activityId = rq.getActivityId();
+        ActRecord actRecord = activityManager.getActivityInfo(player, activityId);
+        if (actRecord == null) {
+            handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
+            return;
+        }
+        int keyId = rq.getKeyId();
+        StaticActivityChrismasAward chrismas = staticActivityMgr.getChrismasAwardMap().get(keyId);
+        if (chrismas == null) {
+            handler.sendErrorMsgToPlayer(GameError.NO_CONFIG);
+            return;
+        }
+        int costConfig = chrismas.getCost();
+        int cost = actRecord.getRecord(-1);
+        if (cost < costConfig) {
+            handler.sendErrorMsgToPlayer(GameError.COST_TYPE_ERROR);
+            return;
+        }
+        ActChrismasRewardRs.Builder builder = ActChrismasRewardRs.newBuilder();
+        chrismas.getAward().forEach(e -> {
+            int type = e.get(0);
+            int id = e.get(1);
+            int count = e.get(2);
+            int tkeyId = playerManager.addAward(player, type, id, count, Reason.ACT_DOUBLE_EGG);
+            builder.addAward(PbHelper.createAward(player, type, id, count, tkeyId));
+        });
+        actRecord.getReceived().put(keyId, 1);
+        // 奖励的
+        final ActRecord finalRecord = actRecord;
+        List<StaticActivityChrismasAward> actChrismasAwards = staticActivityMgr.getChrismasAwardMap().values().stream().filter(e -> e.getAwardId() == actRecord.getAwardId()).collect(Collectors.toList());
+        actChrismasAwards.forEach(statiAward -> {
+            List<CommonPb.Award> tawards = new ArrayList<>();
+            statiAward.getAward().forEach(e -> {
+                tawards.add(PbHelper.createAward(e.get(0), e.get(1), e.get(2)).build());
+            });
+            Integer tcount = finalRecord.getReceived().get(statiAward.getKeyId());
+            builder.addAwards(CommonPb.ActivityCond.newBuilder().setKeyId(statiAward.getKeyId()) // 奖励
+                    .setCond(statiAward.getCost()) // 达成条件
+                    .addAllAward(tawards) // 奖励内容
+                    .setIsAward(tcount == null ? 0
+                            : tcount.intValue())// 领取状态
+                    .setDesc(statiAward.getDesc() == null ? ""
+                            : statiAward.getDesc())
+                    .build());
+        });
+        handler.sendMsgToPlayer(ActChrismasRewardRs.ext, builder.build());
+        ActivityBase activityBase = staticActivityMgr.getActivityById(activityId);
+        String name = "";
+        if (activityBase != null) {
+            name = activityBase.getStaticActivity().getName();
+        }
+        activityEventManager.activityTip(player, actRecord, activityBase);
+        SpringUtil.getBean(EventManager.class).join_activity(player, activityId, name, chrismas.getKeyId());
+        SpringUtil.getBean(EventManager.class).complete_activity(player, activityId, name, chrismas.getKeyId(), new Date(), builder.getAwardList());
+        SpringUtil.getBean(LogUser.class).activity_log(ActivityLog.builder().activityId(activityId).isAward(true).awardId(chrismas.getKeyId()).giftName(chrismas.getDesc()).roleId(player.roleId).vip(player.getVip()).channel(player.account.getChannel()).build());
+    }
 
 	private void sendActDoubleEggs(ActivityBase activityBase, ActivityData activityData) {
 		int prop = getExchangeId(activityBase.getActivityId());
@@ -10344,7 +10290,7 @@ public class ActivityService {
 
 		handler.sendMsgToPlayer(ActHeroDialRs.ext, builder.build());
 
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	public void doNewCommonPurp(DoHeroDialRq req, ClientHandler handler) {
@@ -10482,7 +10428,7 @@ public class ActivityService {
 		builder.setGold(player.getGold());
 		handler.sendMsgToPlayer(DoHeroDialRs.ext, builder.build());
 
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 
 		// 活动类型
 		SpringUtil.getBean(EventManager.class).spin_the_wheel(player, Lists.newArrayList(ActivityConst.ACT_HERO_DIAL, builder.getAwardList().toString(), count));
@@ -10551,7 +10497,7 @@ public class ActivityService {
 			builder.setProp(CommonPb.Prop.newBuilder().setPropId(item.getItemId()).setPropNum(item.getItemNum()));
 		}
 		handler.sendMsgToPlayer(DoHeroExchangelRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	// 碎片合成装备
@@ -10777,7 +10723,7 @@ public class ActivityService {
 		handler.sendMsgToPlayer(DoActTaskHeroRewardRs.ext, builder.build());
 
 		// 推送客户端
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -10794,24 +10740,24 @@ public class ActivityService {
 		}
 		ActivityBase activityBase = activityManager.getActivityBase(ActivityConst.ACT_SURIPRISE_GIFT);
 		if (activityBase == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
 			return;
 		}
 		ActRecord actRecord = activityManager.getActivityInfo(player, ActivityConst.ACT_SURIPRISE_GIFT);
 		if (actRecord == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 			return;
 		}
 		actRecord.checkExprie();
 		if (!actRecord.hasNoExprie()) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 			return;
 		}
 		Map<Integer, StaticLimitGift> limitGift = staticActivityMgr.getLimitGiftByAward(actRecord.getAwardId());
 		if (limitGift == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 			return;
 		}
@@ -10839,7 +10785,7 @@ public class ActivityService {
 		actRecord.getReceived().put(ActivityConst.ACT_SURIPRISE_GIFT, 1);
 		rs.setTips(0);
 		handler.sendMsgToPlayer(ActSuripriseGiftRs.ext, rs.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -11418,7 +11364,7 @@ public class ActivityService {
 			builder.addActivityCond(builder1);
 		});
 		handler.sendMsgToPlayer(ActMaterInfoRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	public void actMaterAward(ActMaterAwardRq rq, ClientHandler handler) {
@@ -11460,7 +11406,7 @@ public class ActivityService {
 		// builder.addAllAward(actAward.getAwardPbList());
 		handler.sendMsgToPlayer(ActMaterAwardRs.ext, builder.build());
 		actRecord.updateReceive(actAward.getKeyId(), 1);
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	// 夺宝奇兵相关
@@ -11597,7 +11543,7 @@ public class ActivityService {
 		if (actRecord.getCount() == 0) {
 			playerManager.synActivity(player, activityBase.getActivityId());
 		}
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	// 充值转盘相关
@@ -11718,7 +11664,7 @@ public class ActivityService {
 			}
 		}
 		handler.sendMsgToPlayer(DoRecharDialRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(EventEnum.DO_DIAL, new CommonTipActor(player, actRecord, activityBase));
+		activityEventManager.activityTip(EventEnum.DO_DIAL, new CommonTipActor(player, actRecord, activityBase));
 	}
 
 	// 好运准盘相关
@@ -11788,7 +11734,7 @@ public class ActivityService {
 			builder.addRecord(rewardRecord.ser(activityData.getActivityId()));
 		});
 		handler.sendMsgToPlayer(ActLucklyDialRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	public void doLucklyAward(DoLucklyDialRq req, ClientHandler handler) {
@@ -12078,7 +12024,7 @@ public class ActivityService {
 		}
 		int propId = rq.getPropId();
 		int targetId = rq.getTargetId();
-		HashMap<Integer, Item> itemMap = player.getItemMap();
+		Map<Integer, Item> itemMap = player.getItemMap();
 		Item item = itemMap.get(propId);
 		StaticProp targetProp = staticPropMgr.getStaticProp(targetId);
 		StaticProp staticProp = staticPropMgr.getStaticProp(propId);
@@ -12203,7 +12149,7 @@ public class ActivityService {
 			}
 			// 推送活动消失
 			if (player.isLogin) {
-				ActivityEventManager.getInst().activityTip(EventEnum.BUY_BROOD_DISPEAR, new CommonTipActor(player, activityInfo, activityBase));
+				activityEventManager.activityTip(EventEnum.BUY_BROOD_DISPEAR, new CommonTipActor(player, activityInfo, activityBase));
 			}
 			activityInfo.cleanActivity();
 		}
@@ -12399,18 +12345,18 @@ public class ActivityService {
 		}
 		ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_SPRING_FESTIVAL);
 		if (activityBase == null || activityBase.getStep() != ActivityConst.ACTIVITY_BEGIN) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 		}
 		ActRecord actRecord = activityManager.getActivityInfo(player, activityBase.getActivityId());
 		if (actRecord == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 			return;
 		}
 		ActivityData activityData = activityManager.getActivity(actRecord.getActivityId());
 		if (activityData == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 			return;
 		}
@@ -12530,18 +12476,18 @@ public class ActivityService {
 		}
 		ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_SPRING_FESTIVAL);
 		if (activityBase == null || activityBase.getStep() != ActivityConst.ACTIVITY_BEGIN) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 		}
 		ActRecord actRecord = activityManager.getActivityInfo(player, activityBase.getActivityId());
 		if (actRecord == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 			return;
 		}
 		ActivityData activityData = activityManager.getActivity(actRecord.getActivityId());
 		if (activityData == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 			return;
 		}
@@ -12601,7 +12547,7 @@ public class ActivityService {
 			builder.setDisplay(specialBuilder);
 		}
 		handler.sendMsgToPlayer(ReceiveSpringFestivalRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	/**
@@ -12660,18 +12606,18 @@ public class ActivityService {
 		}
 		ActivityBase activityBase = activityManager.getActivityBase(ActivityConst.ACT_SPRING_FESTIVAL_GIFT);
 		if (activityBase == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, null, activityBase));
 			return;
 		}
 		ActRecord actRecord = activityManager.getActivityInfo(player, activityBase.getActivityId());
 		if (actRecord == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 			return;
 		}
 		Map<Integer, StaticLimitGift> springGiftMap = staticActivityMgr.getSpringGiftMap(actRecord.getAwardId());
 		if (springGiftMap == null) {
-			ActivityEventManager.getInst().updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
+			activityEventManager.updateActivityHandler(EventEnum.TIME_DISAPPEAR, new CommonTipActor(player, actRecord, activityBase));
 			handler.sendErrorMsgToPlayer(GameError.ACTIVITY_NOT_OPEN);
 			return;
 		}
@@ -12698,7 +12644,7 @@ public class ActivityService {
 			builder.addGifts(b);
 		}
 		handler.sendMsgToPlayer(ActSpringGiftRs.ext, builder.build());
-		ActivityEventManager.getInst().activityTip(player, actRecord, activityBase);
+		activityEventManager.activityTip(player, actRecord, activityBase);
 	}
 
 	// 春节活动在活动结束的时候 发放奖励
@@ -12795,11 +12741,11 @@ public class ActivityService {
 		int integral = actRecord.getRecordNum(0);
 		builder.setIntegral(integral);
 		TDTaskManager tdTaskManager = SpringUtil.getBean(TDTaskManager.class);
-		tdTaskManager.getStaticTDSevenBoxAwardMap().values().forEach(e -> {
+		staticTDTaskMgr.getStaticTDSevenBoxAwardMap().values().forEach(e -> {
 			builder.addBoxAward(e.warp(actRecord));
 		});
 
-		Map<Integer, Map<Integer, StaticTDSevenTask>> tdSevenTaskByType = tdTaskManager.getTdSevenTaskByType();
+		Map<Integer, Map<Integer, StaticTDSevenTask>> tdSevenTaskByType = staticTDTaskMgr.getTdSevenTaskByType();
 
 		tdSevenTaskByType.forEach((k, v) -> {
 			if (k == ActTDSevenType.tdTaskType_1) {
@@ -12856,7 +12802,7 @@ public class ActivityService {
 		TDTaskManager tdTaskManager = SpringUtil.getBean(TDTaskManager.class);
 		int type = rq.getType(); // 1:任务 2:宝箱奖励
 		int keyId = rq.getKeyId();
-		Map<Integer, StaticTDSevenBoxAward> staticTDSevenBoxAwardMap = tdTaskManager.getStaticTDSevenBoxAwardMap();
+		Map<Integer, StaticTDSevenBoxAward> staticTDSevenBoxAwardMap = staticTDTaskMgr.getStaticTDSevenBoxAwardMap();
 		TDTaskAwardRs.Builder builder = TDTaskAwardRs.newBuilder();
 		Map<Integer, Integer> received = actRecord.getReceived();
 		int currentDay = GameServer.getInstance().currentDay;
@@ -12884,7 +12830,7 @@ public class ActivityService {
 				}
 			});
 		} else if (type == 1) {
-			Map<Integer, StaticTDSevenTask> staticTDSevenTaskMap = tdTaskManager.getStaticTDSevenTaskMap();
+			Map<Integer, StaticTDSevenTask> staticTDSevenTaskMap = staticTDTaskMgr.getStaticTDSevenTaskMap();
 			StaticTDSevenTask staticTDSevenTask = staticTDSevenTaskMap.get(keyId);
 			if (staticTDSevenTaskMap == null) {
 				handler.sendErrorMsgToPlayer(GameError.CONFIG_ERROR);
@@ -12910,7 +12856,7 @@ public class ActivityService {
 			builder.addBoxAward(e.warp(actRecord));
 		});
 
-		Map<Integer, Map<Integer, StaticTDSevenTask>> tdSevenTaskByType = tdTaskManager.getTdSevenTaskByType();
+		Map<Integer, Map<Integer, StaticTDSevenTask>> tdSevenTaskByType = staticTDTaskMgr.getTdSevenTaskByType();
 		tdSevenTaskByType.forEach((k, v) -> {
 			if (k == ActTDSevenType.tdTaskType_1) {
 				v.values().forEach(e -> {
@@ -12930,6 +12876,6 @@ public class ActivityService {
 		});
 		handler.sendMsgToPlayer(TDTaskAwardRs.ext, builder.build());
 
-		ActivityEventManager.getInst().activityTip(EventEnum.GET_ACTIVITY_AWARD_TIP, new TdActor(player, actRecord, activityData, activityBase));
+		activityEventManager.activityTip(EventEnum.GET_ACTIVITY_AWARD_TIP, new TdActor(player, actRecord, activityData, activityBase));
 	}
 }

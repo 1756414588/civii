@@ -1,14 +1,11 @@
 package com.game.message.cs;
 
-import com.game.cache.MapMonsterCache;
+import com.game.cache.UserMapCache;
 import com.game.domain.Robot;
-import com.game.domain.World;
 import com.game.message.MessageHandler;
 import com.game.pb.BasePb.Base;
-import com.game.pb.CommonPb.Pos;
 import com.game.pb.CommonPb.WorldEntity;
 import com.game.pb.WorldPb.SynEntityRq;
-import com.game.util.LogHelper;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -20,19 +17,25 @@ public class SynEntityHandler extends MessageHandler {
 	public void action(ChannelHandlerContext ctx, int accountKey, Base req) {
 		SynEntityRq msg = req.getExtension(SynEntityRq.ext);
 
+		// 野怪缓存
 		Robot robot = getRobot(accountKey);
+		UserMapCache userMapCache = robot.getCache().getMapCache();
 
 		// 通知实体消失
-		WorldEntity worldEntity = msg.getEntity();
-		Pos pos = msg.getOldPos();
-		int maxMonsterLv = msg.getMaxMonsterLv();
+		msg.getOldPos();
 
-		if (worldEntity.getEntityType() == 1) {// 野怪消失
-			World world = robot.getWorld();
-			world.setMaxMonsterLv(maxMonsterLv);
+		if (msg.hasMaxMonsterLv()) {
+			int maxLevel = userMapCache.getMaxLevel() > msg.getMaxMonsterLv() ? userMapCache.getMaxLevel() : msg.getMaxMonsterLv();
+			userMapCache.setMaxLevel(maxLevel);
 		}
 
-		getBean(MapMonsterCache.class).synEntityRq(worldEntity, pos);
+		if (msg.hasEntity()) {//消失的实体
+			userMapCache.remove(msg.getEntity());
+		}
+
+		if (msg.hasOldPos()) {//消失的坐标
+			userMapCache.remove(msg.getOldPos().getX(), msg.getOldPos().getY());
+		}
 	}
 
 

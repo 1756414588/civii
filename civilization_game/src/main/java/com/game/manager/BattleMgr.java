@@ -17,31 +17,12 @@ import com.game.dataMgr.StaticMonsterMgr;
 import com.game.dataMgr.StaticWallMgr;
 import com.game.dataMgr.StaticWorldMgr;
 import com.game.domain.Player;
-import com.game.domain.p.AttackInfo;
-import com.game.domain.p.BattleEntity;
-import com.game.domain.p.BattleProperty;
-import com.game.domain.p.City;
-import com.game.domain.p.CityMonster;
-import com.game.domain.p.Hero;
-import com.game.domain.p.LineEntity;
-import com.game.domain.p.Property;
-import com.game.domain.p.RecordEntity;
-import com.game.domain.p.SimpleData;
-import com.game.domain.p.Team;
-import com.game.domain.p.Wall;
-import com.game.domain.p.WallDefender;
-import com.game.domain.p.WallFriend;
+import com.game.domain.p.*;
 import com.game.domain.s.StaticBattle;
 import com.game.domain.s.StaticLordLv;
 import com.game.domain.s.StaticMonster;
 import com.game.domain.s.StaticWallMonsterLv;
 import com.game.domain.s.StaticWorldCity;
-import com.game.season.SeasonManager;
-import com.game.season.SeasonService;
-import com.game.season.SkillModel;
-import com.game.season.StaticSeasonMgr;
-import com.game.season.seven.entity.SevenType;
-import com.game.season.talent.entity.EffectType;
 import com.game.service.CastleService;
 import com.game.util.LogHelper;
 import com.game.util.RandomHelper;
@@ -58,6 +39,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
@@ -120,11 +102,7 @@ public class BattleMgr {
     private WarBookManager warBookManager;
 
     @Autowired
-    StaticSeasonMgr staticSeasonMgr;
-    @Autowired
-    SeasonManager seasonManager;
-    @Autowired
-    SeasonService seasonService;
+    ActivityEventManager activityEventManager;
 
     // GameEntities pk GameEntities
     // Team VS Team(所有战斗)
@@ -135,38 +113,62 @@ public class BattleMgr {
             teamB.setWin(true);
             return;
         }
+
         if (teamB.aliveNum() <= 0) {
             teamA.setWin(true);
             teamB.setWin(false);
             return;
         }
+
         int beforeHpA = teamA.getCurSoldier();
         int beforeHpB = teamB.getCurSoldier();
+
         BattleEntity battleEntityA = teamA.getEntity();
         BattleEntity battleEntityB = teamB.getEntity();
-        while (battleEntityA != null && battleEntityB != null) {
-            battleEntityA.initSkill();
-            battleEntityB.initSkill();
-            doEntityBattle(teamA, teamB, battleEntityA, battleEntityB, rand, isWorldWar);
-            if (battleEntityB.getLineNumber() <= 0) {
-                battleEntityDie(teamB.getAttackInfos());
-                removeBattleBookSkillEffectForEntity(teamA.getColumn());
-                battleEntityB = teamB.getEntity();
+        ArrayList<AttackInfo> attackInfosA = teamA.getAttackInfos();
+        ArrayList<AttackInfo> attackInfosB = teamB.getAttackInfos();
+
+        // 兵书技能加成效果值处理
+        Map<Integer, Integer> columnA = new HashedMap();
+        Map<Integer, Integer> columnB = new HashedMap();
+
+        do {
+            do {
+                doEntityBattle(battleEntityA, battleEntityB, columnA, columnB, attackInfosA, attackInfosB, rand, isWorldWar);
+                if (battleEntityB.getLineNumber() <= 0) {
+                    battleEntityDie(attackInfosB);
+                    removeBattleBookSkillEffectForEntity(columnA);
+                    if (teamB.aliveNum() > 0) {
+                        // 获取下一个没有死亡的英雄
+                        battleEntityB = teamB.getEntity();
+                    }
+                }
+                if (battleEntityA.getLineNumber() <= 0) {
+                    battleEntityDie(attackInfosA);
+                    removeBattleBookSkillEffectForEntity(columnB);
+                    if (teamA.aliveNum() > 0) {
+                        // 获取下一个没有死亡的英雄
+                        battleEntityA = teamA.getEntity();
+                    }
+                    break;
+                }
+            } while (teamB.aliveNum() > 0);
+
+            // 如果B死完了,结束整个战斗
+            if (teamB.aliveNum() <= 0) {
+                break;
             }
-            if (battleEntityA.getLineNumber() <= 0) {
-                battleEntityDie(teamA.getAttackInfos());
-                removeBattleBookSkillEffectForEntity(teamB.getColumn());
-                battleEntityA = teamA.getEntity();
-            }
-        }
+
+        } while (teamA.aliveNum() > 0);
+
         int afterHpA = teamA.getCurSoldier();
         int afterHpB = teamB.getCurSoldier();
 
         teamA.addKillNum(beforeHpB - afterHpB);
         teamB.addKillNum(beforeHpA - afterHpA);
 
-        teamA.getColumn().clear();
-        teamB.getColumn().clear();
+        columnA.clear();
+        columnB.clear();
         if (teamA.isAlive()) {
             teamA.setWin(true);
             teamB.setWin(false);
@@ -176,7 +178,6 @@ public class BattleMgr {
         }
 
     }
-
 
     // 记录entity死亡
     public void battleEntityDie(ArrayList<AttackInfo> attackInfos) {
@@ -188,7 +189,7 @@ public class BattleMgr {
         }
     }
 
-    public void doEntityBattle(Team teamA, Team teamB, BattleEntity battleEntityA, BattleEntity battleEntityB, Random rand, boolean isWorldWar) {
+    public void doEntityBattle(BattleEntity battleEntityA, BattleEntity battleEntityB, Map<Integer, Integer> columnA, Map<Integer, Integer> columnB, ArrayList<AttackInfo> attackInfosA, ArrayList<AttackInfo> attackInfosB, Random rand, boolean isWorldWar) {
         int lineA = battleEntityA.getLineNumber(); // A列数
         int lineB = battleEntityB.getLineNumber(); // B列数
         LineEntity lineEntityA = battleEntityA.getLineEntity();
@@ -200,55 +201,75 @@ public class BattleMgr {
         Player playerB = playerManager.getPlayer(lordIdB);
         long lordIdA = battleEntityA.getLordId();
         Player playerA = playerManager.getPlayer(lordIdA);
-        while (lineA > 0 && lineB > 0) {
-            doLineBattle(teamA, teamB, battleEntityA, playerA, battleEntityB, playerB, lineEntityA, lineEntityB, rand);
-            if (lineEntityB.getSoldierNum() <= 0) {
-                lineEntityDie(teamB.getAttackInfos());
-                --lineB; // 如果等于0，直接结束
-                // 计算兵书的技能加成
-                addBattleBookSkillEffectTotal(battleEntityB, teamB.getColumn(), lineEntityB, BookEffectType.BOOK_EFFECT_10);
-                addBattleBookSkillEffectTotal(battleEntityA, teamA.getColumn(), lineEntityA, BookEffectType.BOOK_EFFECT_15);
-                if (lineB > 1) {
-                    // 计算兵书的技能加成
-                    addBattleBookSkillEffectTotal(battleEntityB, teamB.getColumn(), lineEntityB, BookEffectType.BOOK_EFFECT_17);
-                    lineEntityB.setSoldierNum(battleEntityB.getSoldierNum());
-                } else if (lineB == 1) {
-                    // 计算兵书的技能加成
-                    addBattleBookSkillEffectTotal(battleEntityB, teamB.getColumn(), lineEntityB, BookEffectType.BOOK_EFFECT_17);
-                    lineEntityB.setSoldierNum(battleEntityB.getLastLineSoldierNum());
-                    battleEntityB.setLeftSoldier(0);
-                }
-                teamB.addLine();
-            }
-            if (lineEntityA.getSoldierNum() <= 0) {
-                lineEntityDie(teamA.getAttackInfos());
-                --lineA; // 如果等于0，直接结束
-                // 计算兵书的技能加成
-                addBattleBookSkillEffectTotal(battleEntityA, teamA.getColumn(), lineEntityA, BookEffectType.BOOK_EFFECT_10);
-                addBattleBookSkillEffectTotal(battleEntityB, teamB.getColumn(), lineEntityB, BookEffectType.BOOK_EFFECT_15);
 
-                if (lineA > 1) {
-                    // 计算兵书的技能加成
-                    addBattleBookSkillEffectTotal(battleEntityA, teamA.getColumn(), lineEntityA, BookEffectType.BOOK_EFFECT_17);
-                    lineEntityA.setSoldierNum(battleEntityA.getSoldierNum());
-                } else if (lineA == 1) {
-                    // 计算兵书的技能加成
-                    addBattleBookSkillEffectTotal(battleEntityA, teamA.getColumn(), lineEntityA, BookEffectType.BOOK_EFFECT_17);
-                    lineEntityA.setSoldierNum(battleEntityA.getLastLineSoldierNum());
-                    battleEntityA.setLeftSoldier(0);
+        do {
+            do {
+                doLineBattle(battleEntityA, playerA, battleEntityB, playerB, columnA, columnB, lineEntityA, lineEntityB, attackInfosA, attackInfosB, rand);
+                if (lineEntityB.getSoldierNum() <= 0) {
+                    lineEntityDie(attackInfosB);
+                    if (lineB > 0) {
+                        --lineB; // 如果等于0，直接结束
+
+                        // 计算兵书的技能加成
+                        addBattleBookSkillEffectTotal(battleEntityB, columnB, lineEntityB, BookEffectType.BOOK_EFFECT_10);
+                        addBattleBookSkillEffectTotal(battleEntityA, columnA, lineEntityA, BookEffectType.BOOK_EFFECT_15);
+
+//                        if(lineB>0){
+//                            lineEntityB.setSoldierNum(battleEntityB.getSoldierNum());
+//                        }
+
+                        if (lineB > 1) {
+                            // 计算兵书的技能加成
+                            addBattleBookSkillEffectTotal(battleEntityB, columnB, lineEntityB, BookEffectType.BOOK_EFFECT_17);
+                            lineEntityB.setSoldierNum(battleEntityB.getSoldierNum());
+                        } else if (lineB == 1) {
+                            // 计算兵书的技能加成
+                            addBattleBookSkillEffectTotal(battleEntityB, columnB, lineEntityB, BookEffectType.BOOK_EFFECT_17);
+                            lineEntityB.setSoldierNum(battleEntityB.getLastLineSoldierNum());
+                            battleEntityB.setLeftSoldier(0);
+                        }
+                    }
                 }
-                teamA.addLine();
+
+                if (lineEntityA.getSoldierNum() <= 0) {
+                    lineEntityDie(attackInfosA);
+                    if (lineA > 0) {
+                        --lineA; // 如果等于0，直接结束
+//                        if(lineA>0){
+//                            lineEntityA.setSoldierNum(battleEntityA.getSoldierNum());
+//                        }
+                        // 计算兵书的技能加成
+                        addBattleBookSkillEffectTotal(battleEntityA, columnA, lineEntityA, BookEffectType.BOOK_EFFECT_10);
+                        addBattleBookSkillEffectTotal(battleEntityB, columnB, lineEntityB, BookEffectType.BOOK_EFFECT_15);
+
+                        if (lineA > 1) {
+                            // 计算兵书的技能加成
+                            addBattleBookSkillEffectTotal(battleEntityA, columnA, lineEntityA, BookEffectType.BOOK_EFFECT_17);
+                            lineEntityA.setSoldierNum(battleEntityA.getSoldierNum());
+                        } else if (lineA == 1) {
+                            // 计算兵书的技能加成
+                            addBattleBookSkillEffectTotal(battleEntityA, columnA, lineEntityA, BookEffectType.BOOK_EFFECT_17);
+                            lineEntityA.setSoldierNum(battleEntityA.getLastLineSoldierNum());
+                            battleEntityA.setLeftSoldier(0);
+                        }
+                    }
+                    break;
+                }
+            } while (lineB > 0);
+
+            // 如果B死完了,结束整个战斗
+            if (lineB <= 0) {
+                battleEntityB.setLineNumber(0);
+                battleEntityB.setCurSoldierNum(0);
+                break;
             }
+
+        } while (lineA > 0);
+
+        if (lineA <= 0) {
+            battleEntityA.setLineNumber(0);
+            battleEntityA.setCurSoldierNum(0);
         }
-        // if (lineB <= 0) {
-        // battleEntityB.setLineNumber(0);
-        // battleEntityB.setCurSoldierNum(0);
-        // // break;
-        // }
-        // if (lineA <= 0) {
-        // battleEntityA.setLineNumber(0);
-        // battleEntityA.setCurSoldierNum(0);
-        // }
 
         // 设置排数，进行下一个实体的战斗
         battleEntityA.setLineNumber(lineA);
@@ -274,31 +295,25 @@ public class BattleMgr {
 
         updateKill(battleEntityB, killA);
         if (killB < 0) {
-            LogHelper.ERROR_LOGGER.error("killB < 0 beforeHpB = " + beforeHpB + ", afterHpB = " + afterHpB);
-            LogHelper.ERROR_LOGGER.error("battleEntityB Id= " + battleEntityB.getEntityId() + ", type = " + battleEntityB.getEntityType());
-            LogHelper.ERROR_LOGGER.error("kbattleEntityB line= " + battleEntityB.getLineNumber() + ", soldierNum = " + battleEntityB.getLineEntity().getSoldierNum());
+            LogHelper.CONFIG_LOGGER.info("killB < 0 beforeHpB = " + beforeHpB + ", afterHpB = " + afterHpB);
+            LogHelper.CONFIG_LOGGER.info("battleEntityB Id= " + battleEntityB.getEntityId() + ", type = " + battleEntityB.getEntityType());
+            LogHelper.CONFIG_LOGGER.info("kbattleEntityB line= " + battleEntityB.getLineNumber() + ", soldierNum = " + battleEntityB.getLineEntity().getSoldierNum());
         }
 
         if (killA < 0) {
-            LogHelper.ERROR_LOGGER.error("killA < 0 beforeHpA = " + beforeHpA + ", afterHpA = " + afterHpA);
-            LogHelper.ERROR_LOGGER.error("battleEntityA Id= " + battleEntityA.getEntityId() + ", type = " + battleEntityA.getEntityType());
-            LogHelper.ERROR_LOGGER.error("kbattleEntityA line= " + battleEntityA.getLineNumber() + ", soldierNum = " + battleEntityA.getLineEntity().getSoldierNum());
+            LogHelper.CONFIG_LOGGER.info("killA < 0 beforeHpA = " + beforeHpA + ", afterHpA = " + afterHpA);
+            LogHelper.CONFIG_LOGGER.info("battleEntityA Id= " + battleEntityA.getEntityId() + ", type = " + battleEntityA.getEntityType());
+            LogHelper.CONFIG_LOGGER.info("kbattleEntityA line= " + battleEntityA.getLineNumber() + ", soldierNum = " + battleEntityA.getLineEntity().getSoldierNum());
         }
 
         if (isWorldWar) {
             if (playerA != null) {
-                ActivityEventManager.getInst().activityTip(EventEnum.LOSE_SOLDIER, playerA, killA, 0);
+                activityEventManager.activityTip(EventEnum.LOSE_SOLDIER, playerA, killA, 0);
 //                activityManager.updatePassPortTaskCond(playerA, ActPassPortTaskType.LOSS_SOLDIER, killA);
-                seasonService.addSevenScore(SevenType.KILL, killB, playerA, 1);
-                seasonService.addSevenScore(SevenType.LOSS, killA, playerA, 1);
-
             }
             if (playerB != null) {
-                ActivityEventManager.getInst().activityTip(EventEnum.LOSE_SOLDIER, playerB, killB, 0);
+                activityEventManager.activityTip(EventEnum.LOSE_SOLDIER, playerB, killB, 0);
 //                activityManager.updatePassPortTaskCond(playerB, ActPassPortTaskType.LOSS_SOLDIER, killB);
-
-                seasonService.addSevenScore(SevenType.KILL, killA, playerB, 1);
-                seasonService.addSevenScore(SevenType.LOSS, killB, playerA, 1);
             }
         }
     }
@@ -314,32 +329,41 @@ public class BattleMgr {
     }
 
     // 最本质层
-    public void doLineBattle(Team teamA, Team teamB, BattleEntity battleEntityA, Player playerA, BattleEntity battleEntityB, Player playerB, LineEntity lineEntityA, LineEntity lineEntityB, Random random) {
+    public void doLineBattle(BattleEntity battleEntityA, Player playerA, BattleEntity battleEntityB, Player playerB, Map<Integer, Integer> columnA, Map<Integer, Integer> columnB, LineEntity lineEntityA, LineEntity lineEntityB, ArrayList<AttackInfo> attackInfosA, ArrayList<AttackInfo> attackInfosB, Random random) {
         if (lineEntityA == null || lineEntityB == null) {
-            LogHelper.ERROR_LOGGER.error("lineEntityA == null || lineEntityB == null");
+            LogHelper.CONFIG_LOGGER.info("lineEntityA == null || lineEntityB == null");
             return;
         }
-        //if (lineEntityA.getSoldierNum() <= 0 || lineEntityB.getSoldierNum() <= 0) {
-        //	return;
-        //}
+
+        if (lineEntityA.getSoldierNum() <= 0 || lineEntityB.getSoldierNum() <= 0) {
+            return;
+        }
+
         boolean isFirstBattle = true;
-        while (lineEntityA.getSoldierNum() > 0 && lineEntityB.getSoldierNum() > 0) {
+        do {
             double hpPercentA = (double) lineEntityA.getSoldierNum() / (double) lineEntityA.getMaxSoldierNum();
             double hpPercentB = (double) lineEntityB.getSoldierNum() / (double) lineEntityB.getMaxSoldierNum();
+//            hpPercentA = hpPercentA >= 1 ? 1 : hpPercentA;
+//            hpPercentB = hpPercentB >= 1 ? 1 : hpPercentB;
             double factorA = hpPercentA / hpPercentB;
             double factorB = hpPercentB / hpPercentA;
             factorA = getRealAttackFactor(factorA);
             factorB = getRealAttackFactor(factorB);
 
-            addBattleBookSkillEffect(battleEntityA, teamA.getColumn(), lineEntityA);
-            addBattleBookSkillEffect(battleEntityB, teamB.getColumn(), lineEntityB);
+            addBattleBookSkillEffect(battleEntityA, columnA, lineEntityA);
+            addBattleBookSkillEffect(battleEntityB, columnB, lineEntityB);
 
-            doAttack(teamA, teamB, playerA, playerB, lineEntityA, lineEntityB, random, factorA, isFirstBattle, battleEntityA);
-            doAttack(teamB, teamA, playerB, playerA, lineEntityB, lineEntityA, random, factorB, isFirstBattle, battleEntityB);
+            // System.err.println("columnA>>>>>>>>>>>>>>>>>>>" + columnA);
+            // System.err.println("columnB>>>>>>>>>>>>>>>>>>>" + columnB);
+
+            doAttack(playerB, lineEntityA, lineEntityB, attackInfosB, random, factorA, columnA, columnB, isFirstBattle);
+            doAttack(playerA, lineEntityB, lineEntityA, attackInfosA, random, factorB, columnB, columnA, isFirstBattle);
             isFirstBattle = false;
-            removeBattleBookSkillEffect(teamA.getColumn());
-            removeBattleBookSkillEffect(teamB.getColumn());
-        }
+
+            removeBattleBookSkillEffect(columnA);
+            removeBattleBookSkillEffect(columnB);
+
+        } while (lineEntityA.getSoldierNum() > 0 && lineEntityB.getSoldierNum() > 0);
     }
 
     // 浮点型比较
@@ -365,7 +389,9 @@ public class BattleMgr {
         return 0.0;
     }
 
-    public void doAttack(Team attack, Team def, Player playerA, Player playerB, LineEntity lineEntityA, LineEntity lineEntityB, Random random, double additionFactor, boolean isFirstBattle, BattleEntity entity) {
+    // 属性带入: 玩家(缺少)+英雄+装备+技能
+    // 这个里面加攻击信息
+    public void doAttack(Player playerB, LineEntity lineEntityA, LineEntity lineEntityB, ArrayList<AttackInfo> attackInfos, Random random, double additionFactor, Map<Integer, Integer> bookBattleEffectA, Map<Integer, Integer> bookBattleEffectB, boolean isFirstBattle) {
         // 第1版:战斗公式:每回合伤害=[（A攻击-B防御）* 浮动系数[1/1000]+（A强攻-B韧性）]*
         // 暴击伤害（2倍）*克制关系系数[A->B]
         // 第2版:战斗公式：[（攻击-防御）/4*浮动系数*系数+（强攻-强防）/4]*暴击伤害（2倍）*克制关系系数
@@ -376,13 +402,13 @@ public class BattleMgr {
         attackRes = Math.max(attackRes, 0);
         StaticBattle staticBattle = staticBattleDataMgr.getStaticBattle();
         if (staticBattle == null) {
-            LogHelper.ERROR_LOGGER.error("staticBattle == null, check config!");
+            LogHelper.CONFIG_LOGGER.info("staticBattle == null, check config!");
             return;
         }
 
         List<Integer> floatFactor = staticBattle.getFloatFactor();
         if (floatFactor.size() != 2) {
-            LogHelper.ERROR_LOGGER.error("floatFactor.size() != 2");
+            LogHelper.CONFIG_LOGGER.info("floatFactor.size() != 2");
             return;
         }
 
@@ -391,11 +417,7 @@ public class BattleMgr {
 
         int attckFactor = RandomHelper.nextInt(random, minFloatFactor, maxFloatFactor);
         int strongAttackRes = lineEntityA.getStrongAttack() - lineEntityB.getStrongDefence();
-
-        double seasonBuf = seasonManager.getSeasonBuf(playerA, EffectType.EFFECT_TYPE10);
-        int v = (int) (1 + seasonBuf) * strongAttackRes;
-
-        strongAttackRes = Math.max(v, 0);
+        strongAttackRes = Math.max(strongAttackRes, 0);
 
         double critiRes = (double) (lineEntityA.getCriti() - lineEntityB.getTenacity()) * ((double) staticBattle.getCritiFactor() / getDevideFactor());
 
@@ -403,13 +425,17 @@ public class BattleMgr {
         critiRes = Math.min(critiRes, staticBattle.getMaxCriti());
         critiRes = Math.max(critiRes, staticBattle.getMinCriti());
 
+        // System.err.println("增加前的暴击数>>>>>>>>>>>>>>>>>>>>>>>>" + critiRes);
+
         // 兵书技能加成战斗中战斗中对反坦克炮暴击增加30%
-        if (attack.getColumn().get(BookEffectType.BOOK_EFFECT_16) != null) {
+        if (bookBattleEffectA.get(BookEffectType.BOOK_EFFECT_16) != null) {
             if (lineEntityB.getEntityType() == 1) {
-                Integer bookEffect = attack.getColumn().get(BookEffectType.BOOK_EFFECT_16);
+                Integer bookEffect = bookBattleEffectA.get(BookEffectType.BOOK_EFFECT_16);
                 Integer warBookSoldierType = warBookManager.getWarBookSoldierType(playerB, lineEntityB.getEntityId());
                 if (null != warBookSoldierType && warBookSoldierType.intValue() == BookEffectType.SOLDIER_TYPE_118) {
                     critiRes = critiRes * (1 + (bookEffect.intValue() / 1000.00f));
+//                    System.err.println("兵书技能加成>>>>>>>>>>>战斗中对反坦克炮暴击增加30%");
+                    // System.err.println("增加后的暴击数>>>>>>>>>>>>>>>>>>>>>>>>" + critiRes);
                 }
             }
         }
@@ -417,7 +443,9 @@ public class BattleMgr {
         critiRes = Math.min(critiRes, staticBattle.getMaxCriti());
         critiRes = Math.max(critiRes, staticBattle.getMinCriti());
 
-        double restraintRate = getRestraint(playerA, lineEntityA.getSoldierType(), lineEntityB.getSoldierType());
+        // System.err.println("最终的暴击数>>>>>>>>>>>>>>>>>>>>>>>>" + critiRes);
+
+        double restraintRate = getRestraint(lineEntityA.getSoldierType(), lineEntityB.getSoldierType());
         double missRes = (double) (lineEntityB.getMiss() - lineEntityA.getHit()) * ((double) staticBattle.getMissFactor() / getDevideFactor());
 
         missRes = Math.min(missRes, staticBattle.getMaxMiss());
@@ -429,18 +457,18 @@ public class BattleMgr {
         // 1.检测是否命中
         boolean isMiss = RandomHelper.isBattleActed((int) missRes);
         int damage = 0; // 最小伤害是1
-        SkillModel model = entity.getModel();
         // 如果命中
-        if (!isMiss || (model != null && model.getTotalDamage() > 0)) {
+        if (!isMiss) {
             // 2.检测是否暴击
             isCriti = RandomHelper.isBattleActed((int) critiRes);
 
             // 兵书技能加成战斗中每排兵出场对幻影坦克的首次伤害必定暴击
-            if (attack.getColumn().get(BookEffectType.BOOK_EFFECT_13) != null && isFirstBattle) {
+            if (bookBattleEffectA.get(BookEffectType.BOOK_EFFECT_13) != null && isFirstBattle) {
                 if (lineEntityB.getEntityType() == 1) {
                     Integer warBookSoldierType = warBookManager.getWarBookSoldierType(playerB, lineEntityB.getEntityId());
                     if (null != warBookSoldierType && warBookSoldierType.intValue() == BookEffectType.SOLDIER_TYPE_114) {
                         isCriti = true;
+//                        System.err.println("兵书技能加成>>>>>>>>>>>战斗中每排兵出场对幻影坦克的首次伤害必定暴击");
                     }
                 }
             }
@@ -451,86 +479,71 @@ public class BattleMgr {
             }
             double attackFactorRes = (double) attckFactor / getDevideFactor();
             int attackCity = 0;
-            if (playerA != null && playerB != null) {
+            if (lineEntityA.getEntityType() == 1 && lineEntityB.getEntityType() == 1) {
+                //pvp的话 攻城守城属性得加上
                 attackCity = lineEntityA.getBaseProperty().getAttackCity() - lineEntityB.getBaseProperty().getDefenceCity();
                 attackCity = Math.max(attackCity, 0);
             }
             damage = (int) (((double) attackRes / 4.0 * attackFactorRes * additionFactor + (double) strongAttackRes / 4.0 + (double) attackCity / 4.0) * critiRate * restraintRate);
 
             // 计算兵书技能的技能加成伤害值
-            Set<Map.Entry<Integer, Integer>> effectEntriesA = attack.getColumn().entrySet();
+            Set<Map.Entry<Integer, Integer>> effectEntriesA = bookBattleEffectA.entrySet();
             for (Map.Entry<Integer, Integer> entry : effectEntriesA) {
                 Integer effectKey = entry.getKey();
                 Integer effectValue = entry.getValue();
                 if (effectKey.intValue() == BookEffectType.BOOK_EFFECT_10) {
                     damage = (int) (damage * (1 + (effectValue.intValue() / 1000.00f)));
+//                    System.err.println("兵书技能加成>>>>>>>>>>>战斗中每排兵出场对每少一排兵增加的百分比伤害");
                 } else if (effectKey.intValue() == BookEffectType.BOOK_EFFECT_14) {
                     if (lineEntityB.getSoldierType() == SoldierType.ROCKET_TYPE) {
                         damage = (int) (damage * (1 + (effectValue.intValue() / 1000.00f)));
+//                        System.err.println("兵书技能加成>>>>>>>>>>>战斗中对步兵兵种伤害增加千分比effectValue = " + effectValue.intValue());
                     }
                 } else if (effectKey.intValue() == BookEffectType.BOOK_EFFECT_17) {
                     damage = (int) (damage * (1 + (effectValue.intValue() / 1000.00f)));
+//                    System.err.println("兵书技能加成>>>>>>>>>>>战斗中每多一排兵待命，伤害增加千分比effectValue =" + effectValue.intValue());
                 } else if (effectKey.intValue() == BookEffectType.BOOK_EFFECT_18) {
                     if (lineEntityB.getSoldierType() == SoldierType.TANK_TYPE) {
                         damage = (int) (damage * (1 + (effectValue.intValue() / 1000.00f)));
+//                        System.err.println("兵书技能加成>>>>>>>>>>>战斗中对坦克兵种伤害增加千分比effectValue = " + effectValue.intValue());
                     }
                 } else if (effectKey.intValue() == BookEffectType.BOOK_EFFECT_19) {
                     if (lineEntityB.getEntityType() == 1) {
                         Integer warBookSoldierType = warBookManager.getWarBookSoldierType(playerB, lineEntityB.getEntityId());
                         if (null != warBookSoldierType && warBookSoldierType.intValue() == BookEffectType.SOLDIER_TYPE_112) {
                             damage = (int) (damage * (1 + (effectValue.intValue() / 1000.00f)));
+//                            System.err.println("兵书技能加成>>>>>>>>>>>战斗中对陆战队伤害增加千分比effectValue =" + effectValue.intValue());
                         }
                     }
                 }
             }
 
-            Set<Map.Entry<Integer, Integer>> effectEntriesB = def.getColumn().entrySet();
+            Set<Map.Entry<Integer, Integer>> effectEntriesB = bookBattleEffectB.entrySet();
             for (Map.Entry<Integer, Integer> entry : effectEntriesB) {
                 Integer effectKey = entry.getKey();
                 Integer effectValue = entry.getValue();
                 if (effectKey.intValue() == BookEffectType.BOOK_EFFECT_15) {
                     damage = (int) (damage * (1 - (effectValue.intValue() / 1000.00f)));
+//                    System.err.println("兵书技能加成>>>>>>>>>>>战斗中每击杀一排兵，伤害减免增加千分比effectValue =" + effectValue.intValue());
                 } else if (effectKey.intValue() == BookEffectType.BOOK_EFFECT_12) {
                     if (lineEntityA.getSoldierType() == SoldierType.WAR_CAR) {
                         damage = (int) (damage * (1 - (effectValue.intValue() / 1000.00f)));
+//                        System.err.println("兵书技能加成>>>>>>>>>>>战斗中收到炮兵兵种伤害降低千分比effectValue = " + effectValue.intValue());
+//                        System.err.println("战斗中收到炮兵兵种伤害降低 >>>>>>>>>>>>>>damage = " + damage);
                     }
                 }
             }
+
+            // 保证伤害值最小1点
             damage = Math.max(damage, 3);
-
-            // EFFECT_TYPE11(11, "城战时，5到8排受到的首次非技能伤害变为1"),被攻击者有这个buf 5-8排首次收到攻击生效
-            int buf = seasonManager.getBuf(playerB, EffectType.EFFECT_TYPE11);
-            if (buf > 0) {
-                if (def.isEffectLine()) {
-                    damage = 1;
-                }
-            }
-            // 如果有技能伤害 在第一次碰撞直接全部打出来
-
-            if (model != null && model.getTotalDamage() > 0) {
-                damage += model.getTotalDamage();
-                entity.getModel().setTotalDamage(0);
-                AttackInfo attackInfo1 = new AttackInfo();
-                attackInfo1.setType(1);
-                attackInfo1.setSkillId(model.getSkillId());
-                def.getAttackInfos().add(attackInfo1);
-
-                AttackInfo attackInfo2 = new AttackInfo();
-                attackInfo2.setType(2);
-                attackInfo2.setSkillId(model.getSkillId());
-                attack.getAttackInfos().add(attackInfo2);
-            }
-            double seasonA = seasonManager.getSeasonBuf(playerA, EffectType.EFFECT_TYPE36);
-            double seasonB = seasonManager.getSeasonBuf(playerB, EffectType.EFFECT_TYPE37);
-            damage = (int) Math.ceil(damage * Math.abs(1 + seasonA - seasonB));
         } else {
+            // System.out.println("没有命中， 命中概率=" + missRes);
             attackInfo.setStatus(1); // 闪避不扣血
         }
 
         /*
          * // 计算B的剩余血量, damage: A对B造成的伤害 int soldierNumB = lineEntityB.getSoldierNum(); int soldierNumA = lineEntityA.getSoldierNum();
          */
-
 
         int hpRes = lineEntityB.getSoldierNum() - damage;
         int damageShow = Math.min(lineEntityB.getSoldierNum(), damage);
@@ -539,8 +552,48 @@ public class BattleMgr {
         attackInfo.setEntityId(lineEntityB.getEntityId());
         attackInfo.setTechLv(lineEntityB.getTechLv());
         attackInfo.setDamage(damageShow);
+        // System.err.println("lineEntityA.toString()" + lineEntityA.toString() + ">>>>>>>>>>>>>>>>>>>>>lineEntityB" + lineEntityB.toString() + "damageShow >>>>>>>>>>>>>>>>>>>" + damageShow);
+//        if(attackInfo.getEntityId()==54){
+//            logger.info("entityId {}  damageShow{} soldierNum {}" ,attackInfo.getEntityId(),damageShow,lineEntityB.getSoldierNum());
+//        }
         attackInfo.setEntityType(lineEntityB.getEntityType());
-        def.getAttackInfos().add(attackInfo);
+        attackInfos.add(attackInfo);
+        // logger.error("hero 攻击->[{}] 防守->[{}] 伤害->[{}]", lineEntityA.toString(), lineEntityB.toString(), damageShow);
+//        StringBuffer logString = new StringBuffer();
+//        logString.append("hero 进攻方 ");
+//        logString.append("英雄Id :" + lineEntityA.getEntityId() + " ");
+//        logString.append("攻击 :" + lineEntityA.getAttack() + " ");
+//        logString.append("防御 :" + lineEntityA.getDefence() + " ");
+//        logString.append("当前兵力 :" + soldierNumA + " ");
+//        logString.append("当前兵排最大兵力 :" + lineEntityA.getMaxSoldierNum() + " ");
+//        logString.append("强攻 :" + lineEntityA.getStrongAttack() + " ");
+//        logString.append("强防 :" + lineEntityA.getStrongDefence() + " ");
+//        logString.append("暴击率 :" + lineEntityA.getCriti() + " ");
+//        logString.append("命中率 :" + lineEntityA.getHit() + " ");
+//        logString.append("\n");
+//        logString.append("hero 防守方 ");
+//        logString.append("英雄Id :" + lineEntityB.getEntityId() + " ");
+//        logString.append("攻击 :" + lineEntityB.getAttack() + " ");
+//        logString.append("防御 :" + lineEntityB.getDefence() + " ");
+//        logString.append("当前兵力 :" + soldierNumB + " ");
+//        logString.append("当前兵排最大兵力 :" + lineEntityB.getMaxSoldierNum() + " ");
+//        logString.append("强攻 :" + lineEntityB.getStrongAttack() + " ");
+//        logString.append("强防 :" + lineEntityB.getStrongDefence() + " ");
+//        logString.append("抗暴率 :" + lineEntityB.getTenacity() + " ");
+//        logString.append("闪避率 :" + lineEntityB.getMiss() + " ");
+//        logString.append("\n");
+//        logString.append("此次攻击暴击率 :" + critiRes + " ");
+//        logString.append("此次攻击是否暴击 :" + isCriti + " ");
+//        logString.append("此次攻击闪避率 :" + missRes + " ");
+//        logString.append("此次攻击是否闪避:" + isMiss + " ");
+//        logString.append("此次攻击伤害结果 :" + damage + " ");
+//        logString.append("实际扣除血量 :" + damageShow + " ");
+//
+//        System.err.println(logString.toString());
+//        System.err.println("---------------------------分割线---------------------------------------");
+//        System.err.println();
+//        System.err.println();
+//        System.err.println();
     }
 
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -550,12 +603,9 @@ public class BattleMgr {
     }
 
     // 克制关系系数做成配置
-    public double getRestraint(Player player, int soliderTypeA, int soliderTypeB) {
+    public double getRestraint(int soliderTypeA, int soliderTypeB) {
         int factor = staticBattleDataMgr.getFactor(soliderTypeA, soliderTypeB);
-        double v = (double) factor / DevideFactor.FACTOR_NUM;
-        double seasonBuf = seasonManager.getSeasonBuf(player, EffectType.EFFECT_TYPE38);
-        v += seasonBuf;
-        return v;
+        return (double) factor / DevideFactor.FACTOR_NUM;
     }
 
     // 增加城战模式
@@ -599,10 +649,7 @@ public class BattleMgr {
         if (hero.getHeroBooks() != null && !hero.getHeroBooks().isEmpty()) {
             battleEntity.getHeroBooks().addAll(hero.getHeroBooks());
         }
-        // 如果是赛季英雄
-        if (hero.getType() > 0) {
-            battleEntity.setHero(hero);
-        }
+
         return battleEntity;
     }
 
@@ -720,12 +767,11 @@ public class BattleMgr {
 
         Team team = new Team();
         // 应该用玩家出战的英雄
-        HashMap<Integer, Hero> heroes = player.getHeros();
+        Map<Integer, Hero> heroes = player.getHeros();
         BattleProperty playerBp = getBattleProperty(player.getLevel());
         for (Integer heroId : heroList) {
             Hero hero = heroes.get(heroId);
             if (hero == null) {
-                LogHelper.CONFIG_LOGGER.info("hero is null");
                 continue;
             }
 
@@ -769,7 +815,7 @@ public class BattleMgr {
 
         Team team = new Team();
         // 应该用玩家出战的英雄
-        HashMap<Integer, Hero> heroes = player.getHeros();
+        Map<Integer, Hero> heroes = player.getHeros();
         BattleProperty playerBp = getBattleProperty(player.getLevel());
         for (Integer heroId : heroList) {
             Hero hero = heroes.get(heroId);
@@ -893,17 +939,17 @@ public class BattleMgr {
 
     // 3.初始化玩家友军team
     // 闪电、奔袭或者远征
-    public Team initFriendTeam(Player target, Wall wall, int entityType, int fatherEntityType, boolean isAttacker) {
+    public Team initFriendTeam(Wall wall, int entityType, int fatherEntityType, boolean isAttacker) {
         Team team = new Team();
         if (wall == null) {
             return team;
         }
 
-        HashMap<Integer, WallFriend> wallFriends = wall.getWallFriends();
+        Map<Integer, WallFriend> wallFriends = wall.getWallFriends();
         if (wallFriends.isEmpty()) {
             return team;
         }
-        double seasonBuf = seasonManager.getSeasonBuf(target, EffectType.EFFECT_TYPE13);// 如果被驻防的人带这个buf
+
         // 所有友军
         for (WallFriend wallFriend : wallFriends.values()) {
             if (wallFriend == null) {
@@ -919,18 +965,6 @@ public class BattleMgr {
             if (friendTeam == null) {
                 continue;
             }
-            if (seasonBuf > 0) {
-                ArrayList<BattleEntity> allEnities = friendTeam.getAllEnities();
-                allEnities.forEach(x -> {
-                    LineEntity lineEntity = x.getLineEntity();
-                    Property baseProperty = lineEntity.getBaseProperty();
-                    if (seasonBuf > 0) {
-                        double v = baseProperty.getAttack() * (1 + seasonBuf);
-                        baseProperty.setAttack((int) v);
-                    }
-                });
-            }
-
             team.addTeam(friendTeam);
         }
 
@@ -940,7 +974,7 @@ public class BattleMgr {
     }
 
     // 4.初始化城防军
-    public Team initDefenderTeam(Wall wall, Player target, int fatherEntityType) {
+    public Team initDefenderTeam(Wall wall, long targetId, int fatherEntityType) {
         Team team = new Team();
         if (wall == null) {
             return team;
@@ -950,8 +984,6 @@ public class BattleMgr {
         if (wallDefenders.isEmpty()) {
             return team;
         }
-        double seasonBuf = seasonManager.getSeasonBuf(target, EffectType.EFFECT_TYPE15);
-        int buf = seasonManager.getBuf(target, EffectType.EFFECT_TYPE16);
 
         if (!wallDefenders.isEmpty()) {
             for (WallDefender defender : wallDefenders.values()) {
@@ -959,7 +991,7 @@ public class BattleMgr {
                 int quality = defender.getQuality();
                 StaticWallMonsterLv config = staticWallMgr.getWallMonster(level, quality);
                 if (config == null) {
-                    LogHelper.ERROR_LOGGER.error("config is error!!!!!!!!!!!");
+                    LogHelper.CONFIG_LOGGER.info("config is error!!!!!!!!!!!");
                     continue;
                 }
 
@@ -967,23 +999,10 @@ public class BattleMgr {
                     continue;
                 }
 
-                BattleEntity battleEntity = createWallMonster(defender.getKeyId(), defender.getId(), config, defender.getSoldier(), defender.getSoldierNum(), target.roleId, fatherEntityType);
+                BattleEntity battleEntity = createWallMonster(defender.getKeyId(), defender.getId(), config, defender.getSoldier(), defender.getSoldierNum(), targetId, fatherEntityType);
                 battleEntity.setQuality(quality);
-                battleEntity.setWallLordId(target.getRoleId());
+                battleEntity.setWallLordId(targetId);
                 team.add(battleEntity);
-                LineEntity lineEntity = battleEntity.getLineEntity();
-                Property baseProperty = lineEntity.getBaseProperty();
-                // EFFECT_TYPE15(15, "城墙上的禁卫军攻击属性增加（百分比）"), //面板属性 增加
-                if (seasonBuf > 0) {
-                    if (baseProperty != null) {
-                        double v = baseProperty.getAttack() * (1 + seasonBuf);
-                        baseProperty.setAttack((int) v);
-                    }
-                }
-                // EFFECT_TYPE16(16, "城墙上的禁卫军防御属性增加（固定数值）"),////面板属性 增加
-                if (buf > 0) {
-                    baseProperty.addDefenceValue(buf);
-                }
             }
         }
 
@@ -994,7 +1013,7 @@ public class BattleMgr {
 
     // 5.初始化驻防的武将,闪电、奔袭或者远征
     public Team initAssistTeam(Player target, int faterEntityType, boolean isAttacker) {
-        List<Integer> targetHeros = target.getWall().getDefenceDisHero();
+        List<Integer> targetHeros = target.getEmbattleList();
         ArrayList<Integer> freeHeros = new ArrayList<Integer>();
         for (Integer heroId : targetHeros) {
             Hero hero = target.getHero(heroId);
@@ -1059,11 +1078,11 @@ public class BattleMgr {
         allTeam.addTeam(defenceTeam);
 
         // 城防军
-        Team defenderTeam = initDefenderTeam(wall, target, faterEntityType);
+        Team defenderTeam = initDefenderTeam(wall, target.roleId, faterEntityType);
         allTeam.addTeam(defenderTeam);
 
         // 友军驻防城墙的武将
-        Team friendTeam = initFriendTeam(target, wall, BattleEntityType.WALL_FRIEND_HERO, faterEntityType, isAttacker);
+        Team friendTeam = initFriendTeam(wall, BattleEntityType.WALL_FRIEND_HERO, faterEntityType, isAttacker);
         allTeam.addTeam(friendTeam);
 
         clearTeam(allTeam);

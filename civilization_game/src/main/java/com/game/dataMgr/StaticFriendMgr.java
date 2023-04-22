@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticApprenticeAward;
 import com.game.domain.s.StaticApprenticeRank;
 import com.game.domain.s.StaticFriendshipScoreShop;
@@ -15,6 +16,7 @@ import java.util.Map;
  * @author liyue
  */
 @Component
+@LoadData(name = "好友")
 public class StaticFriendMgr extends BaseDataMgr {
 
     @Autowired
@@ -32,14 +34,17 @@ public class StaticFriendMgr extends BaseDataMgr {
     //徒弟个数奖励列表
     private Map<Integer, StaticApprenticeRank> apprenticeRankMap = new HashMap<>();
 
-
-
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         initMentorAwards();
         initApprenticeAward();
         initFriendshipScoreShop();
         initApprenticeRank();
+    }
+
+    @Override
+    public void init() throws Exception{
+
     }
 
     private void initApprenticeAward() {

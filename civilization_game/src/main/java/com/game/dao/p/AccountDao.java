@@ -23,11 +23,13 @@ public interface AccountDao {
 
 	public void recordLoginTime(Account account);
 
-	public void updateIordId(Account account);
+	//public void updateIordId(Account account);
 
 	public void updateFirstLoginDate(Account account);
 
 	public void deleteIordId(Account account);
 	
 	public List<Account> load(@Param("curIndex")long curIndex, @Param("count")int count);
+
+	public void setIdentity(Account account);
 }

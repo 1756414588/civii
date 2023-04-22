@@ -3,9 +3,11 @@ package com.game.manager;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.game.Loading;
 import com.game.channel.xinkuai.PushActivity;
 import com.game.channel.xinkuai.PushGold;
 import com.game.dao.uc.SChannelDao;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.p.Account;
 import com.game.log.consumer.domin.BaseProperties;
@@ -31,7 +33,8 @@ import org.springframework.stereotype.Component;
  * @date 2021/6/29 15:09 新快活动管理器
  */
 @Component
-public class XinkuaiManager {
+@LoadData(name = "快游日志", type = Loading.LOAD_USER_DB)
+public class XinkuaiManager extends BaseManager {
 
 	@Autowired
 	private SChannelDao channelDao;
@@ -52,8 +55,7 @@ public class XinkuaiManager {
 	@Autowired
 	HttpUtil httpUtil;
 
-	@PostConstruct
-	public void init() {
+	public void load() throws Exception {
 		Map<Integer, String> tmp = new ConcurrentHashMap<>();
 		Map<Integer, Integer> gameTmp = new ConcurrentHashMap<>();
 		list = channelDao.selectAllChannelConfig();
@@ -64,6 +66,11 @@ public class XinkuaiManager {
 		});
 		channelMap = tmp;
 		gameIdMap = gameTmp;
+	}
+
+	@Override
+	public void init() throws Exception {
+
 	}
 
 	/**
@@ -201,7 +208,7 @@ public class XinkuaiManager {
 			array.add(data);
 			data_object.put("data", array);
 			object.put("data_object", data_object);
-			httpUtil.sendToKuaiYou(object.toJSONString());
+			//httpUtil.sendToKuaiYou(object.toJSONString());
 		});
 	}
 }

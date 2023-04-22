@@ -176,6 +176,9 @@ public class Lord implements Cloneable {
     @Setter
     private int tdMoney;//塔防币
 
+    @Getter
+    @Setter
+    private int commandLevel;
 
     @Override
     public Lord clone() {
@@ -1551,5 +1554,6 @@ public class Lord implements Cloneable {
         this.mergeServerStatus = res.mergeServerStatus;  //合服状态  0:不合服   1:合服
         this.isSeven = res.isSeven;  //1.不推7日活动 2.推送
         this.tdMoney = res.tdMoney;  //塔防币
+        this.commandLevel = res.commandLevel;  //塔防币
     }
 }

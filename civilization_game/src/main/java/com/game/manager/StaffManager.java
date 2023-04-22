@@ -22,6 +22,7 @@ import java.util.Map;
 
 @Component
 public class StaffManager {
+
     @Autowired
     private StaticStaffMgr staticStaffMgr;
 
@@ -85,28 +86,31 @@ public class StaffManager {
 
         int total = 0;
         // 给玩家刷4只野怪
-        int mapId = worldManager.getMapId(player);
-        MapInfo mapInfo = worldManager.getMapInfo(mapId);
+        //int mapId = worldManager.getMapId(player);
+        MapInfo mapInfo = worldManager.getMapInfo(player.getLord().getMapId());
         // 表示没有开启世界地图
         if (mapInfo == null) {
             // LogHelper.CONFIG_LOGGER.info("mapInfo is null!");
             return;
         }
 
-        List<Pos> posAround = worldManager.getPos(player);
+        List<Pos> posAround = mapInfo.getPos(player, 3,4);
         List<Entity> list = new ArrayList<>();
         for (Pos pos : posAround) {
             // 判断是否是free的
-            if (!mapInfo.isFreePos(pos)) {
-                continue;
-            }
+            //if (!mapInfo.isFreePos(pos)) {
+            //    continue;
+            //}
 
             Monster monster = worldManager.addMonster(pos, 1000 + monsterLv, monsterLv, mapInfo, AddMonsterReason.STAFF_MONSTER);
-            list.add(monster);
-            ++total;
-            if (total >= 4) {
-                break;
+            if (monster == null) {
+                continue;
             }
+            list.add(monster);
+            //++total;
+            //if (total >= 4) {
+            //    break;
+            //}
         }
         worldManager.synEntityAddRq(list);
     }

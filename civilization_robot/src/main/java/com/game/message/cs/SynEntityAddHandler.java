@@ -1,6 +1,7 @@
 package com.game.message.cs;
 
-import com.game.cache.MapMonsterCache;
+import com.game.cache.UserMapCache;
+import com.game.domain.Robot;
 import com.game.message.MessageHandler;
 import com.game.pb.BasePb.Base;
 import com.game.pb.WorldPb.SynEntityAddRq;
@@ -15,11 +16,13 @@ public class SynEntityAddHandler extends MessageHandler {
 	public void action(ChannelHandlerContext ctx, int accountKey, Base req) {
 		SynEntityAddRq msg = req.getExtension(SynEntityAddRq.ext);
 
-		MapMonsterCache mapMonsterCache = getBean(MapMonsterCache.class);
-		msg.getEntityList().forEach(e -> {
-			mapMonsterCache.entityAdd(e);
-		});
+		// 野怪缓存
+		Robot robot = getRobot(accountKey);
+		UserMapCache userMapCache = robot.getCache().getMapCache();
 
+		msg.getEntityList().forEach(e -> {
+			userMapCache.add(e);
+		});
 	}
 
 }

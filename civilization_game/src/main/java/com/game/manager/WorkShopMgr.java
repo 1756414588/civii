@@ -183,13 +183,11 @@ public class WorkShopMgr {
         }
 
         int workShopLv = workShop.getLv();
-        int buyTimes =  playerManager.buyWorkTimes(player);
+        int buyTimes = player.getLord().getBuyWorkShopQue();
 
         return workShopLv + buyTimes + SpringUtil.getBean(StaticLimitMgr.class).getNum(SimpleId.WORK_SHOP_ADDITIONAL_COUNT);
     }
 
-    @Autowired
-    PlayerManager playerManager;
     // 获取当前减少的时间(单位毫秒)
     public long getTimeDelta(Player player, int workQueNum) {
         workQueNum = Math.max(1, workQueNum); // 最小应该是1

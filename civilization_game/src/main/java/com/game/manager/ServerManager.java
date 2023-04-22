@@ -25,53 +25,55 @@ import javax.annotation.PostConstruct;
 @Component
 public class ServerManager {
 
-    @Value("${serverId}")
-    private int serverId;
+	@Value("${serverId}")
+	private int serverId;
 
-    @Value("${accountServerUrl}")
-    private String accountServerUrl;
+	@Value("${accountServerUrl}")
+	private String accountServerUrl;
 
-    @Autowired
-    private UcHttpService ucHttpService;
+	@Autowired
+	private UcHttpService ucHttpService;
 
-    @Value("${http.server.jetty.port}")
-    private int httpPort;
+	@Value("${http.server.jetty.port}")
+	private int httpPort;
 
-    @Value("${net.server.port}")
-    private int netPort;
+	@Value("${net.server.port}")
+	private int netPort;
+
+	@Value("${payServerUrl}")
+	private String payServerUrl;
+
+	@Value("${jdbc.ini.url}")
+	private String jdbcConfigUrl;
 
 
-    @Value("${payServerUrl}")
-    private String payServerUrl;
+	//服务器信息
+	private Server server;
 
+	@Autowired
+	private BootstrapDao bootstrapDao;
 
-    //服务器信息
-    private Server server;
+	private Bootstrap bootstrap;
 
-    @Autowired
-    private BootstrapDao bootstrapDao;
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Bootstrap bootstrap;
-
-    private Logger logger = LoggerFactory.getLogger(getClass());
-
-    @PostConstruct
-    public void initServer() {
-        try {
-            Message message = ucHttpService.getServer(serverId);
-            if (message.getCode() != UcCodeEnum.SUCCESS.getCode()) {
-                LogHelper.GAME_LOGGER.error("ServerManager initServer error msg {}", message.toString());
-                System.exit(-1);
-                return;
-            }
-            server = JSONObject.parseObject(message.getData(), Server.class);
-            if (server.getHttpPort() != httpPort) {
-                LogHelper.GAME_LOGGER.error("ServerManager http port error ucPort {},properties port {}", server.getPort(), httpPort);
-                System.exit(-1);
-                return;
-            }
-            //设置日志级别
-            //设置日志级别
+	@PostConstruct
+	public void initServer() {
+		try {
+			Message message = ucHttpService.getServer(serverId);
+			if (message.getCode() != UcCodeEnum.SUCCESS.getCode()) {
+				LogHelper.GAME_LOGGER.error("ServerManager initServer error msg {}", message.toString());
+				System.exit(-1);
+				return;
+			}
+			server = JSONObject.parseObject(message.getData(), Server.class);
+			if (server.getHttpPort() != httpPort) {
+				LogHelper.GAME_LOGGER.error("ServerManager http port error ucPort {},properties port {}", server.getPort(), httpPort);
+				System.exit(-1);
+				return;
+			}
+			//设置日志级别
+			//设置日志级别
 //            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 //            if (loggerContext.getLogger("profile") != null) {
 //                if (server.getServerType() == 0) {
@@ -80,14 +82,15 @@ public class ServerManager {
 //                    loggerContext.getLogger("profile").setLevel(Level.valueOf("ERROR"));
 //                }
 //            }
-            initBootStrap();
-            LogHelper.GAME_LOGGER.error("Server init Success : {}", server.toString());
-        } catch (Exception e) {
-            logger.error("ServerManager initServer error  {}", e);
-            System.exit(-1);
-        }
+			initBootStrap();
+			LogHelper.GAME_LOGGER.error("Server init Success : {}", server.toString());
+			LogHelper.GAME_LOGGER.error("database config url : {}", jdbcConfigUrl);
+		} catch (Exception e) {
+			logger.error("ServerManager initServer error  {}", e);
+			System.exit(-1);
+		}
 
-    }
+	}
 
 	public void initBootStrap() {
 		LogHelper.GAME_LOGGER.error("加载引导记录");
@@ -98,54 +101,54 @@ public class ServerManager {
 		}
 	}
 
-    public void updateBootStrap(String model) {
-        int time = TimeHelper.getCurrentDay();
-        if ("user".equals(model)) {
-            bootstrap.setUser(time);
-        }else if("activity".equals(model)){
-            bootstrap.setActivity(time);
-        }else if("courty".equals(model)){
-            bootstrap.setCourty(time);
-        }else if("world".equals(model)){
-            bootstrap.setWorld(time);
-        }
-        bootstrapDao.update(bootstrap);
-    }
+	public void updateBootStrap(String model) {
+		int time = TimeHelper.getCurrentDay();
+		if ("user".equals(model)) {
+			bootstrap.setUser(time);
+		} else if ("activity".equals(model)) {
+			bootstrap.setActivity(time);
+		} else if ("courty".equals(model)) {
+			bootstrap.setCourty(time);
+		} else if ("world".equals(model)) {
+			bootstrap.setWorld(time);
+		}
+		bootstrapDao.update(bootstrap);
+	}
 
 
-    public int getServerId() {
-        return serverId;
-    }
+	public int getServerId() {
+		return serverId;
+	}
 
-    public String getAccountServerUrl() {
-        return accountServerUrl;
-    }
+	public String getAccountServerUrl() {
+		return accountServerUrl;
+	}
 
-    public Server getServer() {
-        return server;
-    }
+	public Server getServer() {
+		return server;
+	}
 
-    public void updateServer(Server server) {
-        this.server = server;
-    }
+	public void updateServer(Server server) {
+		this.server = server;
+	}
 
-    public String getPayServerUrl() {
-        return payServerUrl;
-    }
+	public String getPayServerUrl() {
+		return payServerUrl;
+	}
 
-    public Bootstrap getBootstrap() {
-        return bootstrap;
-    }
+	public Bootstrap getBootstrap() {
+		return bootstrap;
+	}
 
-    public void setBootstrap(Bootstrap bootstrap) {
-        this.bootstrap = bootstrap;
-    }
+	public void setBootstrap(Bootstrap bootstrap) {
+		this.bootstrap = bootstrap;
+	}
 
-    public int getNetPort() {
-        return netPort;
-    }
+	public int getNetPort() {
+		return netPort;
+	}
 
-    public void setNetPort(int netPort) {
-        this.netPort = netPort;
-    }
+	public void setNetPort(int netPort) {
+		this.netPort = netPort;
+	}
 }

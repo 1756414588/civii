@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import com.game.domain.Award;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import com.game.domain.s.StaticMail;
 import com.game.domain.s.StaticMailPlat;
 
 @Component
+@LoadData(name = "邮件配置")
 public class StaticMailDataMgr extends BaseDataMgr {
 	@Autowired
 	private StaticDataDao staticDataDao;
@@ -24,13 +26,8 @@ public class StaticMailDataMgr extends BaseDataMgr {
 
 	private Map<Integer, List<StaticMailPlat>> mailPlatMap = new HashMap<Integer, List<StaticMailPlat>>();
 
-	/**
-	 * Overriding: init
-	 * 
-	 * @see com.game.dataMgr.BaseDataMgr#init()
-	 */
 	@Override
-	public void init() throws Exception{
+	public void load() throws Exception {
 		mailMap = staticDataDao.selectMail();
 		Iterator<StaticMail> it = mailMap.values().iterator();
 		while (it.hasNext()) {
@@ -53,6 +50,16 @@ public class StaticMailDataMgr extends BaseDataMgr {
 			}
 			elist.add(e);
 		}
+	}
+
+	/**
+	 * Overriding: init
+	 * 
+	 * @see com.game.dataMgr.BaseDataMgr#init()
+	 */
+	@Override
+	public void init() throws Exception{
+
 	}
 
 	public StaticMail getStaticMail(int mailId) {

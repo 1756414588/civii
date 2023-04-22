@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import com.game.util.PbHelper;
 import com.game.util.RandomHelper;
 
 @Component
+@LoadData(name = "创角初始数据")
 public class StaticIniDataMgr extends BaseDataMgr {
 
     private StaticLoginAward staticLoginAward;
@@ -43,7 +45,7 @@ public class StaticIniDataMgr extends BaseDataMgr {
     private StaticIniLord staticIniLord;
 
     @Override
-    public void init() throws Exception{
+    public void load() throws Exception {
         staticLoginAward = staticDataDao.selectLoginAward();
         List<List<Integer>> awardList = staticLoginAward.getAwardList();
         List<CommonPb.Award> alist = new ArrayList<CommonPb.Award>();
@@ -61,6 +63,11 @@ public class StaticIniDataMgr extends BaseDataMgr {
         checkInitNameNum();
         portraitMap = staticDataDao.selectPortraitMap();
         staticIniLord = staticDataDao.selectLord();
+    }
+
+    @Override
+    public void init() throws Exception{
+
     }
 
     public StaticIniLord getLordIniData() {

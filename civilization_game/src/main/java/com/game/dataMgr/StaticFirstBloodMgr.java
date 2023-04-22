@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticFirstBloodAward;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import java.util.Map;
  * @author liyue
  */
 @Component
+@LoadData(name = "首杀")
 public class StaticFirstBloodMgr extends BaseDataMgr {
     @Autowired
     private StaticDataDao staticDataDao;
@@ -19,8 +21,12 @@ public class StaticFirstBloodMgr extends BaseDataMgr {
     private Map<Integer, StaticFirstBloodAward> staticFirstBloodAwardMap = new HashMap<>();
 
     @Override
-    public void init() throws Exception {
+    public void load() throws Exception {
         initFirstBloodAward();
+    }
+
+    @Override
+    public void init() throws Exception {
     }
 
     public void initFirstBloodAward() {

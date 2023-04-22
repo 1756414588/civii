@@ -104,16 +104,17 @@ public class MailManager {
             List<Mail> activityMails = player.getMails().stream().filter(e -> {
                 return player.getMailIds().contains(e.getKeyId());
             }).collect(Collectors.toList());
-            for (Mail m : activityMails) {
-                //活动名称相同
-                if (m.getParam()[0] == param[0]) {
-                    //return掉 不给玩家奖励
-                    SpringUtil.getBean(LoginExecutor.class).add(() -> {
-                        //异步发送邮件预警
-                        warningService.sendMail(param[0],mail);
-                    });
-
-                    return mail;
+            if(param!=null && param.length>0){
+                for (Mail m : activityMails) {
+                    //活动名称相同
+                    if (m.getParam()[0] == param[0]) {
+                        //return掉 不给玩家奖励
+                        SpringUtil.getBean(LoginExecutor.class).add(() -> {
+                            //异步发送邮件预警
+                            warningService.sendMail(param[0],mail);
+                        });
+                        return mail;
+                    }
                 }
             }
             player.getMailIds().add(mail.getKeyId());

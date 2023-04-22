@@ -1,6 +1,5 @@
 package com.game.acion.login;
 
-import com.game.acion.LoginAction;
 import com.game.acion.MessageEvent;
 import com.game.domain.Robot;
 import com.game.packet.Packet;
@@ -11,22 +10,22 @@ import com.game.util.LogHelper;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @Author 陈奎
  * @Description 开始游戏请求
  * @Date 2022/9/19 10:50
  **/
 
 @Component
-public class BeginGameAction extends LoginAction {
+public class BeginGameAction extends EnterGameAction {
 
 	@Override
 	public void doAction(MessageEvent messageEvent, Robot robot) {
 		long eventId = messageEvent.getEventId();
 		UserLoginRq.Builder userLoginRq = UserLoginRq.newBuilder();
-		userLoginRq.setServerId(robot.getLoginAccount().getServerId());
-		userLoginRq.setKeyId(robot.getLoginAccount().getKeyId());
-		userLoginRq.setToken(robot.getLoginAccount().getToken());
-		userLoginRq.setDeviceNo(robot.getLoginAccount().getAccount());
+		userLoginRq.setServerId(robot.getData().getServerId());
+		userLoginRq.setKeyId(robot.getData().getAccountKey());
+		userLoginRq.setToken(robot.getData().getToken());
+		userLoginRq.setDeviceNo(robot.getData().getAccount());
 		userLoginRq.setClientVer("2.0.001");
 		userLoginRq.setChannel(1);
 		userLoginRq.setMinCt(1);

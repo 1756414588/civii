@@ -6,24 +6,24 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.StaticActAward;
-import com.game.util.LogHelper;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 
 /**
  * 不懂看这个例子 基地升级
  */
+@Component
 public class ActHeroWashTipEvent extends BaseActivityEvent {
 
-	private static ActHeroWashTipEvent inst = new ActHeroWashTipEvent();
-
-	public static ActHeroWashTipEvent getInst() {
-		return inst;
-	}
+	//private static ActHeroWashTipEvent inst = new ActHeroWashTipEvent();
+	//
+	//public static ActHeroWashTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -42,7 +42,6 @@ public class ActHeroWashTipEvent extends BaseActivityEvent {
 	public void process(EventEnum activityEnum, IActivityActor actor) {
 //		LogHelper.MESSAGE_LOGGER.info("ActBuildingLevelTipEvent");
 		ActRecord actRecord = actor.getActRecord();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> awardList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		if (awardList != null) {
 			int got = (int) actRecord.getStatus(0L);

@@ -1,6 +1,7 @@
 package com.game.servlet.player;
 
 import com.game.constant.UcCodeEnum;
+import com.game.dao.p.AccountDao;
 import com.game.dataMgr.StaticWorldMgr;
 import com.game.domain.Player;
 import com.game.domain.p.Account;
@@ -8,6 +9,7 @@ import com.game.manager.*;
 import com.game.pb.CommonPb;
 import com.game.pb.CommonPb.Chat;
 import com.game.service.AccountService;
+import com.game.service.ChatService;
 import com.game.spring.SpringUtil;
 import com.game.uc.Message;
 import com.game.util.LogHelper;
@@ -19,8 +21,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 
@@ -211,5 +216,40 @@ public class PlayerHandler {
         }
 
         return new Message(String.valueOf(account.getCreated()));
+    }
+
+    /**
+     * 设置玩家身份
+     * @param request
+     */
+    @ResponseBody
+    @RequestMapping(value = "/player/setIdentity.do", method = RequestMethod.POST)
+    public Message setIdentity( HttpServletRequest request, HttpServletResponse response) {
+
+        int serverId = Integer.parseInt(request.getParameter("serverId"));
+        long roleId = Long.parseLong(request.getParameter("roleId"));
+        int identity = Integer.parseInt(request.getParameter("identity"));
+        int flag = Integer.parseInt(request.getParameter("flag"));
+
+        LogHelper.GAME_LOGGER.info("setIdentity serverId:{} accountKey:{}  identity:{} flag:{}", serverId, roleId ,identity ,flag);
+
+        PlayerManager playerManager = SpringUtil.getBean(PlayerManager.class);
+
+        Account account = playerManager.getPlayer(roleId).getAccount();
+
+        if (account == null) {
+            return new Message(UcCodeEnum.PLAYER_IS_NOT_EXIST);
+        }
+        if(Objects.equals(identity, 1)){
+            account.setIsGm(flag);
+        }
+        if(Objects.equals(identity, 2)){
+            account.setIsGuider(flag);
+        }
+
+        // 写入数据
+        playerManager.setIdentity(account);
+
+        return new Message(UcCodeEnum.SUCCESS);
     }
 }

@@ -1,5 +1,6 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.constant.BattleEntityType;
 import com.game.constant.GameError;
 import com.game.constant.MailId;
@@ -8,6 +9,7 @@ import com.game.constant.WorldActivityConsts;
 import com.game.dao.p.ManoeuvreDao;
 import com.game.dataMgr.StaticManoeuvreMgr;
 import com.game.dataMgr.StaticWorldActPlanMgr;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.WorldData;
 import com.game.domain.Award;
@@ -52,16 +54,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @author 陈奎
  * @version 创建时间：2021-12-20 下午17:36:23
  * @Desc 【沙盘演武】管理类
  */
 @Component
 @Getter
-public class ActManoeuvreManager {
+@LoadData(name = "沙盘演武", type = Loading.LOAD_USER_DB, initSeq = 2000)
+public class ActManoeuvreManager extends BaseManager {
 
 	// 历史信息
 	private List<ManoeuvreData> history = new ArrayList<>();
+	private List<Manoeuvre> manoeuvreList = null;
 
 	private ManoeuvreData manoeuvreData;
 	@Autowired
@@ -84,9 +88,9 @@ public class ActManoeuvreManager {
 	private Map<Integer, Integer> victorys = new HashMap<>();
 	private Map<Integer, Function<WorldActPlan, Boolean>> actions = new HashMap<>();
 
-	public void init() {
-		List<Manoeuvre> manoeuvreList = manoeuvreDao.selectTopList();
 
+	public void load() {
+		manoeuvreList = manoeuvreDao.selectTopList();
 		for (int i = 0; i < manoeuvreList.size(); i++) {
 			Manoeuvre e = manoeuvreList.get(i);
 			ManoeuvreData top = new ManoeuvreData(e);
@@ -98,6 +102,10 @@ public class ActManoeuvreManager {
 
 		calcVictory();
 		initAction();
+	}
+
+	@Override
+	public void init() throws Exception{
 
 		WorldData worldData = worldManager.getWolrdInfo();
 		WorldActPlan worldActPlan = worldData.getWorldActPlans().get(WorldActivityConsts.ACTIVITY_14);
@@ -932,7 +940,7 @@ public class ActManoeuvreManager {
 					continue;
 				}
 				List<Integer> heroList = new ArrayList<>();
-				HashMap<Integer, Hero> heros = player.getHeros();
+				Map<Integer, Hero> heros = player.getHeros();
 				for (Integer heroId : embattleList) {
 					if (heroList.contains(heroId)) {
 						continue;
@@ -968,7 +976,7 @@ public class ActManoeuvreManager {
 				List<Integer> heroList = new ArrayList<>();
 
 				Player player = list.remove(0);
-				HashMap<Integer, Hero> heros = player.getHeros();
+				Map<Integer, Hero> heros = player.getHeros();
 				List<Integer> embattleList = player.getEmbattleList();
 				if (embattleList.isEmpty()) {
 					List<Hero> tempList = heros.values().stream().sorted(Comparator.comparing(Hero::getHeroLv).reversed()).collect(Collectors.toList());

@@ -454,8 +454,8 @@
                 typeHandler="com.game.handle.ListListTypeHandler"/>
         <result column="openBuildingId" property="openBuildingId"
                 typeHandler="com.game.handle.ListIntTypeHandler"/>
-        <result column="mulTriggerId" property="mulTriggerId"
-                typeHandler="com.game.handle.ListIntTypeHandler"/>
+<!--        <result column="mulTriggerId" property="mulTriggerId"-->
+<!--                typeHandler="com.game.handle.ListIntTypeHandler"/>-->
 
     </resultMap>
 
@@ -2112,145 +2112,32 @@
         select * from s_bulletwar_level;
     </select>
 
-    <select id="loadComPlan" resultType="com.game.season.StaticCompPlan">
-         select * from s_compseason_plan;
+    <resultMap id="achievement" type="com.game.domain.s.StaticAchievement">
+        <id column="award" property="award" typeHandler="com.game.handle.ListIntTypeHandler"/>
+    </resultMap>
+    <select id="loadAchievement" resultMap="achievement">
+         select * from s_achievement;
     </select>
 
-    <resultMap id="seasonJourney" type="com.game.season.journey.entity.StaticSeasonJourney">
+    <select id="loadAchievementType" resultType="com.game.domain.s.StaticAchiInfo">
+         select * from s_achievement_type;
+    </select>
+
+    <resultMap id="achievementBox" type="com.game.domain.s.StaticAchiAwardBox">
         <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
     </resultMap>
-    <select id="loadSeasonJourney" resultMap="seasonJourney">
-        select * from s_compseason_journey;
+    <select id="loadStaticAchiAwardBox" resultMap="achievementBox">
+         select * from s_achievement_awards;
     </select>
 
-    <resultMap id="seasonJourneyAward" type="com.game.season.journey.entity.StaticJourneyAward">
-        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
+
+    <resultMap id="countryMap" type="com.game.domain.s.StaticCountry">
+      <id column="resouceAddtion" property="resouceAddtion" typeHandler="com.game.handle.ListListTypeHandler"/>
+      <id column="sodierAddtion" property="sodierAddtion" typeHandler="com.game.handle.ListListTypeHandler"/>
     </resultMap>
-    <select id="loadJourneyAward" resultMap="seasonJourneyAward">
-        select * from s_compseason_journey_award;
-    </select>
-
-    <resultMap id="seasonJourneyCamp" type="com.game.season.journey.entity.StaticJourneyCamp">
-        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadJourneyCamp" resultMap="seasonJourneyCamp">
-         select * from s_compseason_journey_camp;
-    </select>
-
-    <resultMap id="seasonJourneyPerson" type="com.game.season.journey.entity.StaticJourneyPerson">
-        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadJourneyPerson" resultMap="seasonJourneyPerson">
-         select * from s_compseason_journey_person;
-    </select>
-    <resultMap id="seasonJourneyRankOff" type="com.game.season.journey.entity.StaticJourneyRankOfficer">
-        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadJourneyRankOff" resultMap="seasonJourneyRankOff">
-         select * from s_compseason_journey_officer;
-    </select>
-
-    <resultMap id="seasonTurn" type="com.game.season.turn.entity.StaticTurn">
-        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticTurn" resultMap="seasonTurn">
-         select * from s_compseason_turntable;
-    </select>
-    <resultMap id="seasonTurnAward" type="com.game.season.turn.entity.StaticTurnAward">
-        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticTurnAward" resultMap="seasonTurnAward">
-          select * from s_compseason_turntable_award;
-    </select>
-    <select id="loadStaticTurnConfig" resultType="com.game.season.turn.entity.StaticTurnConfig">
-        select * from s_compseason_cost;
-    </select>
-
-    <resultMap id="seasonLimitGift" type="com.game.season.directgift.entity.StaticSeasonLimitGift">
-        <id column="awardList" property="awardList" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticSeasonLimitGift" resultMap="seasonLimitGift">
-        select * from s_compseason_limit_gift;
-
-    </select>
-
-    <resultMap id="seasonPayGift" type="com.game.season.seasongift.entity.StaticSeasonPayGift">
-        <id column="sellList" property="sellList" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticSeasonPayGift" resultMap="seasonPayGift">
-        select * from s_act_pay_money;
-    </select>
-
-    <select id="loadStaticSeasonSeven" resultType="com.game.season.seven.entity.StaticSeasonSeven">
-        select * from s_compseason_seven;
-    </select>
-
-
-
-    <resultMap id="seasonSevenType" type="com.game.season.seven.entity.StaticSeasonSevenType">
-        <id column="section" property="section" typeHandler="com.game.handle.ListIntTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticSeasonSevenType" resultMap="seasonSevenType">
-         select * from s_compseason_seven_type;
-    </select>
-
-    <resultMap id="seasonSevenAward" type="com.game.season.seven.entity.StaticSeasonSevenAward">
-        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticSeasonSevenAward" resultMap="seasonSevenAward">
-           select * from s_compseason_seven_award;
-    </select>
-
-    <resultMap id="seasonSevenRank" type="com.game.season.seven.entity.StaticSeasonSevenRank">
-        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticSeasonSevenRank" resultMap="seasonSevenRank">
-          select * from s_compseason_seven_rank;
-    </select>
-
-    <resultMap id="seasonTreasury" type="com.game.season.grand.entity.StaticSeasonTreasury">
-        <id column="award" property="award" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticSeasonTreasury" resultMap="seasonTreasury">
-          select * from s_compseason_treasury;
-    </select>
-
-
-    <resultMap id="seasonSkill" type="com.game.season.hero.StaticComSkill">
-        <id column="upgrade" property="upgrade" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticSeasonSkill" resultMap="seasonSkill">
-          select * from s_compseason_skill;
-    </select>
-
-    <resultMap id="seasonProf" type="com.game.season.hero.StaticComProf">
-        <id column="upgrade" property="upgrade" typeHandler="com.game.handle.ListListTypeHandler"/>
-        <id column="addBasicPro" property="addBasicPro" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticComProf" resultMap="seasonProf">
-            select * from s_compseason_prof;
-    </select>
-
-    <resultMap id="seasonCompTalent" type="com.game.season.talent.entity.StaticCompTalent">
-        <id column="cost" property="cost" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticCompTalent" resultMap="seasonCompTalent">
-        select * from s_compseason_talent;
-    </select>
-
-    <resultMap id="seasonCompTalentUp" type="com.game.season.talent.entity.StaticCompTalentUp">
-        <id column="cost" property="cost" typeHandler="com.game.handle.ListListTypeHandler"/>
-        <id column="effect" property="effect" typeHandler="com.game.handle.ListListTypeHandler"/>
-        <id column="preTypeId" property="preTypeId" typeHandler="com.game.handle.ListIntTypeHandler"/>
-        <id column="totalCost" property="totalCost" typeHandler="com.game.handle.ListListTypeHandler"/>
-    </resultMap>
-    <select id="loadStaticCompTalentUp" resultMap="seasonCompTalentUp">
-        select * from s_compseason_talent_upgrade;
-    </select>
-
-    <select id="loadStaticCompTalentType" resultType="com.game.season.talent.entity.StaticCompTalentType">
-        select * from s_compseason_talent_type;
-    </select>
+    <select id="selectCountryMap" resultMap="countryMap">
+           select * from s_country;
+      </select>
 
 </mapper>
 

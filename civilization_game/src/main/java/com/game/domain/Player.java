@@ -20,7 +20,6 @@ import com.game.pb.DataPb.LevelAwards;
 import com.game.pb.RolePb;
 import com.game.pb.SerializePb;
 import com.game.pb.SerializePb.*;
-import com.game.season.BaseModule;
 import com.game.server.GameServer;
 import com.game.util.DateHelper;
 import com.game.util.GameHelper;
@@ -33,6 +32,7 @@ import com.game.worldmap.Pos;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.util.internal.StringUtil;
 
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.Getter;
@@ -70,10 +70,10 @@ public class Player {
     private PWorldBox pWorldBox = new PWorldBox();
 
     // 道具背包
-    private HashMap<Integer, Item> itemMap = new HashMap<Integer, Item>();
+    private Map<Integer, Item> itemMap = new ConcurrentHashMap<Integer, Item>();
 
     // 将领集合
-    private HashMap<Integer, Hero> heros = new HashMap<Integer, Hero>();
+    private Map<Integer, Hero> heros = new ConcurrentHashMap<Integer, Hero>();
 
     // 邮件列表:战报,系统,私聊
     private ConcurrentLinkedDeque<Mail> mails = new ConcurrentLinkedDeque<Mail>();
@@ -93,16 +93,16 @@ public class Player {
     private Map<Integer, CommonPb.WarBookShopItem> warBookShops = new ConcurrentHashMap<Integer, CommonPb.WarBookShopItem>();
 
     // 上阵武将List Id
-    private List<Integer> embattleList = new ArrayList<Integer>();
+    private List<Integer> embattleList = new CopyOnWriteArrayList<Integer>();
 
     // 采集武将列表
-    private List<Integer> miningList = new ArrayList(4);
+    private List<Integer> miningList = new CopyOnWriteArrayList();
 
     // 扫荡武将列表
-    private List<Integer> sweepHeroList = new ArrayList<>();
+    private List<Integer> sweepHeroList = new CopyOnWriteArrayList<>();
 
     // 城防武将列表
-    private List<WarDefenseHero> defenseArmyList = new ArrayList<>(4);
+    private List<WarDefenseHero> defenseArmyList = new CopyOnWriteArrayList<WarDefenseHero>();
 
     // 士兵信息
     private Map<Integer, Soldier> soldiers = new ConcurrentHashMap<Integer, Soldier>(); // 1,2,3=> 主基地兵营,
@@ -337,6 +337,8 @@ public class Player {
 
     private BulletWarInfo bulletWarInfo = new BulletWarInfo();
 
+    private AchievementInfo achievementInfo = new AchievementInfo();
+
     // 网关ID
     @Getter
     @Setter
@@ -344,24 +346,6 @@ public class Player {
     @Getter
     @Setter
     private long channelId = -1;
-
-    private Map<Class<?>, BaseModule> seasonActivity = new ConcurrentHashMap<>();
-    private Map<Integer, BaseModule> seasonAct = new ConcurrentHashMap<>();
-
-    public <T> T getModule(Class<T> clazz) {
-        T t = (T) seasonActivity.get(clazz);
-        try {
-            if (t == null) {
-                BaseModule baseModule = (BaseModule) clazz.newInstance();
-                baseModule.setPlayer(this);
-                seasonActivity.put(clazz, baseModule);
-                return (T) baseModule;
-            }
-        } catch (Exception e) {
-
-        }
-        return t;
-    }
 
 
     public Player(Lord lord, int nowTime) {
@@ -535,6 +519,7 @@ public class Player {
         ser.setBookTime(this.bookTime);
         ser.setScore(this.score);
         serTitleAward(ser);
+        seAchi(ser);
         return ser.build().toByteArray();
     }
 
@@ -572,6 +557,8 @@ public class Player {
         this.bookTime = ser.getBookTime();
         this.score = ser.getScore();
         dserTitleAward(ser);
+
+        dserAchi(ser);
     }
 
     public Detail serDetail() {
@@ -1458,6 +1445,11 @@ public class Player {
         }
     }
 
+
+    public void updateDefenseArmyList(List<WarDefenseHero> defenseArmyList) {
+        this.defenseArmyList = defenseArmyList;
+    }
+
     private void dserBlack(SerData der) {
         blackList.clear();
         List<Long> blist = der.getBlackIdList();
@@ -1853,6 +1845,8 @@ public class Player {
         Command command = buildings.getCommand();
         if (command != null) {
             command.unwrapPb(serBuilding.getCommandInfo());
+            int lv = command.getLv();
+            lord.setCommandLevel(lv);
         }
 
         if (serBuilding.hasBuildTeams()) {
@@ -2532,32 +2526,32 @@ public class Player {
         return lord.getPortrait();
     }
 
-    public void setMiningList(List<Integer> miningList) {
-        Iterator<Integer> iterator = this.miningList.iterator();
-        if (this.miningList.size() < 1) {
-            this.miningList.addAll(miningList);
-            return;
-        }
-        int i = 0;
-        while (iterator.hasNext()) {
-            int heroId = iterator.next();
-            if (heroId > 0) {
-                i++;
-                continue;
-            }
-            this.miningList.set(i, miningList.get(i));
-            i++;
-        }
-    }
+    //public void setMiningList(List<Integer> miningList) {
+    //    Iterator<Integer> iterator = this.miningList.iterator();
+    //    if (this.miningList.size() < 1) {
+    //        this.miningList.addAll(miningList);
+    //        return;
+    //    }
+    //    int i = 0;
+    //    while (iterator.hasNext()) {
+    //        int heroId = iterator.next();
+    //        if (heroId > 0) {
+    //            i++;
+    //            continue;
+    //        }
+    //        this.miningList.set(i, miningList.get(i));
+    //        i++;
+    //    }
+    //}
 
     public List<Integer> getMeetingArmy(int type) {
         if (type == CastleConsts.MINING) {
             return refreshMingHeros(getMiningList());
         } else {
-            List<Integer> list = new ArrayList<>();
-            List<WarDefenseHero> defenseHeroes = refreshDefenseArmyHeros(getDefenseArmyList());
-            defenseHeroes.forEach(warDefenseHero -> list.add(warDefenseHero.getHeroId()));
-            return list;
+            //List<Integer> list = new ArrayList<>();
+            //List<WarDefenseHero> defenseHeroes = refreshDefenseArmyHeros(getDefenseArmyList());
+            //defenseHeroes.forEach(warDefenseHero -> list.add(warDefenseHero.getHeroId()));
+            return defenseArmyList.stream().mapToInt(x -> x.getHeroId()).boxed().collect(Collectors.toList());
         }
     }
 
@@ -2593,14 +2587,15 @@ public class Player {
         if (type == CastleConsts.MINING) {
             getMiningList().set(index, heroId);
         } else {
-            WarDefenseHero warDefenseHero = new WarDefenseHero();
-            warDefenseHero.setHeroId(heroId);
-            warDefenseHero.setLastRefreshTime(System.currentTimeMillis());
+            WarDefenseHero warDefenseHero = defenseArmyList.get(index);
+            if(warDefenseHero!=null && warDefenseHero.getHeroId()!=-1){
+                warDefenseHero.reset(heroId);
+            }
             Hero hero = heros.get(heroId);
             if (hero != null) {
                 hero.setCurrentSoliderNum(0);
             }
-            getDefenseArmyList().set(index, warDefenseHero);
+            //getDefenseArmyList().set(index, warDefenseHero);
         }
 
     }
@@ -3574,5 +3569,12 @@ public class Player {
         ser.setBulletWarInfoPb(this.bulletWarInfo.encode());
     }
 
+    public void dserAchi(SerData ser) {
+        this.achievementInfo.decode(ser.getAchiPbInfo(),this);
+    }
+
+    public void seAchi(SerData.Builder ser) {
+        ser.setAchiPbInfo(this.achievementInfo.encode());
+    }
 
 }

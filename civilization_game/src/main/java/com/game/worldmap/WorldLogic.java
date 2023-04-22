@@ -21,9 +21,6 @@ import com.game.pb.BuildingPb;
 import com.game.pb.BuildingPb.SynActivityDerateTimeRq;
 import com.game.pb.CommonPb;
 import com.game.pb.CountryPb.SynCountryHeroRq;
-import com.game.season.SeasonService;
-import com.game.season.grand.entity.GrandType;
-import com.game.season.seven.entity.SevenType;
 import com.game.service.*;
 import com.game.util.LogHelper;
 import com.game.util.RandomHelper;
@@ -109,7 +106,10 @@ public class WorldLogic {
 	FlameWarService flameWarService;
 	@Autowired
 	MarchManager marchManager;
-
+	@Autowired
+	AchievementService achievementService;
+	@Autowired
+	ActivityEventManager activityEventManager;
 	public void handleRebel(StaticWorldMonster staticWorldMonster, Player player, Monster monster, March march, MapInfo mapInfo) {
 		List<Integer> heroIds = march.getHeroIds();
 		List<Integer> monsterIds = staticWorldMonster.getMonsterIds();
@@ -155,11 +155,13 @@ public class WorldLogic {
 			worldManager.doKillWorldMonster(WorldTargetType.KILL_MONSTER, player);
 //            activityManager.updateActMonster(player);
 			// 清除野怪
-			worldManager.clearMonsterPos(mapInfo, monster.getPos());
-			// send mail
+//			worldManager.clearMonsterPos(mapInfo, monster.getPos());
+//			// send mail
+//
+//			// 同步野怪
+//			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
 
-			// 同步野怪
-			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
+			mapInfo.clearPos(monster.getPos());
 			// 触发任务[只有叛军触发]
 			doKillMonster(player, monster.getLevel());
 			// 处理自动补兵
@@ -239,7 +241,7 @@ public class WorldLogic {
 			// TODO jyb世界目标击杀叛军
 			worldTargetTaskService.doKillMosnster(player);
 			// TODO 击杀虫子事件影响的活动
-			ActivityEventManager.getInst().activityTip(EventEnum.KILL_MONSTER, player, 1, monster.getLevel());
+			activityEventManager.activityTip(EventEnum.KILL_MONSTER, player, 1, monster.getLevel());
 			// TODO 通行证
 //            activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.DONE_FREE_MONSTER, 1);
 			// TODO 世界宝箱
@@ -259,8 +261,7 @@ public class WorldLogic {
 					player.getSimpleData().setAutoMaxKillLevel(monsterLevel);
 				}
 			}
-			seasonService.addTreasuryScore(player, GrandType.TYPE_1, 1, 1);
-			seasonService.addSevenScore(SevenType.WORM, 1, player, monsterLevel);
+			achievementService.addAndUpdate(player, AchiType.AT_30,1);
 		} else {
 			// send mail
 			marchManager.handleAttackMonsterMarchReturn(march, MarchReason.KillRebelFailed);
@@ -275,8 +276,6 @@ public class WorldLogic {
 		SpringUtil.getBean(EventManager.class).attack_rebel(player, Lists.newArrayList(staticWorldMonster.getLevel(), JSONObject.toJSON(solderRecMap).toString(), march.getAwards()));
 	}
 
-	@Autowired
-	SeasonService seasonService;
 
 	public void zergAccelerate(Player player) {
 		ActivityBase activityBase = staticActivityMgr.getActivityById(ActivityConst.ACT_REBEL_SPEED);
@@ -572,14 +571,15 @@ public class WorldLogic {
 			// 部队回城
 			marchManager.handleMarchReturn(march, MarchReason.KillRebelWin);
 			// 清除野怪
-			worldManager.clearMonsterPos(mapInfo, monster.getPos());
-
+//			worldManager.clearMonsterPos(mapInfo, monster.getPos());
+			mapInfo.clearPos(monster.getPos());
 			// send mail
 			// 全区域广播
 			worldManager.synMarch(mapInfo.getMapId(), march);
 
 			// 同步野怪
-			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
+//			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
+
 
 			// 处理自动补兵
 			// soldierManager.autoAdd(player, march.getHeroIds());
@@ -674,9 +674,11 @@ public class WorldLogic {
 			// countryManager.updateSoldierNum(player, soldierNum);
 			// handleMarchReturn(march, MarchReason.KillRebelWin);
 			marchManager.handleMarchReturn(march, MarchReason.KillRebelWin);
-			worldManager.clearMonsterPos(mapInfo, monster.getPos());
+			mapInfo.clearPos(monster.getPos());
+
+//			worldManager.clearMonsterPos(mapInfo, monster.getPos());
 			worldManager.synMarch(mapInfo.getMapId(), march);
-			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
+//			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
 			soldierManager.autoAdd(player, march.getHeroIds());
 			battleMailMgr.handleSendKillStaffMonster(playerTeam, monsterTeam, player, monster, march.getAwards(), heroAddExp, iron, copper, soldierNum, soldierRecMap);
 			try {
@@ -710,8 +712,11 @@ public class WorldLogic {
 		}
 
 		if (countryHero.getFightTimes() <= 0) {
-			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
-			worldManager.clearMonsterPos(mapInfo, monster.getPos());
+//			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
+//			worldManager.clearMonsterPos(mapInfo, monster.getPos());
+
+			mapInfo.clearPos(monster.getPos());
+
 		}
 
 	}
@@ -1032,7 +1037,7 @@ public class WorldLogic {
 			LoggerFactory.getLogger(getClass()).error("驻防撤回异常 城墙不存在 ->[{}]", lordId);
 			return;
 		}
-		HashMap<Integer, WallFriend> wallFriends = wall.getWallFriends();
+		Map<Integer, WallFriend> wallFriends = wall.getWallFriends();
 		List<Integer> keys = new ArrayList<>(wallFriends.keySet());
 		for (Integer key : keys) {
 			WallFriend friend = wallFriends.get(key);
@@ -1197,10 +1202,11 @@ public class WorldLogic {
 			marchManager.handleMarchReturn(march, MarchReason.KillRebelWin);
 			worldManager.synMarch(mapInfo.getMapId(), march);
 			// 清除野怪
-			worldManager.clearMonsterPos(mapInfo, monster.getPos());
-			// send mail
-			// 同步野怪
-			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
+//			worldManager.clearMonsterPos(mapInfo, monster.getPos());
+//			// send mail
+//			// 同步野怪
+//			worldManager.synEntityRemove(monster, mapInfo.getMapId(), monster.getPos());
+			mapInfo.clearPos(monster.getPos());
 			// 发送邮件
 			int iron = 0;
 			int copper = 0;
@@ -1237,7 +1243,7 @@ public class WorldLogic {
 			player.getLord().addKillRoitNum();
 			// 更新通行证任务
 //			activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.MONSTER_INTRUSION, 1);
-			ActivityEventManager.getInst().activityTip(EventEnum.RIOT_WAR, player, 1, 0);
+			activityEventManager.activityTip(EventEnum.RIOT_WAR, player, 1, 0);
 		} else {
 			// send mail
 			marchManager.handleMarchReturn(march, MarchReason.KillRebelFailed);

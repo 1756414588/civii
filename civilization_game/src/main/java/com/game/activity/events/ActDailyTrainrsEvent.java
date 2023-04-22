@@ -6,11 +6,11 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,15 +18,16 @@ import java.util.Optional;
 /**
  * 日常训练 训练任意数量士兵 训练完士兵能领奖则通知客户端红点 领奖红点走通用ActRewardTipEvent事件
  *
- *
+ * @author 陈奎
  */
+@Component
 public class ActDailyTrainrsEvent extends BaseActivityEvent {
 
-	private static ActDailyTrainrsEvent inst = new ActDailyTrainrsEvent();
-
-	public static ActDailyTrainrsEvent getInst() {
-		return inst;
-	}
+	//private static ActDailyTrainrsEvent inst = new ActDailyTrainrsEvent();
+	//
+	//public static ActDailyTrainrsEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -40,7 +41,6 @@ public class ActDailyTrainrsEvent extends BaseActivityEvent {
 		actRecord.addRecord(1, actor.getChange());
 		ActivityBase activityBase = actor.getActivityBase();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 
 		int record = actRecord.getRecord(1);
 

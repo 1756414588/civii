@@ -6,12 +6,11 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
+import org.springframework.stereotype.Component;
 
-import com.game.spring.SpringUtil;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,13 +19,14 @@ import java.util.Optional;
  *
  * @author cpz
  */
+@Component
 public class ActCostPersonTipEvent extends BaseActivityEvent {
 
-	private static ActCostPersonTipEvent inst = new ActCostPersonTipEvent();
-
-	public static ActCostPersonTipEvent getInst() {
-		return inst;
-	}
+	//private static ActCostPersonTipEvent inst = new ActCostPersonTipEvent();
+	//
+	//public static ActCostPersonTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -38,7 +38,6 @@ public class ActCostPersonTipEvent extends BaseActivityEvent {
 
 		ActRecord actRecord = actor.getActRecord();
 		ActivityBase activityBase = actor.getActivityBase();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		long state = actRecord.getStatus(0);
 		state = state + actor.getChange();
 		actRecord.putState(0, state);
@@ -60,7 +59,6 @@ public class ActCostPersonTipEvent extends BaseActivityEvent {
 	public void process(EventEnum activityEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
 		ActivityBase activityBase = actor.getActivityBase();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 
 		long state = actRecord.getStatus(0);
 		List<StaticActAward> list = staticActivityMgr.getActAwardById(activityBase.getAwardId());

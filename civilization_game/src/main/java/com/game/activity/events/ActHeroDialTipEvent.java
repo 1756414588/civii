@@ -6,24 +6,24 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActDialPurp;
 import com.game.server.GameServer;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
 
 /**
  * 夺命魅影
  */
+@Component
 public class ActHeroDialTipEvent extends BaseActivityEvent {
 
-	private static ActHeroDialTipEvent inst = new ActHeroDialTipEvent();
-
-	public static ActHeroDialTipEvent getInst() {
-		return inst;
-	}
+	//private static ActHeroDialTipEvent inst = new ActHeroDialTipEvent();
+	//
+	//public static ActHeroDialTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -36,7 +36,6 @@ public class ActHeroDialTipEvent extends BaseActivityEvent {
 		ActRecord actRecord = actor.getActRecord();
 		ActivityBase activityBase = actor.getActivityBase();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 
 		// 是否能抽奖
 		StaticActDialPurp dial = staticActivityMgr.getDialPurp(actRecord.getAwardId());

@@ -295,7 +295,8 @@ public class ZergService {
 		int side = 1;
 
 		// 生成行军
-		March march = worldManager.createMarch(player, heroIds, warInfo.getDefencerPos());
+		Pos targetPos = new Pos(warInfo.getDefencerPos().getX(), warInfo.getDefencerPos().getY());
+		March march = worldManager.createMarch(player, heroIds, targetPos);
 		if (march.getEndTime() >= warInfo.getEndTime() - 5000) {// 开战
 			handler.sendErrorMsgToPlayer(GameError.TO_LONG_MARCH);
 			return;

@@ -1,5 +1,6 @@
 package com.game.manager;
 
+import com.game.constant.AchiType;
 import com.game.constant.LostTargetReason;
 import com.game.constant.MarchState;
 import com.game.constant.Quality;
@@ -7,6 +8,7 @@ import com.game.dataMgr.StaticLimitMgr;
 import com.game.domain.Player;
 import com.game.domain.p.*;
 import com.game.pb.WorldPb;
+import com.game.service.AchievementService;
 import com.game.util.LogHelper;
 import com.game.util.RandomHelper;
 import com.game.util.TimeHelper;
@@ -88,7 +90,7 @@ public class WallManager {
 		// 从世界地图删除这个行军
 		worldManager.removeMarch(mapInfo.getMapId(), march);
 
-		HashMap<Integer, WallFriend> wallFriends = wall.getWallFriends();
+		Map<Integer, WallFriend> wallFriends = wall.getWallFriends();
 
 		// 生成多个武将驻防
 		for (Integer heroId : heroIds) {
@@ -125,8 +127,11 @@ public class WallManager {
 		}
 		//TODO jyb 推送 同步对方的城墙信息
 		playerManager.synWallInfo(player);
-
+		achievementService.addAndUpdate(player, AchiType.AT_29,1);
 	}
+
+	@Autowired
+	AchievementService achievementService;
 
 	public March createWallMarch(Player player, int heroId, Pos targetPos) {
 		March march = new March();

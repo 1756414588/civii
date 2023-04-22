@@ -41,7 +41,7 @@ public class KuaiYouRedBagHandler extends BaseLoginHandler {
 		JSONObject parseObject = JSON.parseObject(msg);
 		int code = (int) parseObject.get("result");
 		if (code != 0) {
-			log.error("VerifyLoginService verifyChannelLogin : channelId{},LoginUrl {},parmas {},headParmas,msg {}", ChannelConsts.KUAI_YOU__2318_RED_BAG_ID, kuaiYou2318Config.getLoginUrl(), map, headMap, msg);
+			//log.error("VerifyLoginService verifyChannelLogin : channelId{},LoginUrl {},parmas {},headParmas,msg {}", ChannelConsts.KUAI_YOU__2318_RED_BAG_ID, kuaiYou2318Config.getLoginUrl(), map, headMap, msg);
 			return false;
 		}
 		return true;

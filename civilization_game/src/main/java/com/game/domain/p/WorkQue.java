@@ -4,7 +4,7 @@ import com.game.domain.Award;
 import com.game.pb.CommonPb;
 
 /**
- *
+ * @author 陈奎
  * @version 1.0
  * @filename
  * @time 2016-12-18 下午11:25:30

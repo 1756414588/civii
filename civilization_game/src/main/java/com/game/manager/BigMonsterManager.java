@@ -11,8 +11,7 @@ import com.game.domain.WorldData;
 import com.game.domain.p.*;
 import com.game.domain.s.*;
 import com.game.pb.WorldPb;
-import com.game.season.SeasonService;
-import com.game.season.seven.entity.SevenType;
+import com.game.service.AchievementService;
 import com.game.util.*;
 import com.game.worldmap.*;
 import com.google.common.collect.HashBasedTable;
@@ -51,103 +50,113 @@ public class BigMonsterManager {
 	private StaticLimitMgr staticLimitMgr;
 	@Autowired
 	private MarchManager marchManager;
+	@Autowired
+	AchievementService achievementService;
 
-	public void checkBigMonster() {
-		WorldActPlan worldActPlan = worldManager.getWorldActPlan(WorldActivityConsts.ACTIVITY_10);
-		if (worldActPlan == null) {
-			return;
-		}
-		flushMonster();
-		long curent = TimeHelper.curentTime();
-		for (Integer mapId : worldManager.getAllMap()) {
-			MapInfo mapInfo = worldManager.getMapInfo(mapId);
-			Iterator<BigMonster> it = mapInfo.getBigMonsterMap().values().iterator();
-			while (it.hasNext()) {
-				BigMonster bigMonster = it.next();
-				if (bigMonster.getLeaveTime() <= curent) {
-					it.remove();
-					//时间到了 离开 6分钟后复活
-					//巨型虫族到时撤退时，不做部队撤回处理，让战斗线程去处理部队撤回  遣返战斗
-					// 清除野怪
-					worldManager.clearRebelMonsterPos(mapInfo, bigMonster.getPos());
-					// 同步野怪
-					worldManager.synEntityRemove(bigMonster, mapInfo.getMapId(), bigMonster.getPos());
-					//放入死亡队列
-					bigMonster.setMapId(mapInfo.getMapId());
-					bigMonster.setState(EntityState.DEATH.get());
-					bigMonster.setRebornTime(System.currentTimeMillis() + 6 * TimeHelper.MINUTE_MS);
-					mapInfo.getDeathMonsterMap().add(bigMonster);
-				}
-			}
-		}
-		checkDeathMonster(curent);
-	}
+    public void checkBigMonster() {
+        WorldActPlan worldActPlan = worldManager.getWorldActPlan(WorldActivityConsts.ACTIVITY_10);
+        if (worldActPlan == null) {
+            return;
+        }
+        //flushMonster();
+        long curent = TimeHelper.curentTime();
+        ConcurrentMap<Integer, MapInfo> worldMapInfo = worldManager.getWorldMapInfo();
+        worldMapInfo.values().forEach(mapInfo -> {
+            Iterator<BigMonster> it = mapInfo.getBigMonsterMap().values().iterator();
+            while (it.hasNext()) {
+                BigMonster bigMonster = it.next();
+                if (bigMonster.getLeaveTime() <= curent) {
+                    it.remove();
+                    //时间到了 离开 6分钟后复活
+                    //巨型虫族到时撤退时，不做部队撤回处理，让战斗线程去处理部队撤回  遣返战斗
+                    // 清除野怪
+//                    worldManager.clearRebelMonsterPos(mapInfo, bigMonster.getPos());
+//                    // 同步野怪
+//                    worldManager.synEntityRemove(bigMonster, mapInfo.getMapId(), bigMonster.getPos());
+					mapInfo.clearPos(bigMonster.getPos());
+                    //放入死亡队列
+                    bigMonster.setMapId(mapInfo.getMapId());
+                    bigMonster.setState(EntityState.DEATH.get());
+                    bigMonster.setRebornTime(System.currentTimeMillis() + 6 * TimeHelper.MINUTE_MS);
+                    mapInfo.getDeathMonsterMap().add(bigMonster);
+                }
+            }
+            checkDeathMonster(curent, mapInfo);
+        });
 
-	/**
-	 * 检测虫子复活
-	 *
-	 * @param curent
-	 */
-	private void checkDeathMonster(long curent) {
-		Map<Integer, StaticWorldMap> worldMap = staticWorldMgr.getWorldMap();
-		ConcurrentMap<Integer, MapInfo> worldMapInfo = worldManager.getWorldMapInfo();
-		List<Entity> monsterList = new ArrayList<>();
-		for (MapInfo mapInfo : worldMapInfo.values()) {
-			List<BigMonster> deathMonsterMap = mapInfo.getDeathMonsterMap();
-			if (deathMonsterMap != null) {
-				Iterator<BigMonster> it = deathMonsterMap.iterator();
-				while (it.hasNext()) {
-					BigMonster bigMonster = it.next();
+        //for (Integer mapId : worldManager.getAllMap()) {
+        //    MapInfo mapInfo = worldManager.getMapInfo(mapId);
+        //
+        //}
+    }
+
+    /**
+     * 检测虫子复活
+     *
+     * @param curent
+     */
+    private void checkDeathMonster(long curent, MapInfo mapInfo) {
+        //Map<Integer, StaticWorldMap> worldMap = staticWorldMgr.getWorldMap();
+        //ConcurrentMap<Integer, MapInfo> worldMapInfo = worldManager.getWorldMapInfo();
+        List<Entity> monsterList = new ArrayList<>();
+        //for (MapInfo mapInfo : worldMapInfo.values()) {
+        //
+        //}
+        Queue<BigMonster> deathMonsterMap = mapInfo.getDeathMonsterMap();
+        if (deathMonsterMap != null) {
+            Iterator<BigMonster> it = deathMonsterMap.iterator();
+            while (it.hasNext()) {
+                BigMonster bigMonster = it.next();
 //                    StaticWorldMap staticWorldMap = staticWorldMgr.getStaticWorldMap(bigMonster.getMapId());
-					if (bigMonster.getRebornTime() != 0 && bigMonster.getRebornTime() <= curent) {
-						StaticGiantZerg staticGiantZerg = staticWorldMgr.getGiantZergMap().get(bigMonster.getId());
+                if (bigMonster.getRebornTime() != 0 && bigMonster.getRebornTime() <= curent) {
+                    StaticGiantZerg staticGiantZerg = staticWorldMgr.getGiantZergMap().get(bigMonster.getId());
 //                        List<StaticWorldMap> maps = worldMap.values().stream().filter(e -> e.getAreaType() == staticWorldMap.getAreaType()).collect(Collectors.toList());
 //                        StaticWorldMap staticWorld = RandomUtil.getOneRandomElement(maps);
-						MapInfo rebornMapInfo = worldMapInfo.get(mapInfo.getMapId());
-						rebornMonster(rebornMapInfo, staticGiantZerg, monsterList);
-						it.remove();
-					}
-				}
-			}
-		}
-		worldManager.synEntityAddRq(monsterList);
-	}
+                    //MapInfo rebornMapInfo = worldMapInfo.get(mapInfo.getMapId());
+                    boolean b = rebornMonster(mapInfo, staticGiantZerg, monsterList);
+                    if (b) {
+                        it.remove();
+                    }
+                }
+            }
+        }
+        worldManager.synEntityAddRq(monsterList);
+    }
 
-	/**
-	 * 重生
-	 *
-	 * @param mapInfo
-	 * @param staticGiantZerg
-	 */
-	private void rebornMonster(MapInfo mapInfo, StaticGiantZerg staticGiantZerg, List<Entity> list) {
-		if (staticGiantZerg == null || staticGiantZerg.getRefreshArea() == null || staticGiantZerg.getRefreshArea().size() != 2) {
-			return;
-		}
-		Pos monsterPos = mapInfo.randomAppointPos(staticGiantZerg.getRefreshArea().get(0), staticGiantZerg.getRefreshArea().get(1));
-		if (monsterPos.isError()) {
-			return;
-		}
-		// 创建一个野怪
-		BigMonster bigMonster = worldManager.addBigMonster(monsterPos,
-			staticGiantZerg.getId(),
-			staticGiantZerg.getLevel(),
-			mapInfo,
-			AddMonsterReason.ADD_BIG_MONSTER);
-		bigMonster.setLeaveTime(System.currentTimeMillis() + 180 * TimeHelper.MINUTE_MS);
-		bigMonster.setState(EntityState.SURVIVAL.get());
-		bigMonster.setSoldierType(staticGiantZerg.getSoldierType());
+    /**
+     * 重生
+     *
+     * @param mapInfo
+     * @param staticGiantZerg
+     */
+    private boolean rebornMonster(MapInfo mapInfo, StaticGiantZerg staticGiantZerg, List<Entity> list) {
+        if (staticGiantZerg == null || staticGiantZerg.getRefreshArea() == null || staticGiantZerg.getRefreshArea().size() != 2) {
+            return false;
+        }
+        Pos monsterPos = mapInfo.randomAppointPos(staticGiantZerg.getRefreshArea().get(0), staticGiantZerg.getRefreshArea().get(1));
+        if (monsterPos.isError()) {
+            return false;
+        }
+        // 创建一个野怪
+        BigMonster bigMonster = worldManager.addBigMonster(monsterPos, staticGiantZerg.getId(), staticGiantZerg.getLevel(), mapInfo, AddMonsterReason.ADD_BIG_MONSTER);
+        if (bigMonster == null) {
+            return false;
+        }
+        bigMonster.setLeaveTime(System.currentTimeMillis() + 180 * TimeHelper.MINUTE_MS);
+        bigMonster.setState(EntityState.SURVIVAL.get());
+        bigMonster.setSoldierType(staticGiantZerg.getSoldierType());
 
-		StaticWorldMonster staticWorldMonster = staticWorldMgr.getMonster(Long.valueOf(staticGiantZerg.getId()).intValue());
-		if (staticWorldMonster == null) {
-			LogHelper.CONFIG_LOGGER.info("staticGiantZerg error->[{}]", staticGiantZerg.getId());
-			return;
-		}
-		Team monsterTeam = battleMgr.initMonsterTeam(staticWorldMonster.getMonsterIds(), BattleEntityType.BIG_MONSTER);
-		bigMonster.setTeam(monsterTeam);
-		bigMonster.setTotalHp(monsterTeam.getLessSoldier());
-		list.add(bigMonster);
-
-	}
+        StaticWorldMonster staticWorldMonster = staticWorldMgr.getMonster(Long.valueOf(staticGiantZerg.getId()).intValue());
+        if (staticWorldMonster == null) {
+            LogHelper.CONFIG_LOGGER.info("staticGiantZerg error->[{}]", staticGiantZerg.getId());
+            return false;
+        }
+        Team monsterTeam = battleMgr.initMonsterTeam(staticWorldMonster.getMonsterIds(), BattleEntityType.BIG_MONSTER);
+        bigMonster.setTeam(monsterTeam);
+        bigMonster.setTotalHp(monsterTeam.getLessSoldier());
+        list.add(bigMonster);
+        return true;
+    }
 
 	public Integer getKey(String key) {
 		WorldData worldData = worldManager.getWolrdInfo();
@@ -224,40 +233,30 @@ public class BigMonsterManager {
 		worldData.setBigMonster("");
 	}
 
-	/**
-	 * 活动开始刷新怪物
-	 */
-	public void flushMonster() {
-		if (isFirstBigMonsters()) {
-			return;
-		}
-		setKey(BigMonsteKey.IS_FIRST, 1);
-		List<StaticGiantZerg> list = Lists.newArrayList(staticWorldMgr.getGiantZergMap().values());
-		ConcurrentMap<Integer, MapInfo> worldMapInfo = worldManager.getWorldMapInfo();
-		//刷新地图数据
-		List<Entity> monsterList = new ArrayList<>();
-		for (MapInfo mapInfo : worldMapInfo.values()) {
-			StaticWorldMap staticWorldMap = staticWorldMgr.getStaticWorldMap(mapInfo.getMapId());
-			if (staticWorldMap == null) {
-				continue;
-			}
-			List<StaticGiantZerg> list1 = list.parallelStream().filter(e -> e.getType() == staticWorldMap.getAreaType()).collect(Collectors.toList());
-			for (StaticGiantZerg staticGiantZerg : list1) {
-				int num = staticGiantZerg.getNum();
-				for (; num > 0; num--) {
-//                    Pos monsterPos = mapInfo.randPickPos();
-//                    if (monsterPos.isError() || !mapInfo.isFreePos(monsterPos)) {
-//                        continue;
-//                    }
-					rebornMonster(mapInfo, staticGiantZerg, monsterList);
-				}
-			}
-		}
-		worldManager.synEntityAddRq(monsterList);
-	}
+    /**
+     * 活动开始刷新怪物
+     */
+    public void flushMonster(MapInfo mapInfo) {
+        List<StaticGiantZerg> list = Lists.newArrayList(staticWorldMgr.getGiantZergMap().values());
+        //刷新地图数据
+        List<Entity> monsterList = new ArrayList<>();
+        StaticWorldMap staticWorldMap = staticWorldMgr.getStaticWorldMap(mapInfo.getMapId());
+        Map<Pos, BigMonster> bigMonsterMap = mapInfo.getBigMonsterMap();
+        Queue<BigMonster> deathMonsterMap = mapInfo.getDeathMonsterMap();
+        List<StaticGiantZerg> list1 = list.parallelStream().filter(e -> e.getType() == staticWorldMap.getAreaType()).collect(Collectors.toList());
+        for (StaticGiantZerg staticGiantZerg : list1) {
+            int num = staticGiantZerg.getNum();
+            long id = staticGiantZerg.getId();
+            long count = bigMonsterMap.values().stream().filter(x -> x.getId() == id).count();
+            long count1 = deathMonsterMap.stream().filter(x -> x.getId() == id).count();
+            long l = num - count - count1;
+            for (; l > 0; l--) {
+                rebornMonster(mapInfo, staticGiantZerg, monsterList);
+            }
+        }
+        worldManager.synEntityAddRq(monsterList);
+    }
 
-	@Autowired
-	SeasonService seasonService;
 	/**
 	 * 巨型虫族
 	 *
@@ -300,7 +299,8 @@ public class BigMonsterManager {
 		Player player = playerManager.getPlayer(warInfo.getAttackerId());
 		if (playerTeam.isWin()) {
 			// 清除野怪
-			worldManager.clearRebelMonsterPos(mapInfo, bigMonster.getPos());
+//			worldManager.clearRebelMonsterPos(mapInfo, bigMonster.getPos());
+			mapInfo.clearPos(bigMonster.getPos());
 			//放入死亡队列
 			bigMonster.setMapId(mapInfo.getMapId());
 			bigMonster.setState(EntityState.DEATH.get());
@@ -308,7 +308,7 @@ public class BigMonsterManager {
 			mapInfo.getDeathMonsterMap().add(bigMonster);
 
 			// 同步野怪
-			worldManager.synEntityRemove(bigMonster, mapInfo.getMapId(), bigMonster.getPos());
+//			worldManager.synEntityRemove(bigMonster, mapInfo.getMapId(), bigMonster.getPos());
 
 			StaticWorldMap staticWorldMap = staticWorldMgr.getStaticWorldMap(mapInfo.getMapId());
 			//设置杀敌数增加
@@ -318,7 +318,8 @@ public class BigMonsterManager {
 			for (Map.Entry<Long, List<March>> entry : marchMap.entrySet()) {
 				Player p = playerManager.getPlayer(entry.getKey());
 				activityManager.updActSeven(p, ActivityConst.TYPE_ADD, ActSevenConst.KILL_MONSTERS, 0, 1);
-				seasonService.addSevenScore(SevenType.BIG_WORM, 1, player, bigMonster.getLevel());
+				achievementService.addAndUpdate(player,AchiType.AT_22,1);
+
 			}
 		}
 

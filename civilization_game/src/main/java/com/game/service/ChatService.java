@@ -34,12 +34,13 @@ import com.game.util.TimeHelper;
 import com.game.worldmap.Pos;
 import com.google.common.collect.Lists;
 import io.netty.channel.ChannelHandlerContext;
+
 import java.util.concurrent.ConcurrentLinkedDeque;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.game.dataMgr.StaticSensitiveWordMgr;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -117,21 +118,33 @@ public class ChatService {
 				builder.addChat(e);
 			}
 		}
-		// 全国
 		List<Long> blackList = player.getBlackList();
-		ConcurrentLinkedDeque<CommonPb.Chat> countryList = chatManager.getCountryChat(player.getCountry());
-		if (countryList != null) {
-			for (CommonPb.Chat e : countryList) {
-				if (blackList.contains(e.getLordId())) {
-					continue;
+		// 全国
+		if (player.getAccount().getIsGuider() == 1 || player.getAccount().getIsGm() == 1) {
+			for (int i = 1; i <= 3; i++) {
+				ConcurrentLinkedDeque<CommonPb.Chat> countryList = chatManager.getCountryChat(i);
+				if (countryList != null) {
+					for (CommonPb.Chat e : countryList) {
+						if (e.hasTime()) {
+							builder.addChat(e);
+						}
+					}
 				}
-
-				if (e.getCountry() != player.getCountry()) {
-					continue;
-				}
-
-				if (e.hasTime()) {
-					builder.addChat(e);
+			}
+		} else {
+			ConcurrentLinkedDeque<CommonPb.Chat> countryList = chatManager.getCountryChat(player.getCountry());
+			if (countryList != null) {
+				for (CommonPb.Chat e : countryList) {
+					if (blackList.contains(e.getLordId())) {
+						continue;
+					}
+					Player player1 = playerManager.getPlayer(e.getLordId());
+					if (player1 != null && player.account != null && player1.account.getForbid() == 1) {
+						continue;
+					}
+					if (e.hasTime()) {
+						builder.addChat(e);
+					}
 				}
 			}
 		}
@@ -198,10 +211,13 @@ public class ChatService {
 						}
 					}
 
+					Player player1 = playerManager.getPlayer(e.getLordId());
+					if (player1 != null && player.account != null && player1.account.getForbid() == 1) {
+						continue;
+					}
 					if (e.hasTime()) {
 						builder.addChat(e);
 					}
-
 				}
 			}
 		}
@@ -220,6 +236,9 @@ public class ChatService {
 		builder.addAllParams(player.getRecordList());
 		handler.sendMsgToPlayer(GetChatRs.ext, builder.build());
 	}
+
+	@Autowired
+	AchievementService achievementService;
 
 	/**
 	 * 聊天
@@ -245,40 +264,9 @@ public class ChatService {
 
 		int vip = player.getLord().getVip();
 		int minVip = staticLimitMgr.getNum(242);// 开启聊天的最低VIP等级
-		if (player.getLord().getOpenSpeak() != 1) {
-			if (vip >= minVip) {
-				player.getLord().setOpenSpeak(1);
-			} else {
-				if (player.getLevel() < getChatLimitLevel(SimpleId.CHAT_LEVEL)) {
-					handler.sendErrorMsgToPlayer(GameError.LORD_LV_NOT_ENOUGH);
-					return;
-				}
-				player.getLord().setOpenSpeak(1);
-			}
-		}
-
-		// 禁言时间
-		if (player.account.getCloseSpeakTime() > System.currentTimeMillis()) {
-			handler.sendErrorMsgToPlayer(GameError.CHAT_SILENCE);
-			return;
-		}
-
 		int now = TimeHelper.getCurrentSecond();
-		if (now - player.chatTime < 5) {
-			handler.sendErrorMsgToPlayer(GameError.CHAT_CD);
-			return;
-		}
 
 		String msg = req.getMsg();
-
-		//替换敏感词
-		if (req.getStyle() > 0) {
-			// 区域聊天
-			msg = staticSensitiveWordMgr.replaceSensitiveWord(msg, "areaChatFilter");
-		} else {
-			// 阵营聊天
-			msg = staticSensitiveWordMgr.replaceSensitiveWord(msg, "countryChatFilter");
-		}
 
 		if (msg.isEmpty()) {
 			handler.sendErrorMsgToPlayer(GameError.INVALID_PARAM);
@@ -290,11 +278,63 @@ public class ChatService {
 			return;
 		}
 
+		// 判断是否为引导员或者gm
+		if (player.getAccount().getIsGuider() != 1 && player.getAccount().getIsGm() != 1) {
+			if (player.getLord().getOpenSpeak() != 1) {
+				if (vip >= minVip) {
+					player.getLord().setOpenSpeak(1);
+				} else {
+					if (player.getLevel() < getChatLimitLevel(SimpleId.CHAT_LEVEL)) {
+						handler.sendErrorMsgToPlayer(GameError.LORD_LV_NOT_ENOUGH);
+						return;
+					}
+					player.getLord().setOpenSpeak(1);
+				}
+			}
+
+			// 禁言时间
+			if (player.account.getCloseSpeakTime() > System.currentTimeMillis()) {
+				handler.sendErrorMsgToPlayer(GameError.CHAT_SILENCE);
+				return;
+			}
+
+			if (now - player.chatTime < 5) {
+				handler.sendErrorMsgToPlayer(GameError.CHAT_CD);
+				return;
+			}
+
+			//替换敏感词
+			if (req.getStyle() == 0) {
+				if (req.getRegion()) {
+					// 区域聊天
+					msg = staticSensitiveWordMgr.replaceSensitiveWord(msg, "areaChatFilter");
+				} else {
+					// 阵营聊天
+					msg = staticSensitiveWordMgr.replaceSensitiveWord(msg, "countryChatFilter");
+				}
+			} else if (req.getStyle() == 1) {
+				msg = staticSensitiveWordMgr.replaceSensitiveWord(msg, "countryChatFilter");
+			}
+
+			//替换敏感词
+			if (req.getStyle() > 0) {
+				// 区域聊天
+				msg = staticSensitiveWordMgr.replaceSensitiveWord(msg, "areaChatFilter");
+			} else {
+				// 阵营聊天
+				msg = staticSensitiveWordMgr.replaceSensitiveWord(msg, "countryChatFilter");
+			}
+
+		}
+
 		msg = EmojiHelper.filterEmoji(msg);
 		int officerId = countryManager.getOfficeId(player);
 		ManChat chat = chatManager.createManChat(player, msg);
 		chat.setStyle(req.getStyle());
 		chat.setChatType(req.getRegion() ? 1 : 0);
+		if (req.hasChatType()) {
+			chat.setChatType(req.getChatType());
+		}
 		DoChatRs.Builder builder = DoChatRs.newBuilder();
 		if (req.getStyle() > 0) {
 			sendWorldChat(chat, req.getStyle(), officerId);
@@ -302,6 +342,7 @@ public class ChatService {
 			if (item != null && item.getItemNum() > 0) {
 				item = itemManager.subItem(player, item.getItemId(), 1, Reason.CHAT);
 				builder.setProp(PbHelper.createItemPb(item.getItemId(), item.getItemNum()));
+				achievementService.addAndUpdate(player, AchiType.AT_61, 1);
 			} else if (player.getGold() >= 500) {
 				playerManager.subGoldOk(player, 500, Reason.CHAT);
 			} else {
@@ -317,15 +358,25 @@ public class ChatService {
 					handler.sendErrorMsgToPlayer(GameError.INVALID_PARAM);
 					return;
 				}
-				chatManager.sendCountryChat(player.getCountry(), ChatId.PAI_PAI, player.getLord().getNick(), target.getLord().getNick());
+
+				if (chat.chatType == 4) {// 全服聊天
+					chatManager.sendGameChat(player.getCountry(), ChatId.PAI_PAI, player.getLord().getNick(), target.getLord().getNick());
+				} else {
+					chatManager.sendCountryChat(player.getCountry(), ChatId.PAI_PAI, player.getLord().getNick(), target.getLord().getNick());
+				}
 				// player.chatTime = now;
 				return;
 			}
 
-			if (gmFlag) {
-				sendCountryChat(player.getCountry(), officerId, chat, player.getLord().getLordId());
-			} else {
-				sendCountryChat(player.getCountry(), officerId, chat, 0);
+			// 判断如果是引导员发的消息则取消息中的country值
+			if (chat.chatType == 4) {// 全服聊天
+				sendGameChat(player.getCountry(), officerId, chat);
+			} else {// 阵营聊天
+				if (player.getAccount().getIsGuider() == 1 && req.getCountry() != 0) {
+					sendCountryChat(req.getCountry(), officerId, chat, 0);
+				} else {
+					sendCountryChat(player.getCountry(), officerId, chat, 0);
+				}
 			}
 		}
 		/**
@@ -613,9 +664,9 @@ public class ChatService {
 
 					// 美女
 					Property property = new Property();
-					int beautyAddition = heroManager.getBeautyAddition(hero, player, qulifyAdd, property);
-					int baseSo = (int) Math.floor(baseAdd.getSoldierNum() * beautyAddition / DevideFactor.PERCENT_NUM);
-					int v = (int) Math.floor(qulifyAdd.getSoldierNum() * beautyAddition / DevideFactor.PERCENT_NUM);
+					Property beautyAddition = heroManager.getBeautyAddition(hero, player, qulifyAdd, property);
+					int baseSo = (int) Math.floor(baseAdd.getSoldierNum() * beautyAddition.getPercentageOfForceAdition() / DevideFactor.PERCENT_NUM);
+					int v = (int) Math.floor(qulifyAdd.getSoldierNum() * beautyAddition.getPercentageOfForceAdition() / DevideFactor.PERCENT_NUM);
 					property.addSoldierNumValue(baseSo);
 					property.addSoldierNumValue(v);
 					beautyScore += heroManager.caculateBattleScore(property);
@@ -692,7 +743,7 @@ public class ChatService {
 	}
 
 	public void sendWorldChat(Chat chat, int style, int officerId) {
-		CommonPb.Chat b = chat.ser(style, officerId);
+		CommonPb.Chat b = chat.ser(style, officerId, 0);
 
 		SynChatRq.Builder builder = SynChatRq.newBuilder();
 		builder.setChat(b);
@@ -705,10 +756,7 @@ public class ChatService {
 		while (it.hasNext()) {
 			Player next = it.next();
 			if (next.isLogin && !next.getBlackList().contains(b.getLordId())) {
-//				ctx = next.ctx;
-//				if (ctx != null) {
 				GameServer.getInstance().sendMsgToPlayer(next, msg);
-//				}
 			}
 		}
 	}
@@ -724,10 +772,7 @@ public class ChatService {
 		while (it.hasNext()) {
 			Player next = it.next();
 			if (next.isLogin && !next.getBlackList().contains(b.getLordId()) && next.getLevel() >= staticChat.getLimitLevel()) {
-//				ctx = next.ctx;
-//				if (ctx != null) {
 				GameServer.getInstance().sendMsgToPlayer(next, msg);
-//				}
 			}
 		}
 	}
@@ -750,8 +795,6 @@ public class ChatService {
 			Player player = playerManager.getPlayers().get(playerId);
 			if (player != null) {
 				if (player.isLogin && !player.getBlackList().contains(b.getLordId())) {
-//					ChannelHandlerContext ctx;
-//					ctx = player.ctx;
 					if (player != null) {
 						GameServer.getInstance().sendMsgToPlayer(player, msg);
 					}
@@ -765,14 +808,35 @@ public class ChatService {
 		ChannelHandlerContext ctx;
 		while (it.hasNext()) {
 			Player next = it.next();
-			if (next.getLord().getCountry() != country) {
+			if (next.getLord().getCountry() != country && next.getAccount().getIsGuider() != 1) {
 				continue;
 			}
 			if (next.isLogin && !next.getBlackList().contains(b.getLordId())) {
-//				ctx = next.ctx;
-//				if (ctx != null) {
 				GameServer.getInstance().sendMsgToPlayer(next, msg);
-//				}
+			}
+		}
+	}
+
+	/**
+	 * @param country
+	 * @param officerId
+	 * @param chat
+	 */
+	private void sendGameChat(int country, int officerId, Chat chat) {
+
+		CommonPb.Chat b = chatManager.addGameChat(country, officerId, chat);
+
+		SynChatRq.Builder builder = SynChatRq.newBuilder();
+		builder.setChat(b);
+		Base.Builder msg = PbHelper.createSynBase(SynChatRq.EXT_FIELD_NUMBER, SynChatRq.ext, builder.build());
+
+		// 全区广播
+		Iterator<Player> it = playerManager.getOnlinePlayer().iterator();
+		ChannelHandlerContext ctx;
+		while (it.hasNext()) {
+			Player next = it.next();
+			if (next.isLogin && !next.getBlackList().contains(b.getLordId())) {
+				GameServer.getInstance().sendMsgToPlayer(next, msg);
 			}
 		}
 	}
@@ -1028,6 +1092,11 @@ public class ChatService {
 		if (target != null) {
 			chatPb.setOtherHeadSculpture(target.getLord().getHeadIndex());
 		}
+
+		// 记录私聊日志
+		com.game.log.LogUser logUser = SpringUtil.getBean(com.game.log.LogUser.class);
+		logUser.chatLog(new ChatLog(player.account.getServerId(), player.roleId, player.getLord().getNick(), player.getLevel(), player.getVip(), player.account.getIsGm(), player.account.getChannel(), player.account.getAccountKey(), player.getCountry(), 4, msg));
+
 		builder.setChat(chatPb);
 		builder.setGold(player.getGold());
 		handler.sendMsgToPlayer(DoPersonChatRs.ext, builder.build());

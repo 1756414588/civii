@@ -1071,13 +1071,13 @@ public class WorldPvpService {
         }
 
         Pos monsterPos = mapInfo.randPickPos();
-        for (int i = 1; i < 6; i++) {
-            if (monsterPos.isError() || !mapInfo.isFreePos(monsterPos)) {
-                monsterPos = mapInfo.randPickPos();
-            } else {
-                break;
-            }
-        }
+        //for (int i = 1; i < 6; i++) {
+        //    if (monsterPos.isError() || !mapInfo.isFreePos(monsterPos)) {
+        //        monsterPos = mapInfo.randPickPos();
+        //    } else {
+        //        break;
+        //    }
+        //}
 
         Pos digPos = simpleData.getDigPos();
         digPos.initPos(monsterPos);

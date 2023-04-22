@@ -2,6 +2,7 @@ package com.game.dataMgr;
 
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.p.ConfigException;
 import com.game.domain.p.Property;
 import com.game.domain.p.PropertyFactor;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
+@LoadData(name = "武将")
 public class StaticHeroMgr extends BaseDataMgr {
 	@Autowired
 	private StaticDataDao staticDataDao;
@@ -49,8 +51,8 @@ public class StaticHeroMgr extends BaseDataMgr {
     private Map<Integer, StaticHerDiviConfig> heroDivMap = new HashMap<>();
     private HashBasedTable<Integer, Integer, Map<Integer, StaticHeroTalent>> heroTalentMap = HashBasedTable.create();
 
-	@Override
-    public void init() throws Exception {
+    @Override
+    public void load() throws Exception {
         heroMap      = staticDataDao.selectHeroMap();
         heroExpList  = staticDataDao.selectHeroExpList();
         heroPropList = staticDataDao.selectHeroPropList();
@@ -70,7 +72,11 @@ public class StaticHeroMgr extends BaseDataMgr {
         checkHeroConfig();
         heroDivMap = staticDataDao.selectStaticDivi();
         initHeroTalent();
-		initHeroTypeMap();
+        initHeroTypeMap();
+    }
+
+    @Override
+    public void init() throws Exception {
 	}
 
 	private void initHeroTypeMap() {

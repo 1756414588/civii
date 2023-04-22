@@ -1,8 +1,10 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.constant.DailyTaskId;
 import com.game.dataMgr.DailyTaskMgr;
 import com.game.dataMgr.StaticOpenManger;
+import com.game.define.LoadData;
 import com.game.domain.Player;
 import com.game.domain.p.PlayerDailyTask;
 import com.game.domain.s.StaticTaskDaily;
@@ -21,7 +23,8 @@ import org.springframework.stereotype.Component;
  * @date 2021/3/11 21:13 诵我真名者,永不见bug
  */
 @Component
-public class DailyTaskManager {
+@LoadData(name = "日常任务", type = Loading.LOAD_USER_DB)
+public class DailyTaskManager extends BaseManager {
 
 	@Autowired
 	private StaticOpenManger staticOpenManger;
@@ -39,8 +42,8 @@ public class DailyTaskManager {
 
 	private Map<DailyTaskId, BaseDailyTask> actionMap;
 
-	@PostConstruct
-	protected void init() {
+	@Override
+	public void load() throws Exception {
 		actionMap = new HashMap<>();
 		actionMap.put(DailyTaskId.LOGIN, this::set);
 		actionMap.put(DailyTaskId.UP_BUILD, this::add);
@@ -64,11 +67,11 @@ public class DailyTaskManager {
 		actionMap.put(DailyTaskId.RECHARGE, this::add);
 	}
 
+	@Override
+	public void init() throws Exception {
+	}
+
 	public void record(DailyTaskId taskId, Player player, int countdown) {
-		//根据等级开启
-//        if (!staticOpenManger.isOpen(OpenConsts.OPEN_69, player)) {
-//            return;
-//        }
 		actionMap.get(taskId).action(player, countdown, taskId.get());
 	}
 

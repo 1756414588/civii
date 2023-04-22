@@ -1,16 +1,6 @@
 package com.game.worldmap.fight.process;
 
-import com.game.constant.ActPassPortTaskType;
-import com.game.constant.AwardType;
-import com.game.constant.BattleEntityType;
-import com.game.constant.MarchReason;
-import com.game.constant.MarchState;
-import com.game.constant.Reason;
-import com.game.constant.ResourceType;
-import com.game.constant.WarState;
-import com.game.constant.WarType;
-import com.game.constant.WorldActivityConsts;
-import com.game.constant.WorldBoxTask;
+import com.game.constant.*;
 import com.game.define.Fight;
 import com.game.domain.Player;
 import com.game.domain.Award;
@@ -155,11 +145,11 @@ public class RebelProcess extends FightProcess {
 		}
 		if (playerTeam.isWin()) {
 			// 清除野怪
-			worldManager.clearRebelMonsterPos(mapInfo, rebelMonster.getPos());
-
-			// 同步野怪
-			worldManager.synEntityRemove(rebelMonster, mapInfo.getMapId(), rebelMonster.getPos());
-
+//			worldManager.clearRebelMonsterPos(mapInfo, rebelMonster.getPos());
+//
+//			// 同步野怪
+//			worldManager.synEntityRemove(rebelMonster, mapInfo.getMapId(), rebelMonster.getPos());
+			mapInfo.clearPos(rebelMonster.getPos());
 			Award iron1 = new Award(AwardType.RESOURCE, ResourceType.IRON, staticWorldMonster.getIron());
 			Award copper1 = new Award(AwardType.RESOURCE, ResourceType.COPPER, staticWorldMonster.getCopper());
 			awardList.add(iron1);
@@ -193,6 +183,7 @@ public class RebelProcess extends FightProcess {
 				}
 			});
 			warManager.cancelRebelWar(rebelMonster, mapInfo, warInfo.getWarId());
+
 		} else {
 			// 全区域广播
 			for (March march : warInfo.getAttackMarches()) {

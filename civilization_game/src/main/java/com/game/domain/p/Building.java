@@ -1,13 +1,16 @@
 package com.game.domain.p;
 
+import com.game.constant.AchiType;
+import com.game.constant.BuildingType;
+import com.game.domain.Player;
+import com.game.pb.CommonPb;
+import com.game.service.AchievementService;
+import com.game.service.WorldTargetTaskService;
 import com.game.spring.SpringUtil;
+import com.game.util.TimeHelper;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
-
-import com.game.constant.BuildingType;
-import com.game.pb.CommonPb;
-import com.game.service.WorldTargetTaskService;
-import com.game.util.TimeHelper;
 
 public class Building implements Cloneable {
     private Command command;                //司令部
@@ -197,18 +200,25 @@ public class Building implements Cloneable {
     }
 
     // 升级建筑
-    public void levelupBuilding(int buildingType, int buildingId) {
+    public void levelupBuilding(int buildingType, int buildingId, Player player) {
+        AchievementService achievementService = SpringUtil.getBean(AchievementService.class);
         if (buildingType == BuildingType.COMMAND) {
             command.incrementLevel();
             if (command.getLv() == 7) {
                 SpringUtil.getBean(WorldTargetTaskService.class).updateWorldTaskTarget();
             }
+            achievementService.addAndUpdate(player, AchiType.AT_38, command.getLv());
         } else if (buildingType == BuildingType.TECH) {
             tech.incrementLevel();
+            achievementService.addAndUpdate(player, AchiType.AT_39, tech.getLv());
         } else if (isCamp(buildingType)) {
-            camp.incrementLevel(buildingId);
+            int i = camp.incrementLevel(buildingId);
+            if (buildingType == BuildingType.TANK_CAMP) {
+                achievementService.addAndUpdate(player, AchiType.AT_41, i);
+            }
         } else if (buildingType == BuildingType.WALL) {
             wall.incrementLevel();
+            achievementService.addAndUpdate(player, AchiType.AT_40, wall.getLv());
         } else if (buildingType == BuildingType.WARE) {
             ware.incrementLevel();
         } else if (buildingType == BuildingType.WORK_SHOP) {

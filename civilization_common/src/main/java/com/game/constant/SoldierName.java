@@ -2,9 +2,12 @@ package com.game.constant;
 
 
 public enum SoldierName {
+//    ROCKET(1, "步兵"),
+//    TANK(2, "坦克兵"),
+//    WARCAR(3, "炮兵"),
     ROCKET(1, "步兵"),
-    TANK(2, "坦克兵"),
-    WARCAR(3, "炮兵"),
+    TANK(2, "骑兵"),
+    WARCAR(3, "弓兵"),
     ;
     int val;
     String name;

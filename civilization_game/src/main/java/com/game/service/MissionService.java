@@ -29,8 +29,6 @@ import com.game.pb.CommonPb.MissionInfo;
 import com.game.pb.HeroPb;
 import com.game.pb.MissionPb;
 import com.game.pb.MissionPb.*;
-import com.game.season.SeasonService;
-import com.game.season.seven.entity.SevenType;
 import com.game.spring.SpringUtil;
 import com.game.util.*;
 import com.google.common.collect.Lists;
@@ -96,6 +94,8 @@ public class MissionService {
 	private DailyTaskManager dailyTaskManager;
 	@Autowired
 	private EventManager eventManager;
+    @Autowired
+    ActivityEventManager activityEventManager;
 
 	// 获取关卡所有的信息
 	public void getAllMissionRq(GetAllMissionRq req, ClientHandler handler) {
@@ -230,7 +230,7 @@ public class MissionService {
 		// 应该用玩家出战的英雄
 		// 出战英雄的Id有没有重复
 		Set<Integer> checkHeroSet = new HashSet<Integer>();
-		HashMap<Integer, Hero> heros = player.getHeros();
+		Map<Integer, Hero> heros = player.getHeros();
 		// 检查出战的英雄Id的合法性
 		for (Integer heroId : heroList) {
 			Hero hero = heros.get(heroId);
@@ -364,19 +364,16 @@ public class MissionService {
 			});
 
 			// 更新通行证活动进度
-			ActivityEventManager.getInst().activityTip(EventEnum.MISSSION_DONE, player, 1);
+            activityEventManager.activityTip(EventEnum.MISSSION_DONE, player, 1);
 //            activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.DONE_MISSION_OR_SWEEP, 1);
 //            activityManager.updActData(player, ActivityConst.TYPE_ADD, 0L, 1, ActivityConst.ACT_DAILY_MISSION);
 			dailyTaskManager.record(DailyTaskId.CLEARANCE, player, 1);
-			seasonService.addSevenScore(SevenType.MISSION, 1, player, 1);
 		} else {
 			handleMissionFail(player, staticMission, missionId, playerTeam, mission, handler, builder);
 			SpringUtil.getBean(EventManager.class).end_stage(player, staticMission.getMissionId(), "", now, playerTeam.isWin() ? 0 : 1, new ArrayList<>());
 		}
 		// LogHelper.logMission(player, missionId);
 	}
-	@Autowired
-	SeasonService seasonService;
 
 	public void handleMissionWin(Player player, StaticMission staticMission, int missionId, Team playerTeam, Mission mission, ClientHandler handler, MissionDoneRs.Builder builder) {
 
@@ -530,7 +527,7 @@ public class MissionService {
 
 		List<Hero> heroes = heroDataManager.addAllHeroExp(player, staticMission.getHeroExp(), Reason.MISSION_WIN);
 		List<Integer> embattleList = player.getEmbattleList();
-		HashMap<Integer, Hero> heros = player.getHeros();
+		Map<Integer, Hero> heros = player.getHeros();
 		for (Integer heroId : embattleList) {
 			Hero hero = heros.get(heroId);
 			if (hero == null) {
@@ -601,7 +598,7 @@ public class MissionService {
 		}
 		eventManager.costEnergy(player, Lists.newArrayList(addExp, staticMission.getFailedCost()));
 		List<Integer> embattleList = player.getEmbattleList();
-		HashMap<Integer, Hero> heros = player.getHeros();
+		Map<Integer, Hero> heros = player.getHeros();
 		for (Integer heroId : embattleList) {
 			Hero hero = heros.get(heroId);
 			if (hero == null) {
@@ -1162,7 +1159,7 @@ public class MissionService {
 		heroDataManager.synBattleScoreAndHeroList(player, heroes);
 
 		// TODO 战役通关相关事件
-		ActivityEventManager.getInst().activityTip(EventEnum.MISSSION_DONE, player, time);
+        activityEventManager.activityTip(EventEnum.MISSSION_DONE, player, time);
 //        activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.DONE_MISSION_OR_SWEEP, time);
 //        activityManager.updActData(player, ActivityConst.TYPE_ADD, 0L, time, ActivityConst.ACT_DAILY_MISSION);
 		dailyTaskManager.record(DailyTaskId.CLEARANCE, player, time);

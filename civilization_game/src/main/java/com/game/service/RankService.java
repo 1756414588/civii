@@ -1,6 +1,12 @@
 package com.game.service;
 
+import com.game.domain.p.AchievementInfo;
+import com.game.flame.FlamePlayer;
+import com.game.pb.CommonPb;
 import com.game.util.PbHelper;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,36 +56,37 @@ public class RankService {
             handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
             return;
         }
-
         GetRankRs.Builder builder = GetRankRs.newBuilder();
         builder.setMyRank(rankManager.getMyRank(player.getLord().getLordId()));
-        List<Lord> rankList = rankManager.getRankList();
-        int page = req.getPage();
-        if (page <= 0) {
-            handler.sendErrorMsgToPlayer(GameError.PARAM_ERROR);
-            return;
-        }
-
-        int maxPage = 0;
-        if (!rankList.isEmpty()) {
-            maxPage = MathHelper.devide(rankList.size(), 10);
-            page = Math.max(1, page);
-            page = Math.min(page, maxPage);
-            for (int rank = (page - 1) * 10 + 1; rank <= page * 10 && rank <= rankList.size(); rank++) {
-                Lord next = rankList.get(rank - 1);
-                if (next == null) {
-                    continue;
-                }
-
-                builder.addRankInfo(PbHelper.createRank(next, rank));
-
+        rankManager.readLock().lock();
+        try {
+            List<Lord> rankList = rankManager.getRankList();
+            int page = req.getPage();
+            if (page <= 0) {
+                handler.sendErrorMsgToPlayer(GameError.PARAM_ERROR);
+                return;
             }
+            int maxPage = 0;
+            if (!rankList.isEmpty()) {
+                maxPage = MathHelper.devide(rankList.size(), 10);
+                page = Math.max(1, page);
+                page = Math.min(page, maxPage);
+                for (int rank = (page - 1) * 10 + 1; rank <= page * 10 && rank <= rankList.size(); rank++) {
+                    Lord next = rankList.get(rank - 1);
+                    if (next == null) {
+                        continue;
+                    }
+                    builder.addRankInfo(PbHelper.createRank(next, rank));
+                }
+            }
+            builder.setPage(page);
+            builder.setTotal(maxPage);
+            handler.sendMsgToPlayer(GetRankRs.ext, builder.build());
+        } catch (Exception e) {
+
+        } finally {
+            rankManager.readLock().unlock();
         }
-
-        builder.setPage(page);
-        builder.setTotal(maxPage);
-
-        handler.sendMsgToPlayer(GetRankRs.ext, builder.build());
     }
 
 
@@ -180,4 +187,42 @@ public class RankService {
         handler.sendMsgToPlayer(GetAreaRankRs.ext, builder.build());
     }
 
+    public void getAchievementRank(RankPb.GetAchiRankRq req, ClientHandler handler) {
+        Player player = playerManager.getPlayer(handler.getRoleId());
+        if (player == null) {
+            handler.sendErrorMsgToPlayer(GameError.PLAYER_NOT_EXIST);
+            return;
+        }
+        int page = req.getPage();
+        LinkedList<AchievementInfo> achievementInfos = rankManager.getAchievementInfos();
+        int maxPage = MathHelper.devide(achievementInfos.size(), 10);
+        page = Math.max(1, page);
+        page = Math.min(page, maxPage);
+        int index = achievementInfos.indexOf(player.getLord());
+        RankPb.GetAchiRankRs.Builder builder = RankPb.GetAchiRankRs.newBuilder();
+        builder.setPage(page);
+        builder.setTotal(maxPage);
+        builder.setMyRank(index + 1);
+        if (page > 0) {
+            for (int rank = (page - 1) * 10; rank <= page * 10 && rank < achievementInfos.size(); rank++) {
+                AchievementInfo next = achievementInfos.get(rank);
+                if (next == null) {
+                    continue;
+                }
+                Player player1 = next.getPlayer();
+                CommonPb.RankInfo.Builder rankInfo = CommonPb.RankInfo.newBuilder();
+                rankInfo.setRank(rank + 1);
+                rankInfo.setName(player1.getNick());
+                rankInfo.setLevel(player1.getLevel());
+                rankInfo.setCountry(player1.getCountry());
+                rankInfo.setTitle(player1.getTitle());
+                rankInfo.setBattleSocre(next.getScore());
+                rankInfo.setLordId(player1.roleId);
+                rankInfo.setPortrait(player1.getPortrait());
+                builder.addRankInfo(rankInfo);
+            }
+        }
+
+        handler.sendMsgToPlayer(RankPb.GetAchiRankRs.ext, builder.build());
+    }
 }

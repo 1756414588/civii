@@ -1,46 +1,19 @@
 package com.game.manager;
 
-import com.game.constant.AwardType;
-import com.game.constant.BattleEntityType;
-import com.game.constant.BookEffectType;
-import com.game.constant.GameError;
-import com.game.constant.LostTargetReason;
-import com.game.constant.MailId;
-import com.game.constant.MapId;
-import com.game.constant.MarchReason;
-import com.game.constant.MarchState;
-import com.game.constant.Reason;
-import com.game.constant.WarState;
-import com.game.constant.WarType;
+import com.game.constant.*;
 import com.game.dataMgr.StaticSuperResMgr;
-import com.game.dataMgr.StaticWorldMgr;
 import com.game.domain.Player;
 import com.game.domain.WorldData;
-import com.game.domain.p.BattleEntity;
-import com.game.domain.p.City;
-import com.game.domain.p.Hero;
-import com.game.domain.p.SimpleData;
-import com.game.domain.p.SquareMonster;
-import com.game.domain.p.Team;
+import com.game.domain.p.*;
 import com.game.domain.s.StaticSuperRes;
-import com.game.domain.s.StaticWorldMap;
 import com.game.flame.FlameWarManager;
 import com.game.pb.DataPb;
-import com.game.pb.DataPb.CompanionMap;
 import com.game.pb.DataPb.MarchData;
 import com.game.pb.WorldPb;
-import com.game.server.GameServer;
 import com.game.server.exec.LoginExecutor;
 import com.game.service.RebelService;
-import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
-import com.game.worldmap.BigMonster;
-import com.game.worldmap.MapInfo;
-import com.game.worldmap.March;
-import com.game.worldmap.Monster;
-import com.game.worldmap.Pos;
-import com.game.worldmap.SuperResource;
-import com.game.worldmap.WarInfo;
+import com.game.worldmap.*;
 import com.game.worldmap.fight.Fighter;
 import com.game.worldmap.fight.IWar;
 import com.game.worldmap.fight.war.BigMonsterWarInfo;
@@ -49,16 +22,13 @@ import com.game.worldmap.fight.war.ZergWarInfo;
 import com.game.worldmap.fight.zerg.PlayerAttack;
 import com.game.worldmap.fight.zerg.ZergFighter;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 // 战争管理器
 // 奔袭战、远征战、国战、攻城战,伏击叛军
@@ -95,8 +65,8 @@ public class WarManager {
 		warInfo.setWarType(warType);
 		warInfo.setState(1);
 
-		warInfo.attacker = new Fighter(attacker.roleId, 0, attacker.getCountry(), attackerPos.clone());
-		warInfo.defender = new Fighter(defender.roleId, 0, defender.getCountry(), defenderPos.clone());
+		warInfo.attacker = new Fighter(attacker.roleId, 0, attacker.getCountry(), attackerPos);
+		warInfo.defender = new Fighter(defender.roleId, 0, defender.getCountry(), defenderPos);
 		worldManager.flushWar(warInfo, true, attacker.getCountry());
 		return warInfo;
 	}
@@ -110,7 +80,7 @@ public class WarManager {
 		warInfo.setCityWarType(warData.getCityWarType());
 
 		warInfo.attacker = new Fighter(warData.getAttackerId(), warData.getAttackerType(), warData.getAttackerCountry(), warData.getHelpTime(), new Pos(warData.getAttackerPos()));
-		warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getAttackerPos()));
+		warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getDefencerPos()));
 
 		// 怪物
 		for (DataPb.SquareMonsterData monsterData : warData.getMonsterDataList()) {
@@ -171,7 +141,7 @@ public class WarManager {
 		warInfo.setState(WarState.Waiting);
 		warInfo.setCityId(cityId);
 
-		warInfo.attacker = new Fighter(attackerId, 0, country, attackerPos.clone());
+		warInfo.attacker = new Fighter(attackerId, 0, country, attackerPos);
 
 		int defCountry = 0;
 		// 找城池Id
@@ -179,7 +149,7 @@ public class WarManager {
 		if (city != null) {
 			defCountry = city.getCountry();
 		}
-		warInfo.defender = new Fighter(cityId, 1, defCountry, defenderPos.clone());
+		warInfo.defender = new Fighter(cityId, 1, defCountry, defenderPos);
 
 		//进攻必须有国家才加入
 		if (country != 0 || warInfo.getDefencerCountry() != 0) {
@@ -200,7 +170,7 @@ public class WarManager {
 		warInfo.setCityWarType(warData.getCityWarType());
 
 		warInfo.attacker = new Fighter(warData.getAttackerId(), warData.getAttackerType(), warData.getAttackerCountry(), warData.getHelpTime(), new Pos(warData.getAttackerPos()));
-		warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getAttackerPos()));
+		warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getDefencerPos()));
 
 		warInfo.setCityId((int) warData.getDefencerId());
 		warInfo.setCityName("");
@@ -268,8 +238,8 @@ public class WarManager {
 		warInfo.setCityId(city.getCityId());
 		warInfo.setCityName(city.getCityName());
 
-		warInfo.attacker = new Fighter(monsterId, 1, country, attackerPos.clone());
-		warInfo.defender = new Fighter(city.getCityId(), 1, city.getCountry(), defenderPos.clone());
+		warInfo.attacker = new Fighter(monsterId, 1, country, attackerPos);
+		warInfo.defender = new Fighter(city.getCityId(), 1, city.getCountry(), defenderPos);
 
 		//进攻必须有国家才加入
 		if (country != 0 || warInfo.getDefencerCountry() != 0) {
@@ -289,7 +259,7 @@ public class WarManager {
 		warInfo.setCityWarType(warData.getCityWarType());
 
 		warInfo.attacker = new Fighter(warData.getAttackerId(), warData.getAttackerType(), warData.getAttackerCountry(), warData.getHelpTime(), new Pos(warData.getAttackerPos()));
-		warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getAttackerPos()));
+		warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getDefencerPos()));
 
 		warInfo.setCityId((int) warData.getDefencerId());
 		warInfo.setCityName("");
@@ -382,10 +352,6 @@ public class WarManager {
 			worldManager.synMarch(mapInfo.getMapId(), march);
 		}
 	}
-
-
-
-
 
 
 	/**
@@ -605,8 +571,8 @@ public class WarManager {
 
 		Pos pos = player.getPos();
 
-		warInfo.attacker = new Fighter(attackerId, 0, country, pos.clone());
-		warInfo.defender = new Fighter(defencerId, 1, 0, pos.clone());
+		warInfo.attacker = new Fighter(attackerId, 0, country, pos);
+		warInfo.defender = new Fighter(defencerId, 1, 0, pos);
 
 		if (riotWar.isEmpty()) {
 			riotWar.put(warId, warInfo);
@@ -624,7 +590,7 @@ public class WarManager {
 		warInfo.setCityWarType(warData.getCityWarType());
 
 		warInfo.attacker = new Fighter(warData.getAttackerId(), warData.getAttackerType(), warData.getAttackerCountry(), warData.getHelpTime(), new Pos(warData.getAttackerPos()));
-		warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getAttackerPos()));
+		warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getDefencerPos()));
 
 		// 怪物
 		for (DataPb.SquareMonsterData monsterData : warData.getMonsterDataList()) {
@@ -657,8 +623,8 @@ public class WarManager {
 		warInfo.setState(WarState.Waiting);
 		warInfo.setWarType(WarType.REBEL_WAR);
 
-		warInfo.attacker = new Fighter(attackerId, 0, country, attackerPos.clone());
-		warInfo.defender = new Fighter(defencerId, 2, 0, defenderPos.clone());
+		warInfo.attacker = new Fighter(attackerId, 0, country, attackerPos);
+		warInfo.defender = new Fighter(defencerId, 2, 0, defenderPos);
 
 		worldManager.handleRebelWarSoldier(warInfo);
 		worldManager.flushWar(warInfo, true, country);
@@ -694,8 +660,8 @@ public class WarManager {
 		warInfo.setWarType(warType);
 		warInfo.setState(WarState.Waiting);
 
-		warInfo.attacker = new Fighter(attackerId, 0, country, attackerPos.clone());
-		warInfo.defender = new Fighter(defencerId, 2, 0, defenderPos.clone());
+		warInfo.attacker = new Fighter(attackerId, 0, country, attackerPos);
+		warInfo.defender = new Fighter(defencerId, 2, 0, defenderPos);
 
 		//
 		warInfo.setCountry(country);
@@ -706,61 +672,60 @@ public class WarManager {
 		return warInfo;
 	}
 
-    public BigMonsterWarInfo createBigMonsterWar(DataPb.WarData warData, MapInfo mapInfo) {
-        BigMonsterWarInfo warInfo = new BigMonsterWarInfo();
+	public BigMonsterWarInfo createBigMonsterWar(DataPb.WarData warData, MapInfo mapInfo) {
+		BigMonsterWarInfo warInfo = new BigMonsterWarInfo();
 
-        Pos defenderPos = new Pos(warData.getDefencerPos());
+		Pos defenderPos = new Pos(warData.getDefencerPos());
 
-        warInfo.setWarId(warData.getWarId());
-        warInfo.setEndTime(warData.getEndTime());
-        warInfo.setWarType(warData.getWarType());
-        warInfo.setCityWarType(warData.getCityWarType());
-        warInfo.setState(warData.getState());
-        warInfo.setPos(defenderPos);
+		warInfo.setWarId(warData.getWarId());
+		warInfo.setEndTime(warData.getEndTime());
+		warInfo.setWarType(warData.getWarType());
+		warInfo.setCityWarType(warData.getCityWarType());
+		warInfo.setState(warData.getState());
+		warInfo.setPos(defenderPos);
 
-        warInfo.setCountry(warData.getAttackerCountry());
+		warInfo.setCountry(warData.getAttackerCountry());
 
-        warInfo.attacker = new Fighter(warData.getAttackerId(), warData.getAttackerType(), warData.getAttackerCountry(), new Pos(warData.getAttackerPos()));
-        warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), defenderPos.clone());
+		warInfo.attacker = new Fighter(warData.getAttackerId(), warData.getAttackerType(), warData.getAttackerCountry(), new Pos(warData.getAttackerPos()));
+		warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), defenderPos);
 
-        warInfo.setAttackerHelpTime(warData.getHelpTime());
-        warInfo.setDefencerHelpTime(warData.getDefencerHelpTime());
+		warInfo.setAttackerHelpTime(warData.getHelpTime());
+		warInfo.setDefencerHelpTime(warData.getDefencerHelpTime());
 
-        // 进攻的行军
-        List<DataPb.MarchData> attackerList = warData.getAttackerList();
-        if (attackerList != null && !attackerList.isEmpty() && mapInfo != null) {
-            attackerList.forEach(x -> {
-                March march = mapInfo.getMarch(x.getKeyId());
-                if (march != null) {
-                    warInfo.attacker.addMarch(march);
-                }
-            });
-        }
+		// 进攻的行军
+		List<DataPb.MarchData> attackerList = warData.getAttackerList();
+		if (attackerList != null && !attackerList.isEmpty()) {
+			attackerList.forEach(x -> {
+				March march = mapInfo.getMarch(x.getKeyId());
+				if (march != null) {
+					warInfo.attacker.addMarch(march);
+				}
+			});
+		}
 
-        List<DataPb.MarchData> defencerList = warData.getDefencerList();
-        if (defencerList != null && !defencerList.isEmpty() && mapInfo != null) {
-            defencerList.forEach(x -> {
-                March march = mapInfo.getMarch(x.getKeyId());
-                if (march != null) {
-                    warInfo.defender.addMarch(march);
-                }
-            });
-        }
+		List<DataPb.MarchData> defencerList = warData.getDefencerList();
+		if (defencerList != null && !defencerList.isEmpty()) {
+			defencerList.forEach(x -> {
+				March march = mapInfo.getMarch(x.getKeyId());
+				if (march != null) {
+					warInfo.defender.addMarch(march);
+				}
+			});
+		}
 
-        warData.getCompanionMap().getLordIdList().forEach(e -> {
-            Player player = playerManager.getPlayer(e);
-            if (player != null) {
-                warInfo.getCompanionMap().put(e, player);
-            }
-        });
+		warData.getCompanionMap().getLordIdList().forEach(e -> {
+			Player player = playerManager.getPlayer(e);
+			if (player != null) {
+				warInfo.getCompanionMap().put(e, player);
+			}
+		});
+		mapInfo.getWarMap().put(warData.getWarId(), warInfo);
+		if (warData.getAttackerCountry() != 0) {
+			worldManager.flushWar(warInfo, true, warData.getAttackerCountry());
+		}
 
-        mapInfo.getWarMap().put(warData.getWarId(), warInfo);
-        if (warData.getAttackerCountry() != 0) {
-            worldManager.flushWar(warInfo, true, warData.getAttackerCountry());
-        }
-
-        return warInfo;
-    }
+		return warInfo;
+	}
 
 	/**
 	 * 遣返所有伏击叛军的部队
@@ -821,15 +786,15 @@ public class WarManager {
 
 		ZergWarInfo warInfo = new ZergWarInfo();
 		warInfo.setWarId(warId);
-        warInfo.setEndTime(entTime - 1500);
+		warInfo.setEndTime(entTime - 1500);
 		warInfo.setMapId(MapId.CENTER_MAP_ID);
 		warInfo.setState(WarState.Waiting);
 		warInfo.setWarType(warType);
 		warInfo.setCityWarType(warType);
 		warInfo.setCityId(city.getCityId());
 
-        warInfo.attacker = new Fighter(0, 0, 0, new Pos(0, 0));
-        warInfo.defender = new ZergFighter(monsterId, pos, zergManager.getZergData().getTeam());
+		warInfo.attacker = new Fighter(0, 0, 0, new Pos(0, 0));
+		warInfo.defender = new ZergFighter(monsterId, pos, zergManager.getZergData().getTeam());
 
 		mapInfo.addWar(warInfo);
 		return warInfo;
@@ -843,14 +808,14 @@ public class WarManager {
 		ZergWarInfo warInfo = new ZergWarInfo();
 		warInfo.setWarId(warId);
 		warInfo.setMapId(MapId.CENTER_MAP_ID);
-        warInfo.setEndTime(endTime - 1500);
+		warInfo.setEndTime(endTime - 1500);
 		warInfo.setWarType(warType);
 		warInfo.setCityWarType(warType);
 		warInfo.setState(WarState.Waiting);
 
 		Pos pos = defencer.getPos();
 
-        Team team = zergManager.createTeamMonsterId(monsterId);
+		Team team = zergManager.createTeamMonsterId(monsterId);
 		warInfo.attacker = new ZergFighter(monsterId, pos, team);
 		warInfo.defender = new Fighter(defencer.getPlayerCity().getLordId(), 0, defencer.getCountry(), pos);
 
@@ -869,19 +834,17 @@ public class WarManager {
 		warInfo.setCityWarType(warData.getCityWarType());
 		warInfo.setState(warData.getState());
 
-        
+		if (warData.getWarType() == WarType.ATTACK_ZERG) {
+			warInfo.attacker = new Fighter(warData.getAttackerId(), warData.getAttackerType(), warData.getAttackerCountry(), warData.getHelpTime(), new Pos(warData.getAttackerPos()));
+			warInfo.defender = new ZergFighter(warData.getDefencerId(), new Pos(warData.getDefencerPos()), zergManager.getZergData().getTeam());
+		} else {
+			Team team = zergManager.createTeamMonsterId((int) warData.getAttackerId());
+			warInfo.attacker = new ZergFighter((int) warData.getAttackerId(), new Pos(warData.getAttackerPos()), team);
+			warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getDefencerPos()));
+		}
 
-        if (warData.getWarType() == WarType.ATTACK_ZERG) {
-            warInfo.attacker = new Fighter(warData.getAttackerId(), warData.getAttackerType(), warData.getAttackerCountry(), warData.getHelpTime(), new Pos(warData.getAttackerPos()));
-            warInfo.defender = new ZergFighter(warData.getDefencerId(), new Pos(warData.getDefencerPos()), zergManager.getZergData().getTeam());
-        } else {
-            Team team = zergManager.createTeamMonsterId((int) warData.getAttackerId());
-            warInfo.attacker = new ZergFighter((int) warData.getAttackerId(), new Pos(warData.getAttackerPos()), team);
-            warInfo.defender = new Fighter(warData.getDefencerId(), warData.getDefencerType(), warData.getDefencerCountry(), warData.getDefencerHelpTime(), new Pos(warData.getDefencerPos()));
-        }
-
-        warInfo.setAttackerHelpTime(warData.getHelpTime());
-        warInfo.setDefencerHelpTime(warData.getDefencerHelpTime());
+		warInfo.setAttackerHelpTime(warData.getHelpTime());
+		warInfo.setDefencerHelpTime(warData.getDefencerHelpTime());
 
 		List<DataPb.MarchData> attackerList = warData.getAttackerList();
 		if (attackerList != null && !attackerList.isEmpty() && mapInfo != null) {
@@ -910,6 +873,18 @@ public class WarManager {
 		});
 
 		return warInfo;
+	}
+
+	@Autowired
+	RebelService rebelService;
+
+	public void checkWarWorldActPlan( ) {
+		WorldData worldData = worldManager.getWolrdInfo();
+		WorldActPlan worldActPlan = worldData.getWorldActPlans().get(WorldActivityConsts.ACTIVITY_2);
+		if (worldActPlan == null) {
+			return ;
+		}
+		rebelService.refreshRebelActivity();
 	}
 
 }

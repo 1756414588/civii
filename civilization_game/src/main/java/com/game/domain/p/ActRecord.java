@@ -11,6 +11,7 @@ import com.game.pb.DataPb.Status;
 import com.game.pb.DataPb.TowInt;
 import com.game.server.GameServer;
 import com.game.util.TimeHelper;
+
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,11 +20,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- *
+ * @author 陈奎
  */
 
 public class ActRecord implements Cloneable {
@@ -381,7 +383,11 @@ public class ActRecord implements Cloneable {
     }
 
     public long getExpireTime() {
-        return activityRecords.stream().filter(e -> !received.containsKey(e.getKey())).sorted(Comparator.comparingLong(ActivityRecord::getExpireTime).reversed()).findFirst().get().getExpireTime();
+        ActivityRecord activityRecord = activityRecords.stream().filter(e -> !received.containsKey(e.getKey())).sorted(Comparator.comparingLong(ActivityRecord::getExpireTime).reversed()).findFirst().orElse(null);
+        if (activityRecord != null) {
+            return activityRecord.getExpireTime();
+        }
+        return 0L;
     }
 
     public int getRecordNum(int id) {
@@ -528,7 +534,7 @@ public class ActRecord implements Cloneable {
             actRecord.setDailGuarantee(map5);
             List<ActivityRecord> list = new LinkedList<>();
             Iterator<ActivityRecord> iterator = activityRecords.iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 ActivityRecord next = iterator.next();
                 list.add(next.clone());
             }

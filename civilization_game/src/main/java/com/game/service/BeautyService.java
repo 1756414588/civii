@@ -69,6 +69,9 @@ public class BeautyService {
     @Autowired
     private EventManager eventManager;
 
+    @Autowired
+    ActivityEventManager activityEventManager;
+
     private static class BeautyContainer {
 
         private static com.game.log.LogUser logUser = SpringUtil.getBean(com.game.log.LogUser.class);
@@ -282,7 +285,7 @@ public class BeautyService {
         builder.setBeautyId(beautyId);
         builder.setSeekingTimes(beautyInfo.getSeekingTimes());
         taskManager.doTask(TaskType.REAUTY_SEEKING, player);
-        ActivityEventManager.getInst().activityTip(EventEnum.BREAUTY_SEEKING, player, 1, 0);
+        activityEventManager.activityTip(EventEnum.BREAUTY_SEEKING, player, 1, 0);
 //        activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.BREAUTY_SEEKING, 1);
         dailyTaskManager.record(DailyTaskId.APPOINTMENT, player, 1);
         handler.sendMsgToPlayer(BeautyPb.NewPlaySeekingRs.ext, builder.build());
@@ -356,8 +359,11 @@ public class BeautyService {
             builder.getAddValue(),
             afterIntimacyValue
         ));
-    }
 
+        achievementService.addAndUpdate(player,AchiType.AT_53,num);
+    }
+    @Autowired
+    AchievementService achievementService;
     /**
      * 获取美女技能列表 *@param req
      *
@@ -394,11 +400,11 @@ public class BeautyService {
         int beautyId = req.getBeautyId();
         int upBeautyStar = 1;
         BeautyData beautyInfo = beautyManager.getBeautyInfo(player, beautyId);
-        upBeautyStar += beautyInfo.getStar();
         if (null == beautyInfo) {
             handler.sendErrorMsgToPlayer(GameError.BEAUTY_NO_HAVE_ERROR);
             return;
         }
+        upBeautyStar += beautyInfo.getStar();
         List<StaticBeautyDateSkills> staticBeautStarSkillList = staticBeautyMgr.getStaticBeautStarSkills(beautyId);
         if (staticBeautStarSkillList == null) {
             handler.sendErrorMsgToPlayer(GameError.BEAUTY_UPLV_ERROR);

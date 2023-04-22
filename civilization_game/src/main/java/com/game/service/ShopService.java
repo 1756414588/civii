@@ -65,6 +65,9 @@ public class ShopService {
     @Autowired
     private EventManager eventManager;
 
+    @Autowired
+    TaskManager taskManager;
+
     // 资源强征集道具
     public boolean isCollectType(int itemType) {
         return itemType == ItemType.COLLECT_IRON_PROP || itemType == ItemType.COLLECT_COPPER_PROP || itemType == ItemType.COLLECT_OIL_PROP
@@ -282,6 +285,10 @@ public class ShopService {
                     StaticChat staticChat = SpringUtil.getBean(StaticChatMgr.class).getChat(ChatId.SYSTEM_SHARE_HEROM);
                     chatService.sendChat(systemChat,staticChat);
                 }
+                if(itemType == AwardType.PROP && itemId == ItemId.QUICK_MONSTER){
+                    taskManager.doTask(TaskType.QUICK_MONSTER,player,null);
+                }
+
                 /**
                  * 商店购买资源日志埋点
                  */
@@ -590,6 +597,7 @@ public class ShopService {
                     long endTime = playerManager.addEffect(player, LordPropertyType.MARCH_SPEED, value, expriod * number);
                     builder.setMarchEffect(endTime);
                     eventManager.quicken(player, Lists.newArrayList());
+                    taskManager.doTask(TaskType.GOVER, player, null);
                 } else if (awardId == LordPropertyType.RECRUIT_SOLDIERS) {// 添加招募速度
                     int speedCollect = staticVip.getSpeedCollect();
                     long endTime = playerManager.addEffect(player, LordPropertyType.RECRUIT_SOLDIERS, speedCollect, expriod * number);

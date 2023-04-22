@@ -7,25 +7,26 @@ import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActWorldBattleConst;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 /**
  * 世界征战
  *
- *
+ * @author 陈奎
  */
+@Component
 public class ActWorldBattleEvent extends BaseActivityEvent {
 
-	private static ActWorldBattleEvent inst = new ActWorldBattleEvent();
-
-	public static ActWorldBattleEvent getInst() {
-		return inst;
-	}
+	//private static ActWorldBattleEvent inst = new ActWorldBattleEvent();
+	//
+	//public static ActWorldBattleEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -39,7 +40,6 @@ public class ActWorldBattleEvent extends BaseActivityEvent {
 		ActRecord actRecord = actor.getActRecord();
 		ActivityBase activityBase = actor.getActivityBase();
 		long status = actRecord.getStatus(ActWorldBattleConst.KILL_MASTER);
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
 		if (null == condList || condList.size() == 0) {
 			return;
@@ -73,7 +73,6 @@ public class ActWorldBattleEvent extends BaseActivityEvent {
 		status += actor.getChange();
 		actRecord.putState(ActWorldBattleConst.KILL_MASTER, status);
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> condList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		if (null == condList || condList.size() == 0) {
 			return;

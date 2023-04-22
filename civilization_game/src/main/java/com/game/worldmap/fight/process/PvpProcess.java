@@ -1,19 +1,6 @@
 package com.game.worldmap.fight.process;
 
-import com.game.constant.ActPassPortTaskType;
-import com.game.constant.ActivityConst;
-import com.game.constant.BattleEntityType;
-import com.game.constant.CountryConst;
-import com.game.constant.CountryTaskType;
-import com.game.constant.DailyTaskId;
-import com.game.constant.LostTargetReason;
-import com.game.constant.MailId;
-import com.game.constant.MapId;
-import com.game.constant.MarchReason;
-import com.game.constant.MarchState;
-import com.game.constant.WarState;
-import com.game.constant.WarType;
-import com.game.constant.WorldBoxTask;
+import com.game.constant.*;
 import com.game.define.Fight;
 import com.game.domain.Player;
 import com.game.domain.Award;
@@ -229,6 +216,8 @@ public class PvpProcess extends FightProcess {
 				activityManager.updActSeven(player1, ActivityConst.TYPE_ADD, sortId, 0, 1);
 				activityManager.updActSeven(player1, ActivityConst.TYPE_ADD, 15000, 0, 1);
 				worldBoxManager.calcuPoints(WorldBoxTask.CITY_FIGHT, player1, 1);
+
+				achievementService.addAndUpdate(player1, AchiType.AT_28,1);
 			}
 		} else { // 防守方胜利, 防守方回城，攻击方也回城
 			// 直接回城
@@ -237,11 +226,11 @@ public class PvpProcess extends FightProcess {
 			battleMailManager.sendCityFailWarReport(warInfo, attacker, defencer, heroAddExp, defenceRec, allSoldierRec);
 
 		}
-		if (mapInfo.getMapId() == MapId.FIRE_MAP) {
-			flameWarService.calKill(player, attacker);
-			flameWarService.calKill(target, defencer);
+		//if (mapInfo.getMapId() == MapId.FIRE_MAP) {
+		//	flameWarService.calKill(player, attacker);
+		//	flameWarService.calKill(target, defencer);
+		//}
 
-		}
 		worldManager.soldierAutoAdd(target);
 		synAllPlayerChange(warInfo);
 		// 通知参战双方删除战斗

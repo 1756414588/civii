@@ -6,15 +6,13 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.manager.ActivityManager;
-import com.game.spring.SpringUtil;
 import com.game.util.StringUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -24,13 +22,14 @@ import java.util.List;
  * @author zcp
  * @date 2021/9/6 9:39
  */
+@Component
 public class ActWeelCrownThreeTipEvent extends BaseActivityEvent {
 
-	private static ActWeelCrownThreeTipEvent inst = new ActWeelCrownThreeTipEvent();
-
-	public static ActWeelCrownThreeTipEvent getInst() {
-		return inst;
-	}
+	//private static ActWeelCrownThreeTipEvent inst = new ActWeelCrownThreeTipEvent();
+	//
+	//public static ActWeelCrownThreeTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -44,7 +43,6 @@ public class ActWeelCrownThreeTipEvent extends BaseActivityEvent {
 		if (player.getLevel() < 48) {
 			return;
 		}
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		ActivityBase activityBase = actor.getActivityBase();
 		ActRecord activity = actor.getActRecord();
 		ActivityData activityData = actor.getActivityData();
@@ -80,7 +78,6 @@ public class ActWeelCrownThreeTipEvent extends BaseActivityEvent {
 		Player player = actor.getPlayer();
 		ActivityBase activityBase = actor.getActivityBase();
 		ActRecord actRecord = actor.getActRecord();
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 
 		ActivityData activityData = activityManager.getActivity(activityBase.getActivityId());
 		if (activityData == null) {
@@ -90,7 +87,6 @@ public class ActWeelCrownThreeTipEvent extends BaseActivityEvent {
 		int selfGold = actRecord.getRecord(0);
 		int countryGold = activityData.getRecord(player.getCountry());
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> actAwardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
 		boolean flag = false;
 		for (StaticActAward award : actAwardList) {

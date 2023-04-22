@@ -35,26 +35,6 @@ import com.game.pb.RolePb.*;
 import com.game.pb.ShopPb.*;
 import com.game.pb.SoldierPb.*;
 import com.game.pb.StaffPb.*;
-import com.game.season.LoadSeasonActHandler;
-import com.game.season.directgift.handler.LoadGiftHandler;
-import com.game.season.grand.handler.LoadTreasuryAwardHandler;
-import com.game.season.grand.handler.LoadTreasuryHandler;
-import com.game.season.grand.handler.TreasuryAwardHandler;
-import com.game.season.hero.SeasonHeroHandler;
-import com.game.season.journey.handler.LoadSeasonJourneyInfo;
-import com.game.season.journey.handler.SeasonJourneyActiveAward;
-import com.game.season.journey.handler.SeasonJourneyAwardHandler;
-import com.game.season.journey.handler.SeasonJourneyRankHandler;
-import com.game.season.seven.handler.AwardSevenHandler;
-import com.game.season.seven.handler.LoadSevenHandler;
-import com.game.season.seven.handler.LoadSevenRankHandler;
-import com.game.season.talent.handler.LoadSeasonTalentHandler;
-import com.game.season.talent.handler.OpenSeasonTalentHandler;
-import com.game.season.talent.handler.SelectSeasonTalentHandler;
-import com.game.season.talent.handler.UpSeasonTalentHandler;
-import com.game.season.turn.handler.DoSeasonTurnHandler;
-import com.game.season.turn.handler.LoadSeasonTurnHandler;
-import com.game.season.turn.handler.TurnAwardHandler;
 import com.game.util.LogHelper;
 
 import java.util.HashMap;
@@ -195,8 +175,6 @@ public class MessagePool {
 			// 战火
 			registerFlame();
 
-			registerSeason();
-
 			// 地图信息
 			registerMapInfo();
 
@@ -207,6 +185,8 @@ public class MessagePool {
 
 			// 客户端连接相关
 			registerChannel();
+
+			registerAchievement();
 
 			// ss
 			registerS(VerifyRs.EXT_FIELD_NUMBER, UserLoginRs.EXT_FIELD_NUMBER, VerifyRsHandler.class);
@@ -299,38 +279,6 @@ public class MessagePool {
 		registerC(FlameWarPb.FlameRankRq.EXT_FIELD_NUMBER, FlameWarPb.FlameRankRs.EXT_FIELD_NUMBER, FlameRankHandler.class);//排行榜
 		registerC(FlameWarPb.FlameResRankRq.EXT_FIELD_NUMBER, FlameWarPb.FlameResRankRs.EXT_FIELD_NUMBER, FlameResRankHandler.class);//采集点详情
 	}
-
-	private void registerSeason() {
-		registerC(SeasonActivityPb.GetSeasonActivityRq.EXT_FIELD_NUMBER, SeasonActivityPb.SeasonActivityRs.EXT_FIELD_NUMBER, LoadSeasonActHandler.class);// 初始界面
-		registerC(SeasonActivityPb.SeasonJourneyRq.EXT_FIELD_NUMBER, SeasonActivityPb.SeasonJourneyRs.EXT_FIELD_NUMBER, LoadSeasonJourneyInfo.class);// 初始界面
-		registerC(SeasonActivityPb.SeasonJourneyCompleteRq.EXT_FIELD_NUMBER, SeasonActivityPb.SeasonJourneyCompleteRs.EXT_FIELD_NUMBER, SeasonJourneyAwardHandler.class);// 初始界面
-		registerC(SeasonActivityPb.SeasonJourneyActiveAwardRq.EXT_FIELD_NUMBER, SeasonActivityPb.SeasonJourneyActiveAwardRs.EXT_FIELD_NUMBER, SeasonJourneyActiveAward.class);// 初始界面
-		registerC(SeasonActivityPb.SeasonJourneyRankRq.EXT_FIELD_NUMBER, SeasonActivityPb.SeasonJourneyRankRs.EXT_FIELD_NUMBER, SeasonJourneyRankHandler.class);// 初始界面
-
-		registerC(SeasonActivityPb.SeasonLucklyDialRq.EXT_FIELD_NUMBER, SeasonActivityPb.SeasonLucklyDialRs.EXT_FIELD_NUMBER, LoadSeasonTurnHandler.class);
-		registerC(SeasonActivityPb.DoSeasonLucklyDialRq.EXT_FIELD_NUMBER, SeasonActivityPb.DoSeasonLucklyDialRs.EXT_FIELD_NUMBER, DoSeasonTurnHandler.class);
-		registerC(SeasonActivityPb.DoSeasonAwardRq.EXT_FIELD_NUMBER, SeasonActivityPb.DoSeasonAwardRs.EXT_FIELD_NUMBER, TurnAwardHandler.class);
-
-		registerC(SeasonActivityPb.LoadGiftRq.EXT_FIELD_NUMBER, SeasonActivityPb.LoadGiftRs.EXT_FIELD_NUMBER, LoadGiftHandler.class);
-
-		registerC(SeasonActivityPb.LoadSevenRq.EXT_FIELD_NUMBER, SeasonActivityPb.LoadSevenRs.EXT_FIELD_NUMBER, LoadSevenHandler.class);
-		registerC(SeasonActivityPb.AwardSevenRq.EXT_FIELD_NUMBER, SeasonActivityPb.AwardSevenRs.EXT_FIELD_NUMBER, AwardSevenHandler.class);
-		registerC(SeasonActivityPb.LoadSevenRankRq.EXT_FIELD_NUMBER, SeasonActivityPb.LoadSevenRankRs.EXT_FIELD_NUMBER, LoadSevenRankHandler.class);
-
-		registerC(SeasonActivityPb.LoadTreasuryRq.EXT_FIELD_NUMBER, SeasonActivityPb.LoadTreasuryRs.EXT_FIELD_NUMBER, LoadTreasuryHandler.class);
-		registerC(SeasonActivityPb.LoadTreasuryAwardRq.EXT_FIELD_NUMBER, SeasonActivityPb.LoadTreasuryAwardRs.EXT_FIELD_NUMBER, LoadTreasuryAwardHandler.class);
-		registerC(SeasonActivityPb.TreasuryAwardRq.EXT_FIELD_NUMBER, SeasonActivityPb.TreasuryAwardRs.EXT_FIELD_NUMBER, TreasuryAwardHandler.class);
-
-		registerC(SeasonActivityPb.UpHeroLevelRq.EXT_FIELD_NUMBER, SeasonActivityPb.UpHeroLevelRs.EXT_FIELD_NUMBER, SeasonHeroHandler.class);
-
-		// 赛季天赋
-		registerC(SeasonActivityPb.LoadSeasonTalentRq.EXT_FIELD_NUMBER, SeasonActivityPb.LoadSeasonTalentRs.EXT_FIELD_NUMBER, LoadSeasonTalentHandler.class);
-		registerC(SeasonActivityPb.OpenSeasonTalentRq.EXT_FIELD_NUMBER, SeasonActivityPb.OpenSeasonTalentRs.EXT_FIELD_NUMBER, OpenSeasonTalentHandler.class);
-		registerC(SeasonActivityPb.SelectSeasonTalentRq.EXT_FIELD_NUMBER, SeasonActivityPb.SelectSeasonTalentRs.EXT_FIELD_NUMBER, SelectSeasonTalentHandler.class);
-		registerC(SeasonActivityPb.UpSeasonTalentRq.EXT_FIELD_NUMBER, SeasonActivityPb.UpSeasonTalentRs.EXT_FIELD_NUMBER, UpSeasonTalentHandler.class);
-
-	}
-
 
 	private void registerSkin() {
 		registerC(SkinPb.GetCommandSkinRq.EXT_FIELD_NUMBER, SkinPb.GetCommandSkinRs.EXT_FIELD_NUMBER, GetCommandSkinHandler.class);
@@ -1099,5 +1047,14 @@ public class MessagePool {
 
 	public void registerChannel() {
 		registerC(ChannelOfflineRq.EXT_FIELD_NUMBER, 0, ChannelOfflineHandler.class);
+	}
+
+	public void registerAchievement() {
+		registerC(ActivityPb.AchievementRq.EXT_FIELD_NUMBER, ActivityPb.AchievementRs.EXT_FIELD_NUMBER, AchievementInfoHandler.class);
+		registerC(ActivityPb.AchievementInfoRq.EXT_FIELD_NUMBER, ActivityPb.AchievementInfoRs.EXT_FIELD_NUMBER, AchievementDetailHandler.class);
+		registerC(ActivityPb.AchievementBoxAwardRq.EXT_FIELD_NUMBER, ActivityPb.AchievementBoxAwardRs.EXT_FIELD_NUMBER, AchievementBoxAwardHandler.class);
+		registerC(ActivityPb.AchievementInfoAwardRq.EXT_FIELD_NUMBER, ActivityPb.AchievementInfoAwardRs.EXT_FIELD_NUMBER, AchievementDetailAwardHandler.class);
+		registerC(RankPb.GetAchiRankRq.EXT_FIELD_NUMBER, RankPb.GetAchiRankRs.EXT_FIELD_NUMBER, GetAchievementRankHandler.class);
+
 	}
 }

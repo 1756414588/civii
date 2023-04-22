@@ -22,7 +22,7 @@ public class ChannelOfflineHandler extends ClientHandler {
 		ChannelOfflineRq offlineRq = msg.getExtension(ChannelOfflineRq.ext);
 		long roleId = offlineRq.getUserId();
 
-		LogHelper.CHANNEL_LOGGER.info("接收玩家下线 channelId:{} playerId:{}", channelId, roleId);
+		LogHelper.GAME_LOGGER.info("接收玩家下线 channelId:{} playerId:{}", channelId, roleId);
 
 		if (roleId == 0) {
 			return;
@@ -37,7 +37,7 @@ public class ChannelOfflineHandler extends ClientHandler {
 		playerManager.offLine(new OffLiner(player, channelId));
 
 		playerExit(player, channelId);
-		LogHelper.CHANNEL_LOGGER.info("玩家下线 channelId:{} playerId:{}", channelId, roleId);
+		LogHelper.GAME_LOGGER.info("玩家下线 channelId:{} playerId:{}", channelId, roleId);
 
 	}
 

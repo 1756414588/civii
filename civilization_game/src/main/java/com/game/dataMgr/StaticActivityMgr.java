@@ -3,6 +3,7 @@ package com.game.dataMgr;
 import com.game.activity.ActivityEventManager;
 import com.game.constant.ActivityConst;
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.p.ActRecord;
 import com.game.domain.p.ActShopProp;
 import com.game.domain.p.ConfigException;
@@ -27,6 +28,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 @Component
+@LoadData(name = "活动配置数据", initSeq = 1500)
 public class StaticActivityMgr extends BaseDataMgr {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
@@ -204,6 +206,13 @@ public class StaticActivityMgr extends BaseDataMgr {
 	private Map<Integer, Map<Integer, StaticLimitGift>> staticSpringGiftMap = new HashMap<>();
 	private Map<Integer, StaticLimitGift> springGiftMap = new HashMap<>();
 
+	@Autowired
+	ActivityEventManager activityEventManager;
+
+	@Override
+	public void load() {
+	}
+
 	@Override
 	public void init() throws Exception {
 		staticActFirstPay = staticDataDao.selectActFirstPay();
@@ -245,7 +254,7 @@ public class StaticActivityMgr extends BaseDataMgr {
 		iniSpringGiftMap();
 
 		// 活动事件监听
-		ActivityEventManager.getInst().listen();
+		activityEventManager.listen();
 	}
 
 	/**
@@ -1124,7 +1133,7 @@ public class StaticActivityMgr extends BaseDataMgr {
 	 */
 	public long[] getCostCount(long stoneCost) {
 		long total = 0L;
-		long rets[] = { 0, 0 };
+		long rets[] = {0, 0};
 		int count = stoneDial.size();// 总次数
 		for (int i = 1; i <= count; i++) {
 			StaticActDialStone staticStone = stoneDial.get(i);
@@ -1280,8 +1289,8 @@ public class StaticActivityMgr extends BaseDataMgr {
 	}
 
 	public StaticPassPortTask getPassPortTask(int taskId) {
-		if(passPortTasks.containsKey(taskId)) {
-		return passPortTasks.get(taskId);
+		if (passPortTasks.containsKey(taskId)) {
+			return passPortTasks.get(taskId);
 		}
 		return null;
 	}

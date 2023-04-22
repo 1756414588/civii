@@ -1,24 +1,25 @@
 package com.game.manager;
 
-import com.game.acion.ActionFactory;
+import com.game.acion.facotry.ActionFactory;
 import com.game.acion.IAction;
 import com.game.acion.MessageEvent;
 import com.game.define.LoadData;
-import com.game.domain.Record;
 import com.game.domain.Robot;
 import com.game.domain.p.RobotMessage;
 import com.game.load.ILoadData;
+import com.game.pb.BasePb.Base;
 import com.google.common.collect.HashBasedTable;
+import io.netty.channel.ChannelHandlerContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @Author 陈奎
  * @Description
  * @Date 2022/9/9 17:50
  **/
@@ -29,16 +30,15 @@ public class MessageEventManager implements ILoadData {
 
 	private Map<Long, IAction> actionMap = new HashMap<>();
 
-	// accountKey,事件ID,action
 	@Getter
-	private HashBasedTable<Integer, Long, MessageEvent> listenEvents = HashBasedTable.create();
+	private Map<Integer, Map<Long, MessageEvent>> listenEvents = new ConcurrentHashMap<>();
 
 	@Autowired
 	private MessageManager messageManager;
 	@Autowired
-	private RobotManager robotManager;
-	@Autowired
 	private ActionFactory actionFactory;
+	@Autowired
+	private RobotManager robotManager;
 
 	@Override
 	public void load() {
@@ -58,13 +58,24 @@ public class MessageEventManager implements ILoadData {
 		return actionMap.get(id);
 	}
 
+
+	/**
+	 * 创建事件容器
+	 *
+	 * @param accountKey
+	 */
+	public void createEventContain(int accountKey) {
+		listenEvents.put(accountKey, new HashMap<>());
+	}
+
 	/**
 	 * 注册事件
 	 *
 	 * @param messageEvent
 	 */
 	public void registerEvent(MessageEvent messageEvent) {
-		listenEvents.put(messageEvent.getRobot().getId(), messageEvent.getEventId(), messageEvent);
+		Map<Long, MessageEvent> messageEventMap = listenEvents.get(messageEvent.getRobot().getId());
+		messageEventMap.put(messageEvent.getEventId(), messageEvent);
 	}
 
 	/**
@@ -75,7 +86,8 @@ public class MessageEventManager implements ILoadData {
 	 * @param messageEvent
 	 */
 	public void registerEvent(Robot robot, long eventId, MessageEvent messageEvent) {
-		listenEvents.put(robot.getId(), eventId, messageEvent);
+		Map<Long, MessageEvent> messageEventMap = listenEvents.get(robot.getId());
+		messageEventMap.put(eventId, messageEvent);
 	}
 
 	/**
@@ -86,27 +98,44 @@ public class MessageEventManager implements ILoadData {
 	 * @return
 	 */
 	public MessageEvent getEvent(int accountKey, long eventId) {
-		return listenEvents.get(accountKey, eventId);
+		Map<Long, MessageEvent> messageEventMap = listenEvents.get(accountKey);
+		if (messageEventMap == null) {
+			return null;
+		}
+		return messageEventMap.get(eventId);
 	}
 
+	/**
+	 * 移除
+	 *
+	 * @param robot
+	 */
+	public void removeEvent(Robot robot) {
+		Map<Long, MessageEvent> messageEventMap = listenEvents.get(robot.getId());
+		messageEventMap.clear();
+	}
 
-	public void actionTimer() {
-		List<Robot> list = robotManager.getRobotMap().values().stream().filter(e -> e.isLogin()).collect(Collectors.toList());
-		list.forEach(robot -> {
+	/**
+	 * 调用事件
+	 *
+	 * @param ctx
+	 * @param accountKey
+	 * @param base
+	 */
+	public void callEvent(ChannelHandlerContext ctx, int accountKey, Base base) {
+		long eventId = base.getParam();
+		if (eventId == 0) {
+			return;
+		}
 
-			Record record = robot.getRecord();
-			IAction action = actionMap.get(record.getRecordId());
-			if (!action.isCompalte(robot)) {
-				return;
-			}
+		MessageEvent messageEvent = getEvent(accountKey, eventId);
+		if (messageEvent == null) {
+			return;
+		}
 
-			// 获取下一步的指令
-			long cmdKey = messageManager.getNext(record.getRecordId());
-			IAction next = actionMap.get(cmdKey);
-			if (next != null) {
-				next.registerEvent(robot);
-			}
-		});
+		Robot robot = robotManager.getRobotByKey(accountKey);
+		messageEvent.getAction().onResult(messageEvent, robot, base);
+		listenEvents.remove(accountKey, base.getParam());
 	}
 
 }

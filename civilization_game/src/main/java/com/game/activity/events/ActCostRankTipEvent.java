@@ -6,7 +6,6 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.Player;
 import com.game.domain.p.ActPlayerRank;
@@ -14,9 +13,9 @@ import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
 import com.game.domain.s.StaticActRankDisplay;
-import com.game.manager.ActivityManager;
-import com.game.spring.SpringUtil;
 import com.game.util.TimeHelper;
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -24,13 +23,14 @@ import java.util.Optional;
 /**
  * 消费排行榜
  */
+@Component
 public class ActCostRankTipEvent extends BaseActivityEvent {
 
-	private static ActCostRankTipEvent inst = new ActCostRankTipEvent();
-
-	public static ActCostRankTipEvent getInst() {
-		return inst;
-	}
+	//private static ActCostRankTipEvent inst = new ActCostRankTipEvent();
+	//
+	//public static ActCostRankTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -44,9 +44,6 @@ public class ActCostRankTipEvent extends BaseActivityEvent {
 		ActivityBase activityBase = actor.getActivityBase();
 		Player player = actor.getPlayer();
 		ActRecord actRecord = actor.getActRecord();
-
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 
 		Date rewardTime = TimeHelper.getRewardTime(activityBase.getEndTime());
 		Date now = new Date();

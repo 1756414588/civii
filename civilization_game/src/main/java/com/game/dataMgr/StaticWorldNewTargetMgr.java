@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.StaticWorldNewTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @description
  */
 @Component
+@LoadData(name = "世界目标")
 public class StaticWorldNewTargetMgr extends BaseDataMgr {
 
 	@Autowired
@@ -22,8 +24,12 @@ public class StaticWorldNewTargetMgr extends BaseDataMgr {
 	private Map<Integer, StaticWorldNewTarget> staticWorldNewTargets = new ConcurrentHashMap<>();
 
 	@Override
-	public void init() throws Exception {
+	public void load() throws Exception {
 		staticWorldNewTargets = staticDataDao.selectWorldNewTarget();
+	}
+
+	@Override
+	public void init() throws Exception {
 	}
 
 

@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.p.ConfigException;
 import com.game.domain.s.StaticSensitiveWord;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@LoadData(name = "屏蔽字")
 public class StaticSensitiveWordMgr extends BaseDataMgr {
 
     @Autowired
@@ -20,12 +22,17 @@ public class StaticSensitiveWordMgr extends BaseDataMgr {
     private Map<Integer, StaticSensitiveWord> countryMailFilter;
 
 
-    public void init() throws Exception {
+    @Override
+    public void load() throws Exception {
         this.privateChatFilter = this.staticDataDao.loadSensitiveWord("privateChatSwitch");
         this.countryChatFilter = this.staticDataDao.loadSensitiveWord("countryChatSwitch");
         this.areaChatFilter = this.staticDataDao.loadSensitiveWord("areaChatSwitch");
         this.countryMailFilter = this.staticDataDao.loadSensitiveWord("countryMailSwitch");
         this.check();
+    }
+
+    public void init() throws Exception {
+
     }
 
     public boolean containSensitiveWord(String str, String scene) {

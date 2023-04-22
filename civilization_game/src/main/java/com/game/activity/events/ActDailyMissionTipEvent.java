@@ -6,23 +6,24 @@ import com.game.activity.define.EventEnum;
 import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.StaticActAward;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 /**
  * @author zcp
  * @date 2021/9/6 10:48
  */
+@Component
 public class ActDailyMissionTipEvent extends BaseActivityEvent {
 
-	private static ActDailyMissionTipEvent inst = new ActDailyMissionTipEvent();
-
-	public static ActDailyMissionTipEvent getInst() {
-		return inst;
-	}
+	//private static ActDailyMissionTipEvent inst = new ActDailyMissionTipEvent();
+	//
+	//public static ActDailyMissionTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -35,7 +36,6 @@ public class ActDailyMissionTipEvent extends BaseActivityEvent {
 		long status = actRecord.getStatus(0);
 		status += actor.getChange();
 		actRecord.putState(0, status);
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> awardList = staticActivityMgr.getActAwardById(actRecord.getAwardId());
 		boolean flag = false;
 		if (awardList != null) {

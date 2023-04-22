@@ -2,7 +2,7 @@ package com.game.domain.s;
 
 /**
  * @filename
- *
+ * @author 陈奎
  * @version 1.0
  * @time 2017-4-21 下午7:33:20
  * @describe

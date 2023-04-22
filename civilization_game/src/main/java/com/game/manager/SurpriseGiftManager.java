@@ -40,7 +40,8 @@ public class SurpriseGiftManager {
 	private ActivityManager activityManager;
 	@Autowired
 	private PlayerManager playerManager;
-
+	@Autowired
+	ActivityEventManager activityEventManager;
 	/**
 	 * @param player
 	 * @param suripriseId
@@ -84,7 +85,7 @@ public class SurpriseGiftManager {
 		rs.setTips(1);
 		actRecord.getReceived().remove(ActivityConst.ACT_SURIPRISE_GIFT);
 		SynHelper.synMsgToPlayer(player, ActivityPb.SynSuripriseGiftRq.EXT_FIELD_NUMBER, ActivityPb.SynSuripriseGiftRq.ext, rs.build());
-		ActivityEventManager.getInst().activityTip(EventEnum.SYN_ACTIVITY_AND_DISAPPERAR, new CommonTipActor(player, actRecord, activityBase));
+		activityEventManager.activityTip(EventEnum.SYN_ACTIVITY_AND_DISAPPERAR, new CommonTipActor(player, actRecord, activityBase));
 	}
 
 	/**

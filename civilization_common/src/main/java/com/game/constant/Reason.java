@@ -249,10 +249,11 @@ public interface Reason {
 	int ACT_TD_SEVEN_TASK = 242; // 塔防活动
 	int GET_FISH_ATLAS_AWARD = 243; // 渔场图鉴奖励
 	int GET_FISH_SHOP_AWARD = 244; // 渔场兑换奖励
-	int ROBOT_ADD = 245; // 机器人添加
+	int ROBOT_ADD = 246; // 机器人添加
 
 	int FLAME = 245;
-	int SEASON = 246;
+
+	int ACHI = 247;
 
 	enum ReasonName {
 		key_0(UNKOWN, " 未知原因"), key_1(MISSION_HIRE_HERO, "副本招募英雄"), key_2(BUY_MISSION_RESOURCE_TIMES, "购买资源副本次数"), key_3(PAY, "充值"), key_4(BUY_MISSION_EQUIP_PAPER, "购买副本装备图纸"), key_5(COLLECT_RESOURCE, "征收资源"), key_6(HIRE_OFFICER, "雇佣内政官"), key_7(FIGHT_RESOURCE_MISSION, "攻打资源副本"), key_8(LEVEL_UP_BUILDING, "升级建筑"), key_9(USE_ITEM, "使用道具"), key_10(KILL_BUILD_CD, "建筑加速"), key_11(INIT_PLAYER, "玩家初始化"), key_12(BUY_BUILD_TEAM, "购买建造队"), key_13(BUY_PROTECTED_TIME, "购买城防"), key_14(BUY_DEPOT, "购买聚宝盆"), key_15(IRON_BUY_DEPOT, "购买聚宝盆"), key_16(BUY_DEPOT_ITEM, "聚宝盆获得道具"), key_17(RECRUIT_SOLDIER, "募兵"), key_18(LARGER_BARRACKS, "兵营扩容"), key_19(LEVEL_UP_RECRUIT_TIME, "增加募兵时间"), key_20(KILL_RECRUIT_CD, "募兵秒CD"), key_21(BUY_SHOP, "购买军事其他商店道具"), key_22(BUY_VIP_GIFT, "购买vip礼包"), key_23(BUY_VIP_SHOP, "购买vip特价道具"), key_24(COMPOUND_ITEM, "合成装备"), key_25(COMPOUND_KILL_CD, "打造秒CD"), key_26(SELL_ITEM, "出售道具"), key_27(WASH_HERO, "洗练英雄"), key_28(SWEEP_MISSION, "关卡扫荡"), key_29(BUY_ENERGY, "购买体力值"),

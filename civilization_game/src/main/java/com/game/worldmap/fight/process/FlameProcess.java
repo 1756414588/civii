@@ -15,7 +15,7 @@ import com.game.flame.FlameMap;
 import com.game.flame.FlameWarManager;
 import com.game.flame.FlameWarResource;
 import com.game.flame.FlameWarService;
-import com.game.flame.StaticFlameWarMgr;
+import com.game.dataMgr.StaticFlameWarMgr;
 import com.game.flame.entity.StaticFlameMine;
 import com.game.pb.FlameWarPb;
 import com.game.pb.FlameWarPb.SynFlameEntityAddRq;

@@ -222,7 +222,7 @@ public class PlayerLog {
         Account account = player.account;
         registerTime = account == null ? null : account.getCreateDate();
         // TODO 暂时没有这个ip
-        registerIp = account.getRegisterIp();
+        registerIp = account == null ? "" : account.getRegisterIp();
         LastLoginTime = account == null ? null : account.getLoginDate();
         channel = account.getChannel();
         this.vipExp = player.getVipExp();

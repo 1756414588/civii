@@ -1,17 +1,15 @@
 package com.game.acion.message;
 
-import com.game.acion.EventAction;
 import com.game.acion.MessageAction;
 import com.game.acion.MessageEvent;
 import com.game.acion.events.AddSoldierEvent;
-import com.game.cache.MapMonsterCache;
 import com.game.cache.StaticWorldMapCache;
+import com.game.cache.UserMapCache;
 import com.game.constant.GameError;
-import com.game.domain.Record;
 import com.game.domain.Robot;
 import com.game.domain.WorldPos;
+import com.game.domain.p.RobotData;
 import com.game.domain.p.RobotMessage;
-import com.game.domain.World;
 import com.game.domain.s.StaticWorldMap;
 import com.game.packet.PacketCreator;
 import com.game.pb.BasePb.Base;
@@ -19,11 +17,12 @@ import com.game.pb.CommonPb.Pos;
 import com.game.pb.WorldPb.AttackRebelRq;
 import com.game.util.BasePbHelper;
 import com.game.util.LogHelper;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- *
+ * @Author 陈奎
  * @Description 攻打野外叛军
  * @Date 2022/9/14 18:04
  **/
@@ -41,69 +40,31 @@ public class AttackRebelAction extends MessageAction {
 
 	@Override
 	public void doAction(MessageEvent messageEvent, Robot robot) {
-		long eventId = messageEvent.getEventId();
 
-		World world = robot.getWorld();
-		int monsterLv = world.getMaxMonsterLv() + 1;
-		int lordX = robot.getLord().getPosX();
-		int lordY = robot.getLord().getPosY();
-
-		// 野怪缓存数据
-		MapMonsterCache mapMonsterCache = getBean(MapMonsterCache.class);
-		StaticWorldMapCache staticWorldMapCache = getBean(StaticWorldMapCache.class);
-
-		StaticWorldMap staticWorldMap = staticWorldMapCache.getStaticWorldMap(lordX, lordY);
-		if (staticWorldMap.getAreaType() == 1) {// 平原
-			monsterLv = monsterLv > 8 ? 8 : monsterLv;
-		} else if (staticWorldMap.getAreaType() == 2) {// 高原
-			monsterLv = monsterLv > 15 ? 15 : monsterLv;
-		}
-
-		List<WorldPos> entityList = mapMonsterCache.getMonsterByLv(staticWorldMap.getMapId(), monsterLv);
-		if (entityList.isEmpty()) {
-			return;
-		}
-
-		List<WorldPos> worldPosList = getPreSelectList(messageEvent);
-
-		WorldPos target = null;
-		int targetDistance = 0;
-
-		for (WorldPos worldPos : entityList) {
-			if (worldPos.getX() == -1 || worldPos.getY() == -1) {
-				continue;
-			}
-
-			if (worldPosList.contains(worldPos)) {
-				continue;
-			}
-
-			// 选择距离最短的
-			int distance = distance(lordX, lordY, worldPos.getX(), worldPos.getY());
-			if (target == null || distance < targetDistance) {
-				targetDistance = distance;
-				target = worldPos;
-			}
-		}
+		Map<Integer, WorldPos> worldPosMap = getSelectPre(messageEvent);
+		WorldPos target = getNearestPos(robot, worldPosMap);
 
 		// 未选中目标
 		if (target == null) {
+			if (robot.getCache().getMapCache().getMaxLevel() >= 7) {//新手引导打怪已经做完了,放弃打怪
+				RobotData robotData = robot.getData();
+				robotData.setGuildState(robotData.getGuildState() + 1);
+				return;
+			}
+
 			tryEvent(messageEvent, 60000);//1分钟之后重新选择,等待地图刷怪
 			return;
 		}
-
-		// 记录已攻打的目标
-		worldPosList.add(target);
 
 		// 攻击目标
 		AttackRebelRq.Builder builder = AttackRebelRq.newBuilder();
 		builder.setPos(Pos.newBuilder().setX(target.getX()).setY(target.getY()));
 		builder.addAllHeroId(attackRebelRq.getHeroIdList());
 
-		Base.Builder base = BasePbHelper.createRqBase(AttackRebelRq.EXT_FIELD_NUMBER, eventId, AttackRebelRq.ext, builder.build());
+		Base.Builder base = BasePbHelper.createRqBase(AttackRebelRq.EXT_FIELD_NUMBER, messageEvent.getEventId(), AttackRebelRq.ext, builder.build());
 		robot.sendPacket(PacketCreator.create(base.build()));
 
-		LogHelper.CHANNEL_LOGGER.info("[消息.发送] accountKey:{} cmd:{} eventId:{} id:{} name:{} pos:{} level:{} heroList:{}", robot.getId(), requestCode, eventId, id, getName(), target, monsterLv, attackRebelRq.getHeroIdList());
+		LogHelper.CHANNEL_LOGGER.info("[消息.发送] accountKey:{} cmd:{} eventId:{} id:{} name:{} pos:{} level:{} heroList:{}", robot.getId(), requestCode, messageEvent.getEventId(), id, getName(), target, attackRebelRq.getLevel(), attackRebelRq.getHeroIdList());
 	}
 
 
@@ -118,9 +79,7 @@ public class AttackRebelAction extends MessageAction {
 
 		if (base.getCode() == GameError.NO_SOLDIER_COUNT.getCode()) {// 带兵量不足,补个兵
 			attackRebelRq.getHeroIdList().forEach(heroId -> {
-
 				AddSoldierEvent addSoldierEvent = new AddSoldierEvent(robot, heroId, 10);
-
 				tryEvent(addSoldierEvent);
 			});
 
@@ -134,18 +93,63 @@ public class AttackRebelAction extends MessageAction {
 			return;
 		}
 
-		Record record = robot.getRecord();
-		record.setState(record.getState() + 1);
+		RobotData robotData = robot.getData();
+		robotData.setGuildState(robotData.getGuildState() + 1);
 	}
 
-	private List<WorldPos> getPreSelectList(MessageEvent messageEvent) {
-		List<WorldPos> list = null;
-		if (!messageEvent.getParam().containsKey(SELECT_PRE)) {
-			list = new ArrayList<>();
-			messageEvent.getParam().put(SELECT_PRE, list);
-			return list;
+	private WorldPos getNearestPos(Robot robot, Map<Integer, WorldPos> worldPosMap) {
+
+		int lordX = robot.getLord().getPosX();
+		int lordY = robot.getLord().getPosY();
+
+		StaticWorldMapCache staticWorldMapCache = getBean(StaticWorldMapCache.class);
+		StaticWorldMap staticWorldMap = staticWorldMapCache.getStaticWorldMap(lordX, lordY);
+		int lordMapId = staticWorldMap.getMapId();
+
+		UserMapCache mapCache = robot.getCache().getMapCache();
+		List<WorldPos> entityList = mapCache.getPosList(lordMapId, attackRebelRq.getLevel());
+		if (entityList.isEmpty()) {
+			return null;
 		}
-		return (List<WorldPos>) messageEvent.getParam().get(SELECT_PRE);
+
+		WorldPos target = null;
+		int targetDistance = 0;
+
+		for (WorldPos worldPos : entityList) {
+			if (worldPos.getX() == -1 || worldPos.getY() == -1) {
+				continue;
+			}
+
+			// 已选择过
+			int posValue = worldPos.getPosValue();
+			if (worldPosMap.containsKey(posValue)) {
+				continue;
+			}
+
+			// 选择距离最短的
+			int distance = distance(lordX, lordY, worldPos.getX(), worldPos.getY());
+			if (target == null || distance < targetDistance) {
+				targetDistance = distance;
+				target = worldPos;
+			}
+		}
+
+		if (target != null) {
+			target.setAttack(true);
+			worldPosMap.put(target.getPosValue(), target);
+		}
+
+		return target;
+	}
+
+	private Map<Integer, WorldPos> getSelectPre(MessageEvent messageEvent) {
+		Map<Integer, WorldPos> map = null;
+		if (!messageEvent.getParam().containsKey(SELECT_PRE)) {
+			map = new HashMap<>();
+			messageEvent.getParam().put(SELECT_PRE, map);
+			return map;
+		}
+		return (Map<Integer, WorldPos>) messageEvent.getParam().get(SELECT_PRE);
 	}
 
 

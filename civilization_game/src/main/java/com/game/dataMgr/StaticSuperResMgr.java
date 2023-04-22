@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import com.game.domain.s.StaticFortressLv;
 import com.game.domain.s.StaticSuperRes;
 
 @Component
+@LoadData(name = "超级矿")
 public class StaticSuperResMgr extends BaseDataMgr {
 
     private List<StaticSuperRes> resList = new ArrayList<>();
@@ -26,13 +28,18 @@ public class StaticSuperResMgr extends BaseDataMgr {
     StaticDataDao staticDataDao;
 
     @Override
-    public void init() {
+    public void load() throws Exception {
         this.resList = staticDataDao.querySuperRes();
         resList.forEach(x -> {
             resMap.put(x.getResId(), x);
         });
         this.fortressLvMap = staticDataDao.queryFortressLv();
         this.fortressBuildMap = staticDataDao.queryFortressBuild();
+    }
+
+    @Override
+    public void init() {
+
     }
 
     public StaticSuperRes getStaticSuperRes(int resId) {

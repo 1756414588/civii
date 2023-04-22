@@ -2,6 +2,7 @@ package com.game.manager;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.game.Loading;
 import com.game.constant.CityState;
 import com.game.constant.Reason;
 import com.game.constant.WorldActPlanConsts;
@@ -10,6 +11,7 @@ import com.game.dataMgr.StaticActivityMgr;
 import com.game.dataMgr.StaticLimitMgr;
 import com.game.dataMgr.StaticWorldActPlanMgr;
 import com.game.dataMgr.StaticWorldMgr;
+import com.game.define.LoadData;
 import com.game.domain.Award;
 import com.game.domain.Player;
 import com.game.domain.WorldData;
@@ -114,7 +116,7 @@ public class StealCityManager {
 		return calendar.getTime();
 	}
 
-	public void init() {
+	public void initSelectMap() {
 		LogHelper.GAME_DEBUG.error("活动进入初始化状态, 准备清理相关的数据..");
 		if (!selectdMap.isEmpty()) {
 			selectdMap.clear();
@@ -122,7 +124,6 @@ public class StealCityManager {
 			for (int i = 1; i <= 3; i++) {
 				selectdMap.put(i, new TreeSet<Integer>());
 				LogHelper.GAME_DEBUG.error("初始化selectMap为三个TreeSet...");
-
 			}
 		}
 	}
@@ -273,7 +274,7 @@ public class StealCityManager {
 		checkMakeItem();
 		if (actState == 0) {  // 进入活动初始化
 			actState = 1;     // 进入初始化状态
-			init();
+			initSelectMap();
 			LogHelper.GAME_DEBUG.error("抢夺名城进入城池选择阶段...");
 		} else if (actState == 1) {  // 进入活动状态1, 2, 3
 			// 如果当前时间处于index, index没有做相关逻辑，则进行相关逻辑
@@ -363,25 +364,27 @@ public class StealCityManager {
 			return;
 		}
 		TreeSet<Integer> selectSet = citySelected.get(state);
-		if (selectSet != null && selectSet.size() > 0) {
-			return;
+		if (selectSet != null ) {
+			if( selectSet.size() > 0){
+				return;
+			}
+			int index1 = RandomHelper.threadSafeRand(0, city1.size() - 1);
+			int index2 = RandomHelper.threadSafeRand(0, city2.size() - 1);
+			int index3 = RandomHelper.threadSafeRand(0, city3.size() - 1);
+			Integer cityId1 = city1.get(index1);
+			Integer cityId2 = city2.get(index2);
+			Integer cityId3 = city3.get(index3);
+			currentSelected.clear();
+			selectSet.add(cityId1);
+			selectSet.add(cityId2);
+			selectSet.add(cityId3);
+			LogHelper.GAME_DEBUG.error("算法选中的城池 = " + cityId1 + ", " + cityId2 + ", " + cityId3);
+			currentSelected.add(cityId1);
+			currentSelected.add(cityId2);
+			currentSelected.add(cityId3);
+			LogHelper.GAME_DEBUG.error("selectd = " + citySelected);
+			LogHelper.GAME_DEBUG.error("currentSelected = " + currentSelected);
 		}
-		int index1 = RandomHelper.threadSafeRand(0, city1.size() - 1);
-		int index2 = RandomHelper.threadSafeRand(0, city2.size() - 1);
-		int index3 = RandomHelper.threadSafeRand(0, city3.size() - 1);
-		Integer cityId1 = city1.get(index1);
-		Integer cityId2 = city2.get(index2);
-		Integer cityId3 = city3.get(index3);
-		currentSelected.clear();
-		selectSet.add(cityId1);
-		selectSet.add(cityId2);
-		selectSet.add(cityId3);
-		LogHelper.GAME_DEBUG.error("算法选中的城池 = " + cityId1 + ", " + cityId2 + ", " + cityId3);
-		currentSelected.add(cityId1);
-		currentSelected.add(cityId2);
-		currentSelected.add(cityId3);
-		LogHelper.GAME_DEBUG.error("selectd = " + citySelected);
-		LogHelper.GAME_DEBUG.error("currentSelected = " + currentSelected);
 	}
 
 
@@ -948,8 +951,8 @@ public class StealCityManager {
 			}
 		} else {
 			citys = new LinkedList<>();
-			long lordId = player.getLord().getLordId();
 			if (player != null) {
+				long lordId = player.getLord().getLordId();
 				citys.add(lordId);
 			}
 		}
@@ -969,7 +972,7 @@ public class StealCityManager {
 			return null;
 		}
 		List<List<Integer>> awards = config.getAwards();
-		if (awards == null && awards.size() == 0) {
+		if (awards == null || awards.size() == 0) {
 			return null;
 		}
 

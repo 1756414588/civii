@@ -1,12 +1,16 @@
 package com.game.manager;
 
+import com.game.Loading;
 import com.game.activity.ActivityEventManager;
 import com.game.activity.define.EventEnum;
 import com.game.constant.*;
-import com.game.dao.p.*;
+import com.game.dao.p.AccountDao;
+import com.game.dao.p.DetailDao;
+import com.game.dao.p.LordDao;
 import com.game.dao.p.PDataDao;
 import com.game.dao.uc.UServerInfoDao;
 import com.game.dataMgr.*;
+import com.game.define.LoadData;
 import com.game.domain.*;
 import com.game.domain.p.*;
 import com.game.domain.s.*;
@@ -33,12 +37,9 @@ import com.game.pb.WorldPb.SynCountryWarRq;
 import com.game.pb.WorldPb.SynMarchRq;
 import com.game.rank.RankInfo;
 import com.game.rank.RebelScoreRankMgr;
-import com.game.season.*;
-import com.game.season.grand.entity.GrandType;
-import com.game.season.seven.entity.SevenType;
-import com.game.season.talent.entity.EffectType;
 import com.game.server.GameServer;
-import com.game.server.LogicServer;
+import com.game.server.datafacede.SavePlayerServer;
+import com.game.server.exec.LoginExecutor;
 import com.game.service.AccountService;
 import com.game.service.CityGameService;
 import com.game.service.WorldActPlanService;
@@ -66,11 +67,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class PlayerManager {
+@LoadData(name = "用户管理", type = Loading.LOAD_USER_DB, initSeq = 1500)
+public class PlayerManager extends BaseManager {
 
 	// 清理账号开始时间
 	public static final int CLEAN_ACCOUNT_BEGIN = 4;
@@ -211,7 +212,7 @@ public class PlayerManager {
 	@Autowired
 	private LogUser logUser;
 	@Autowired
-	private StaticCityGameManager cityGameManager;
+	private StaticCityGameMgr cityGameManager;
 	@Autowired
 	private CityGameService cityGameService;
 	@Autowired
@@ -231,7 +232,7 @@ public class PlayerManager {
 	private WorldTargetManager worldTargetManager;
 
 	@Autowired
-	SeasonActDao seasonActDao;
+	ActivityEventManager activityEventManager;
 
 	private Map<Integer, Map<Integer, AtomicInteger>> maxLordIdPlatNo = new ConcurrentHashMap<>();
 
@@ -246,26 +247,12 @@ public class PlayerManager {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	// @PostConstruct
-	public void init() throws Exception {
-		nickManager.init();
-		loadAllPlayer();
-		inited = true;
-		// 世界应该是在玩家加载好之后进行初始化
-		worldManager.loadWorldInfo();
-		// 加载国家
-		countryManager.loadCountry();
-		// testManager.testPlayer();
-		activityManager.checkSeven();
-		// 排行榜初始化
-		newRankManager.init();
-	}
 
-	public ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Account>> accountCache = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Account>>();
-	public ConcurrentHashMap<Integer, Account> accountKeyCache = new ConcurrentHashMap<Integer, Account>();
+	private Map<Integer, Map<Integer, Account>> accountCache = new ConcurrentHashMap<Integer, Map<Integer, Account>>();
+	private Map<Integer, Account> accountKeyCache = new ConcurrentHashMap<Integer, Account>();
 
 	// 已经注册的玩家
-	private ConcurrentHashMap<Long, Player> playerCache = new ConcurrentHashMap<Long, Player>();
+	private Map<Long, Player> playerCache = new ConcurrentHashMap<Long, Player>();
 
 	private Set<String> usedNames = Collections.synchronizedSet(new HashSet<String>());
 
@@ -288,6 +275,22 @@ public class PlayerManager {
 	@Getter
 	private ConcurrentHashMap<Long, Integer> accountSessionMap = new ConcurrentHashMap<Long, Integer>();
 
+
+	@Override
+	public void load() throws Exception {
+		loadAccount();
+
+		loadDetail();
+		loadServerInfoMap();
+	}
+
+	@Override
+	public void init() throws Exception {
+		inited = true;
+		serverManager.updateBootStrap("user");
+	}
+
+
 	/**
 	 * 记录登陆过的用户
 	 *
@@ -301,12 +304,12 @@ public class PlayerManager {
 		}
 	}
 
-	// 加载玩家数据到内存
-	public void loadAllPlayer() {
-		load();
-		com.game.util.LogHelper.GAME_LOGGER.error("load all players data!!");
-		serverManager.updateBootStrap("user");
-	}
+//	// 加载玩家数据到内存
+//	public void loadAllPlayer() {
+//		load();
+//		com.game.util.LogHelper.GAME_LOGGER.error("load all players data!!");
+//
+//	}
 
 	public Map<Long, Player> getPlayers() {
 		return playerCache;
@@ -318,7 +321,7 @@ public class PlayerManager {
 	}
 
 	public Account getAccount(int serverId, int accountKey) {
-		return accountCache.computeIfAbsent(serverId, e -> new ConcurrentHashMap<>()).get(accountKey);
+		return accountCache.computeIfAbsent(accountKey, e -> new ConcurrentHashMap<>()).get(serverId);
 	}
 
 	public Player loginLoadPlayer(Account account, long roleId) {
@@ -367,6 +370,7 @@ public class PlayerManager {
 		if (player != null && player.getCountry() != 0) {
 			worldManager.randerPlayerPos(player, true);
 		}
+		player.getFullLoad().set(true);
 		return player;
 	}
 
@@ -392,38 +396,7 @@ public class PlayerManager {
 		if (!StringUtil.isNullOrEmpty(lord.getNick())) {
 			usedNames.add(lord.getNick());
 		}
-		initModules(player);
-		loadSeasonData(player);
 		return player;
-	}
-
-	public void initModules(Player player) {
-		try {
-			List<Class<?>> allClass = ModuleMgr.getAllModulesClass();
-			for (Class<?> aClass : allClass) {
-				BaseModule bm = (BaseModule) aClass.newInstance();
-				bm.setPlayer(player);
-				player.getSeasonActivity().put(aClass, bm);
-				player.getSeasonAct().put(bm.getType().getActId(), bm);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void loadSeasonData(Player player) {
-		Map<Integer, SeasonInfo> map = new HashMap<>();
-		List<SeasonInfo> seasonInfos = seasonActDao.loadPlayerSeasonInfo(player.roleId);
-		if (seasonInfos != null) {
-			map = seasonInfos.stream().collect(Collectors.toMap(SeasonInfo::getSeasonType, Function.identity()));
-		}
-		Map<Class<?>, BaseModule> seasonActivity = player.getSeasonActivity();
-		for (BaseModule value : seasonActivity.values()) {
-			SeasonInfo seasonInfo = map.get(value.getType().getActId());
-			if (seasonInfo != null) {
-				value.load(seasonInfo);
-			}
-		}
 	}
 
 	public Player getPlayer(String nick) {
@@ -454,6 +427,7 @@ public class PlayerManager {
 	public void offLine(OffLiner offLiner) {
 //        offLiner.getPlayer().offTime();
 		offLinePlayer.put(offLiner.getPlayerId(), offLiner);
+		savePlayerServer.saveData(new Role(offLiner.getPlayer()));
 	}
 
 	public List<Player> getOnlinePlayer() {
@@ -589,14 +563,11 @@ public class PlayerManager {
 
 	// -1：未开启，0：未上阵, 非0表示已经上阵
 	// 默认上阵一个武将
-	public List<Integer> createMiningList(int level) {
+	public void createMiningList(Player player) {
+		List<Integer> miningList = player.getMiningList();
 		List<Integer> configList = staticLimitMgr.getAddtion(SimpleId.MINING_LEVEL_NUM);
-
-		// TODO 默认能上阵的武将人数
 		int defaultHeroCount = 0;
-		// 上限个数为默认个数+配置个数
-		int limitopenCount = defaultHeroCount + configList.size();
-		List<Integer> miningList = new ArrayList<Integer>(limitopenCount);
+		int limitopenCount = defaultHeroCount + configList.size() - miningList.size();
 		// 初始化上阵武将Id，-1：未开启，0：未上阵, 大于0表示已经上阵的武将Id
 		for (int i = 0; i < limitopenCount; i++) {
 			miningList.add(-1);
@@ -605,48 +576,54 @@ public class PlayerManager {
 		// 根据等级计算能上阵的武将人数
 		for (int i = 0; i < configList.size(); i++) {
 			int lv = configList.get(i);
-			if (level >= lv) {
+			if (player.getLevel() >= lv) {
 				openHeroCount++;
 			} else {
 				break;
 			}
 		}
 		// 循环设置开启的坑位
-		for (int i = 0; i < openHeroCount; i++) {
-			miningList.set(i, 0);
+		for (int i = 0; i < openHeroCount && openHeroCount <= miningList.size(); i++) {
+			Integer integer = miningList.get(i);
+			if (integer != null && integer == -1) {
+				miningList.set(i, 0);
+			}
 		}
-		return miningList;
 	}
 
 	// -1：未开启，0：未上阵, 非0表示已经上阵
 	// 默认上阵一个武将
-	public List<WarDefenseHero> createDefanceArmyList(int level) {
+	public void createDefanceArmyList(Player player) {
+		List<WarDefenseHero> defenseArmyList = player.getDefenseArmyList();
 		List<Integer> configList = staticLimitMgr.getAddtion(CastleConsts.CONDITION_188);
 
 		// TODO 默认能上阵的武将人数
 		int defaultHeroCount = 0;
 		// 上限个数为默认个数+配置个数
-		int limitopenCount = defaultHeroCount + configList.size();
-		List<WarDefenseHero> warDefenseHeroes = new ArrayList<>();
-		// 初始化上阵武将Id，-1：未开启，0：未上阵, 大于0表示已经上阵的武将Id
+		int limitopenCount = defaultHeroCount + configList.size() - defenseArmyList.size();
 		for (int i = 0; i < limitopenCount; i++) {
-			warDefenseHeroes.add(new WarDefenseHero(-1, 0, 0));
+			defenseArmyList.add(new WarDefenseHero(-1, 0, 0));
 		}
+		//List<WarDefenseHero> warDefenseHeroes = new CopyOnWriteArrayList<>();
+		// 初始化上阵武将Id，-1：未开启，0：未上阵, 大于0表示已经上阵的武将Id
+
 		int openHeroCount = defaultHeroCount;
 		// 根据等级计算能上阵的武将人数
 		for (int i = 0; i < configList.size(); i++) {
 			int lv = configList.get(i);
-			if (level >= lv) {
+			if (player.getLevel() >= lv) {
 				openHeroCount++;
 			} else {
 				break;
 			}
 		}
 		// 循环设置开启的坑位
-		for (int i = 0; i < openHeroCount; i++) {
-			warDefenseHeroes.set(i, new WarDefenseHero(0, 0, 0));
+		for (int i = 0; i < openHeroCount && openHeroCount <= defenseArmyList.size(); i++) {
+			WarDefenseHero warDefenseHero = defenseArmyList.get(i);
+			if (warDefenseHero != null && warDefenseHero.getHeroId() == -1) {
+				warDefenseHero.reset(0);
+			}
 		}
-		return warDefenseHeroes;
 	}
 
 	// 初始化兵数据
@@ -723,7 +700,9 @@ public class PlayerManager {
 	}
 
 	public void recordLogin(Account account) {
-		accountDao.recordLoginTime(account);
+		SpringUtil.getBean(LoginExecutor.class).add(() -> {
+			accountDao.recordLoginTime(account);
+		});
 	}
 
 	// 初始化玩家数据[注册]
@@ -968,7 +947,6 @@ public class PlayerManager {
 		}
 		lordDao.updateLord(role.getLord());
 		detailDao.updateDetail(role.getDetail());
-		updateSeason(role.getPlayer());
 	}
 
 	// 增加道具, 物品类型从配置表读取，不要写死在程序中
@@ -1590,44 +1568,6 @@ public class PlayerManager {
 //		return player;
 //	}
 
-	public void load() {
-		logger.info("begin load all players data, waiting!!!");
-		List<Lord> list = getLoadList();
-		Player player = null;
-		int now = TimeHelper.getCurrentSecond();
-		for (Lord lord : list) {
-			if (lord.getLevel() == 0 || lord.getSoliderLines() == 0) {
-				initLord(lord);
-			}
-			player = initPlayer(lord, now);
-			int mapId = worldManager.getMapId(player.getPos());
-			lord.setMapId(mapId);
-			if (mapId == MapId.CENTER_MAP_ID) {
-				int cityIdByPos = staticWorldMgr.getCityIdByPos(player.getPos());
-				player.getLord().setCity(cityIdByPos);
-			}
-			// int channelId = getChannelIdByLord(lord.getLordId());
-			int serverId = getServerIdByLord(lord.getLordId());
-			int country = getCountryIdByLord(lord.getLordId());
-			int maxLord = getMaxLordIdByLord(lord.getLordId());
-			// AtomicInteger maxId = maxLordIdPlatNo.get(channelId + "_" + serverId);
-			Map<Integer, AtomicInteger> integerAtomicIntegerMap = maxLordIdPlatNo.computeIfAbsent(serverId, x -> new ConcurrentHashMap<>());
-			AtomicInteger maxId = integerAtomicIntegerMap.get(country);
-			if (maxId == null) {
-				integerAtomicIntegerMap.put(country, new AtomicInteger(maxLord));
-			} else {
-				int id2 = maxId.get();
-				maxId.set(Math.max(maxLord, id2));
-			}
-		}
-		loadAccount();
-		loadDetail();
-		if (player != null) {
-			rankManager.checkRankList(player.getLord());
-		}
-		loadServerInfoMap();
-		logger.info("done load all players data!!!");
-	}
 
 	private void loadServerInfoMap() {
 		Map<Integer, List<Integer>> map = new HashMap<>();
@@ -1675,18 +1615,39 @@ public class PlayerManager {
 	 */
 	private void loadAccount() {
 		List<Account> list = loadAccountAsPage();
-
-		Player player = null;
-		for (Account account : list) {
-			player = playerCache.get(account.getLordId());
-			if (player != null) {
-				player.account = account;
+		list.parallelStream().forEach(account -> {
+			Map<Integer, Account> accountMap = accountCache.computeIfAbsent(account.getAccountKey(), key -> new ConcurrentHashMap<Integer, Account>());
+			accountMap.put(account.getServerId(), account);
+			//accountKeyCache.put(account.getAccountKey(), account);
+			if (account.getIsDelete() != 1 && account.getLordId() > 0) {
+				Lord lord = lordDao.selectLordById(account.getLordId());
+				if (lord != null) {
+					if (lord.getLevel() == 0 || lord.getSoliderLines() == 0) {
+						initLord(lord);
+					}
+					Player player = initPlayer(lord, TimeHelper.getCurrentSecond());
+					int mapId = worldManager.getMapId(player.getPos());
+					lord.setMapId(mapId);
+					if (mapId == MapId.CENTER_MAP_ID) {
+						int cityIdByPos = staticWorldMgr.getCityIdByPos(player.getPos());
+						player.getLord().setCity(cityIdByPos);
+					}
+					int serverId = getServerIdByLord(lord.getLordId());
+					int country = getCountryIdByLord(lord.getLordId());
+					int maxLord = getMaxLordIdByLord(lord.getLordId());
+					Map<Integer, AtomicInteger> integerAtomicIntegerMap = maxLordIdPlatNo.computeIfAbsent(serverId, x -> new ConcurrentHashMap<>());
+					AtomicInteger maxId = integerAtomicIntegerMap.get(country);
+					if (maxId == null) {
+						integerAtomicIntegerMap.put(country, new AtomicInteger(maxLord));
+					} else {
+						int id2 = maxId.get();
+						maxId.set(Math.max(maxLord, id2));
+					}
+					player.account = account;
+					rankManager.checkRankList(player.getLord());
+				}
 			}
-			accountCache.computeIfAbsent(account.getServerId(), key -> new ConcurrentHashMap<Integer, Account>());
-
-			accountCache.get(account.getServerId()).put(account.getAccountKey(), account);
-			accountKeyCache.put(account.getAccountKey(), account);
-		}
+		});
 	}
 
 	private List<Account> loadAccountAsPage() {
@@ -1717,25 +1678,26 @@ public class PlayerManager {
 	 * @Description: 加载 @return void @throws
 	 */
 	private void loadDetail() {
-		List<Detail> list = getLoadDetailList();
-		Player player = null;
-		for (Detail data : list) {
-			player = playerCache.get(data.getLordId());
-			if (player != null) {
+		playerCache.values().parallelStream().forEach(player -> {
+			Detail detail = detailDao.selectDetail(player.getRoleId());
+			if (detail != null) {
 				try {
-					// 玩家坐标为(-1,-1)则不加载
-//					if (!player.getPos().isError()) {
-					player.dserDetail(data);
-					dserItem(player, data.getRoleData());
+					player.dserDetail(detail);
+					dserItem(player, detail.getRoleData());
 					caculateAllScore(player); // 计算玩家的战斗力
 					player.getFullLoad().set(true);
-//					}
 				} catch (InvalidProtocolBufferException e) {
 					logger.error("loadDetail", e);
 				}
 			}
-		}
-
+		});
+		//List<Detail> list = getLoadDetailList();
+		//list.parallelStream().forEach(data -> {
+		//    Player player = playerCache.get(data.getLordId());
+		//    if (player != null) {
+		//
+		//    }
+		//});
 	}
 
 	private boolean loadPlayerDetail(Player player) {
@@ -1755,7 +1717,7 @@ public class PlayerManager {
 	private List<Detail> getLoadDetailList() {
 		List<Detail> list = new ArrayList<>();
 		long curIndex = 0;
-		int count = 2000;
+		int count = 10;
 		int pageSize = 0;
 		while (true) {
 			List<Detail> page = detailDao.loadDetail(curIndex, count);
@@ -1907,21 +1869,24 @@ public class PlayerManager {
 	}
 
 	public void initTask(Player player) {
-		Map<Integer, StaticTask> taskMapConfig = staticTaskMgr.getTaskMap();
 		Map<Integer, Task> taskMap = player.getTaskMap();
-		StaticTask staticTask = taskMapConfig.get(1);
-		Task task = new Task();
-		task.setProcess(1);
-		task.setStatus(0);
-		task.setTaskId(1);
-		// 条件个数
-		List<List<Integer>> param = staticTask.getParam();
-		if (param != null) {
-			task.initCond(param.size());
+		Map<Integer, StaticTask> nextTaskMap = staticTaskMgr.getNextTaskMap();
+		StaticTask taskByNext = nextTaskMap.values().stream().filter(x -> x.getFirst() == 1).findFirst().orElse(null);
+		if (taskByNext != null) {
+			Task task = taskManager.createTask(taskByNext.getTaskId());
+			// 条件个数
+			List<List<Integer>> param = taskByNext.getParam();
+			if (param != null) {
+				task.initCond(param.size());
+			}
+			taskMap.put(task.getTaskId(), task);
+			List<StaticTask> taskList = staticTaskMgr.getTaskList(taskByNext.getTaskId());
+			if (taskList != null) {
+				taskList.forEach(x -> {
+					taskManager.addTask(x.getTaskId(), taskMap);
+				});
+			}
 		}
-		// task.doneCond();
-//        taskManager.recordFinished(task, player);
-		taskMap.put(task.getTaskId(), task);
 	}
 
 	public void initHeros(Player player, StaticIniLord staticIniLord) {
@@ -2055,7 +2020,7 @@ public class PlayerManager {
 		builder.setBuildTeamTime(lord.getBuildTeamTime());
 		builder.setEquipBuyTimes(lord.getBuyEquipSlotTimes());
 		builder.setPeople(lord.getPeople());
-		builder.setBuyWorkShopQue(buyWorkTimes(player));
+		builder.setBuyWorkShopQue(lord.getBuyWorkShopQue());
 		builder.setRecoverPeopleEndTime(lord.getRecoverPeopleTime() + staticLimit.getRecoverPeopleInterval() * TimeHelper.SECOND_MS);
 		builder.setMaxMonsterLv(lord.getMaxMonsterLv());
 		builder.setClothes(lord.getClothes());
@@ -2243,7 +2208,7 @@ public class PlayerManager {
 		}
 		builder.setWarBookShopRefresh(lord.getWarBookShopRefresh());
 
-		HashMap<Integer, Hero> heros = player.getHeros();
+		Map<Integer, Hero> heros = player.getHeros();
 		long now = System.currentTimeMillis();
 		if (heros != null && heros.size() > 0) {
 			Iterator<Hero> iterator = heros.values().iterator();
@@ -2463,22 +2428,16 @@ public class PlayerManager {
 		return true;
 	}
 
-	@Autowired
-	SeasonService seasonService;
-
-
 	public boolean subGold(Player player, int num, int reason) {
 		player.subGold(num);
 		boolean result = false;
 		if (num > 0 && reason != Reason.ACT_HOPE) {
 			activityManager.updActRecharScore(player, num, ActivityConst.ACT_COST_GOLD);
-			ActivityEventManager.getInst().activityTip(EventEnum.SUB_GOLD, player, num);
+			activityEventManager.activityTip(EventEnum.SUB_GOLD, player, num);
 			// 母巢之战单独处理
 			if (reason == Reason.BROOD_WAR) {
-				ActivityEventManager.getInst().activityTip(EventEnum.BUY_BROOD_BUFF, player, num);
+				activityEventManager.activityTip(EventEnum.BUY_BROOD_BUFF, player, num);
 			}
-			seasonService.addTreasuryScore(player, GrandType.TYPE_4, 1, num);
-			seasonService.addSevenScore(SevenType.USE_GOLD, num, player, 1);
 		}
 		List param = Lists.newArrayList(num, reason, player.getGold());
 		SpringUtil.getBean(EventManager.class).cost_diamond(player, param);
@@ -2524,7 +2483,7 @@ public class PlayerManager {
 				activityManager.updActPerson(player, ActivityConst.ACT_OIL_RANK, count, 0);
 				// 更新通行证任务
 //				activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.GET_OI, (int) count);
-				ActivityEventManager.getInst().activityTip(EventEnum.GET_OIL, player, (int) count, 0);
+				activityEventManager.activityTip(EventEnum.GET_OIL, player, (int) count, 0);
 			}
 		} else if (resType == ResourceType.STONE) {
 			if (count > 0) {
@@ -2624,8 +2583,6 @@ public class PlayerManager {
 		return addResource(player, resType, count, reason);
 
 	}
-	@Autowired
-	SeasonManager seasonManager;
 
 	// 获取内政官加成
 	public CommonPb.Resource.Builder getOfficerAdd(Player player) {
@@ -2664,8 +2621,7 @@ public class PlayerManager {
 		}
 
 		double addFactor = staticEmployee.getBaseResoureFactor();
-		double seasonBuf = seasonManager.getSeasonBuf(player, EffectType.EFFECT_TYPE22);
-		addFactor += seasonBuf;
+
 		long ironAdd = 0;
 		if (resAddFlag.get(ResourceType.IRON - 1) == 1) {
 			ironAdd = (int) (addFactor * resAdd.getIron());
@@ -3054,8 +3010,6 @@ public class PlayerManager {
 			return false;
 		}
 		SimpleData simpleData = player.getSimpleData();
-		double seasonBuf = seasonManager.getSeasonBuf(player, EffectType.EFFECT_TYPE19);
-		score = (int) (score * (1 + seasonBuf));
 		simpleData.setManoeuvreScore(simpleData.getManoeuvreScore() + score);
 		return true;
 	}
@@ -3659,7 +3613,7 @@ public class PlayerManager {
 				builder.addDefender(defender.wrapPb());
 			}
 
-			HashMap<Integer, WallFriend> wallFriends = wall.getWallFriends();
+			Map<Integer, WallFriend> wallFriends = wall.getWallFriends();
 			for (WallFriend friend : wallFriends.values()) {
 				builder.addFriend(wrapWallFriend(friend));
 			}
@@ -4403,29 +4357,6 @@ public class PlayerManager {
 		return factor;
 	}
 
-	// 玩家位置改变，坐标也会发生改变
-	public void changePlayerPos(Player player, Pos newPos) {
-		Pos pos = player.initNewPos(newPos);
-		int mapId = worldManager.getMapId(newPos);
-		player.getLord().setMapId(mapId);
-
-		int oldMapId = worldManager.getMapId(pos);
-		if (mapId != oldMapId) {
-			LogicServer mainLogicServer = GameServer.getInstance().mainLogicServer;
-			if (mainLogicServer != null) {
-				mainLogicServer.addCommand(() -> {
-					worldManager.sendWar(player);
-				});
-			}
-		}
-		if (mapId == MapId.CENTER_MAP_ID) {
-			int cityIdByPos = staticWorldMgr.getCityIdByPos(player.getPos());
-			player.getLord().setCity(cityIdByPos);
-		} else {
-			player.getLord().setCity(0);
-		}
-		SpringUtil.getBean(EventManager.class).record_userInfo(player, EventName.player_move);
-	}
 
 	/**
 	 * 叛军暴乱
@@ -5046,17 +4977,21 @@ public class PlayerManager {
 		if (oldMapInfo == null) {
 			return;
 		}
-		worldManager.removePlayerCity(playerPos, oldMapInfo);// 删除玩家城池
+		worldManager.removePlayerCity(player);// 删除玩家城池
 		com.game.util.LogHelper.GAME_LOGGER.error("逻辑删除玩家并且移除城池lordId->[{}] 原来坐标->[{}] ", player.roleId, playerPos.toPosStr());
 
-		Integer playerNum = oldMapInfo.getMapPlayerNum().get(lord.getCountry());
-		// 区服导量人数减一
-		oldMapInfo.getMapPlayerNum().put(playerNum, playerNum - 1);
+		//Integer playerNum = oldMapInfo.getMapPlayerNum().get(lord.getCountry());
+		//// 区服导量人数减一
+		//oldMapInfo.getMapPlayerNum().put(playerNum, playerNum - 1);
 		lord.setPosX(-1);
 		lord.setPosY(-1);
-		playerCache.remove(lord.getLordId());// 已经注册的玩家
-		updateRole(new Role(player));
+		//playerCache.remove(lord.getLordId());// 已经注册的玩家
+		//updateRole();
+		savePlayerServer.saveData(new Role(player));
 	}
+
+	@Autowired
+	SavePlayerServer savePlayerServer;
 
 	/**
 	 * 离线玩家登录刷新主城小虫子
@@ -5179,7 +5114,7 @@ public class PlayerManager {
 				it.remove();// 移出offlineMap
 				if (player.getChannelId() == -1 || offLiner.getChannelId() == player.getChannelId()) {// 是同一个ctx
 					removeOnline(offLiner.getPlayer());// 移出onlineMap
-					LogHelper.CHANNEL_LOGGER.info("移除离线列表 playerId:{}", offLiner.getPlayerId());
+					LogHelper.GAME_LOGGER.info("移除离线列表 playerId:{}", offLiner.getPlayerId());
 				}
 			}
 		}
@@ -5259,26 +5194,26 @@ public class PlayerManager {
 		}
 	}
 
-	public void updateSeason(Player player) {
-		Map<Class<?>, BaseModule> seasonActivity = player.getSeasonActivity();
-		seasonActivity.values().forEach(x -> {
-			x.saveInfo();
-		});
+	public void setIdentity(Account account) {
+		accountDao.setIdentity(account);
 	}
 
-	public int buyWorkTimes(Player player) {
-		int buyWorkShopQue = player.getLord().getBuyWorkShopQue();
-		int buf = seasonManager.getBuf(player, EffectType.EFFECT_TYPE30);
-		int nexTimes = buyWorkShopQue + buf;
-		Map<Integer, StaticWorkShopBuy> staticWorkShopBuyMap = staticWorkShopMgr.getWorkShopBuyMap();
-		if (staticWorkShopBuyMap == null) {
-			return buyWorkShopQue;
-		}
-		StaticWorkShopBuy staticWorkShopBuy = staticWorkShopBuyMap.get(nexTimes);
-		if (staticWorkShopBuy != null) {
-			return nexTimes;
-		}
-		return buyWorkShopQue;
+	public void reAccount(long channelId, Account account) {
+		this.accountSessionMap.put(channelId, account.getAccountKey());
+		Map<Integer, Account> AccountConcurrentHashMap = this.accountCache.computeIfAbsent(account.getAccountKey(), x -> new ConcurrentHashMap<>());
+		AccountConcurrentHashMap.put(account.getServerId(), account);
+		this.accountKeyCache.put(account.getAccountKey(), account);
+	}
 
+	public Account getAccountByAccountKey(int key) {
+		return accountKeyCache.get(key);
+	}
+
+	public Map<Integer, Map<Integer, Account>> getAccountCache() {
+		return accountCache;
+	}
+
+	public void setAccountCache(Map<Integer, Map<Integer, Account>> accountCache) {
+		this.accountCache = accountCache;
 	}
 }

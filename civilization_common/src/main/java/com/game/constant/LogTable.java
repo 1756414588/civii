@@ -58,6 +58,7 @@ public enum LogTable {
     endless_td_log("endless_td_log"),
     endless_td_error_log("endless_td_error_log"),
     material_substitution_log("material_substitution_log"),
+    manoeuvre_log("manoeuvre_log"),
     ;
 
 

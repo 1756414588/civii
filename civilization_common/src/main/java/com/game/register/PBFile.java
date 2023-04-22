@@ -1,11 +1,58 @@
 package com.game.register;
 
-import com.game.pb.*;
+import com.game.pb.AccountPb;
+import com.game.pb.ActManoeuvrePb;
+import com.game.pb.ActivityPb;
+import com.game.pb.BeautyPb;
+import com.game.pb.BroodWarPb;
+import com.game.pb.BuildingPb;
+import com.game.pb.CastlePb;
+import com.game.pb.ChatPb;
+import com.game.pb.CommonPb;
+import com.game.pb.CountryPb;
+import com.game.pb.DailyTaskPb;
+import com.game.pb.DepotPb;
+import com.game.pb.EquipPb;
+import com.game.pb.FirstBloodPb;
+import com.game.pb.FishingPb;
+import com.game.pb.FlameWarPb;
+import com.game.pb.FriendPb;
+import com.game.pb.GmToolPb;
+import com.game.pb.HeroPb;
+import com.game.pb.InnerPb;
+import com.game.pb.JourneyPb;
+import com.game.pb.KillEquipPb;
+import com.game.pb.MailPb;
+import com.game.pb.MapInfoPb;
+import com.game.pb.MissionPb;
+import com.game.pb.NotifyPb;
+import com.game.pb.OmamentPb;
+import com.game.pb.PayPb;
+import com.game.pb.PropPb;
+import com.game.pb.PvpBattlePb;
+import com.game.pb.RankPb;
+import com.game.pb.RebelPb;
+import com.game.pb.RiotPb;
+import com.game.pb.RolePb;
+import com.game.pb.SettingPb;
+import com.game.pb.ShopPb;
+import com.game.pb.SkinPb;
+import com.game.pb.SoldierPb;
+import com.game.pb.StaffPb;
+import com.game.pb.TDPb;
+import com.game.pb.TaskPb;
+import com.game.pb.TechPb;
+import com.game.pb.WallPb;
+import com.game.pb.WarBookPb;
+import com.game.pb.WorkShopPb;
+import com.game.pb.WorldBoxPb;
+import com.game.pb.WorldPb;
+import com.game.pb.ZergPb;
 import com.game.util.LogHelper;
 import com.google.protobuf.ExtensionRegistry;
 
 /**
- *
+ * @Author 陈奎
  * @Description protobuf注册文件
  * @Date 2022/9/9 11:30
  **/
@@ -70,7 +117,6 @@ public class PBFile {
 		FishingPb.registerAllExtensions(registry);
 		FlameWarPb.registerAllExtensions(registry);
 		MapInfoPb.registerAllExtensions(registry);
-		SeasonActivityPb.registerAllExtensions(registry);
 		LogHelper.GAME_LOGGER.info("加载pb文件");
 	}
 

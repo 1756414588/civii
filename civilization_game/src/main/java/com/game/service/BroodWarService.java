@@ -55,8 +55,6 @@ import com.game.pb.BroodWarPb;
 import com.game.pb.BroodWarPb.BuyBroodShopRq;
 import com.game.pb.BroodWarPb.BuyBroodShopRs;
 import com.game.pb.CommonPb;
-import com.game.season.SeasonService;
-import com.game.season.grand.entity.GrandType;
 import com.game.util.LogHelper;
 import com.game.util.PbHelper;
 import com.game.util.RandomUtil;
@@ -280,7 +278,7 @@ public class BroodWarService {
 							continue;
 						}
 						// 行军 或者是满级buff
-						if (buffConfig.getType() == 8 || buffConfig.getNext_buffId() == 0) {
+						if (buffConfig.getType() == PropertyType.SPEED || buffConfig.getNext_buffId() == 0) {
 							continue;
 						}
 						isAllMax = false;
@@ -288,15 +286,16 @@ public class BroodWarService {
 					}
 					if (isAllMax) {
 						// 初始是0级
-						StaticBroodWarBuff buffConfig = broodWarManager.getBuff(broodWarInfo.getBroodWarBuff().get(8));
+						StaticBroodWarBuff buffConfig = broodWarManager.getBuff(broodWarInfo.getBroodWarBuff().get(PropertyType.SPEED));
 						// 获取下一级行军增益
 						broodWarInfo.getBroodWarBuff().put(buffConfig.getType(), buffConfig.getNext_buffId());
 						builder.addBuff(CommonPb.TwoInt.newBuilder().setV1(buffConfig.getNext_buffId()).setV2(1).build());
 //                        heroManager.caculateAllProperty();
 					}
 				}
+				builder.addBuff(CommonPb.TwoInt.newBuilder().setV1(nextBuff.getId()).setV2(nextBuff.getLv()).build());
 			}
-			builder.addBuff(CommonPb.TwoInt.newBuilder().setV1(nextBuff.getId()).setV2(nextBuff.getLv()).build());
+
 			heroManager.synBattleScoreAndHeroList(player, player.getAllHeroList());
 		}
 		builder.setGold(player.getGold());
@@ -315,8 +314,6 @@ public class BroodWarService {
 		return (broodWarState == BroodWarState.OPEN_BUY || broodWarState == BroodWarState.BEGIN_WAR);
 	}
 
-	@Autowired
-	SeasonService seasonService;
 	/**
 	 * 出击
 	 *
@@ -475,7 +472,6 @@ public class BroodWarService {
 		builder.setResource(player.wrapResourcePb());
 		handler.sendMsgToPlayer(BroodWarPb.AttackBroodRs.ext, builder.build());
 		worldManager.synMarch(mapInfo.getMapId(), march);
-		seasonService.addTreasuryScore(player, GrandType.TYPE_3, 3, 1);
 	}
 
 	@Test
@@ -889,8 +885,8 @@ public class BroodWarService {
 			if (oldTarget != null) {
 				oldTarget.setBroodWarPosition(null);
 			}
+			oldPosition.setLordId(targetId);
 		}
-		oldPosition.setLordId(targetId);
 		target.setBroodWarPosition(oldPosition);
 		BroodWarPb.BroodWarAppointRs.Builder builder = BroodWarPb.BroodWarAppointRs.newBuilder();
 		handler.sendMsgToPlayer(BroodWarPb.BroodWarAppointRs.ext, builder.build());

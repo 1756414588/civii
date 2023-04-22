@@ -1,8 +1,5 @@
 package com.game.activity.events;
 
-import com.game.spring.SpringUtil;
-import java.util.List;
-
 import com.game.activity.ActivityEventResult;
 import com.game.activity.BaseActivityEvent;
 import com.game.activity.define.EventEnum;
@@ -10,23 +7,25 @@ import com.game.activity.define.SynEnum;
 import com.game.activity.facede.IActivityActor;
 import com.game.activity.result.ActDisappearRet;
 import com.game.constant.ActivityConst;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.ActivityData;
 import com.game.domain.p.ActRecord;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticActAward;
-import com.game.manager.ActivityManager;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 母巢之战 累计消费 监听
  */
+@Component
 public class ActBroodTipEvent extends BaseActivityEvent {
-
-	private static ActBroodTipEvent inst = new ActBroodTipEvent();
-
-	public static ActBroodTipEvent getInst() {
-		return inst;
-	}
+	//
+	//private static ActBroodTipEvent inst = new ActBroodTipEvent();
+	//
+	//public static ActBroodTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -38,7 +37,6 @@ public class ActBroodTipEvent extends BaseActivityEvent {
 
 	@Override
 	public void process(EventEnum activityEnum, IActivityActor actor) {
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		ActivityBase activityBase = actor.getActivityBase();
 		ActRecord activity = actor.getActRecord();
 		int change = actor.getChange();
@@ -60,12 +58,10 @@ public class ActBroodTipEvent extends BaseActivityEvent {
 		//Player player = actor.getPlayer();
 		ActivityBase activityBase = actor.getActivityBase();
 		ActRecord actRecord = actor.getActRecord();
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 		ActivityData activityData = activityManager.getActivity(activityBase.getActivityId());
 		if (activityData == null) {
 			return;
 		}
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticActAward> actAwardList = staticActivityMgr.getActAwardById(activityBase.getAwardId());
 		boolean flag = false;
 		for (StaticActAward award : actAwardList) {

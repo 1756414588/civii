@@ -68,6 +68,9 @@ public class BuildingManager {
 	@Autowired
 	private BeautyManager beautyManager;
 
+	@Autowired
+	private CountryManager countryManager;
+
 	// 创建雇佣官
 	public Employee createEmployee(int employeeId) {
 		StaticEmployee staticEmployee = staticBuildingMgr.getEmployee(employeeId);
@@ -683,6 +686,12 @@ public class BuildingManager {
 		if (0 != beautySkillEffectStone) {
 			Builder additon = helpBeautyAdd(resAdd, ResourceType.STONE, beautySkillEffectStone);
 			resources.add(additon);
+		}
+
+		// 阵营加成
+		Builder countryAdditon = countryManager.getResourceAdd(resAdd, player.getCountry());
+		if (countryAdditon != null) {
+			resources.add(countryAdditon);
 		}
 
 		Builder caculateResorceAdd = caculateResorceAdd(resources);

@@ -1,6 +1,7 @@
 package com.game.dataMgr;
 
 import com.game.dao.s.StaticDataDao;
+import com.game.define.LoadData;
 import com.game.domain.s.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,9 @@ import java.util.stream.Collectors;
  * @CaoBing halo_game StaticBeautyMgr.java
  **/
 @Component
+@LoadData(name = "战斗数据")
 public class StaticBeautyMgr extends BaseDataMgr {
+
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
@@ -45,7 +48,7 @@ public class StaticBeautyMgr extends BaseDataMgr {
 	private Map<Integer, StaticBeautyDateAward> allBeautyDateAwardMap = new HashMap<>(); // 奖励id为map主键
 
 	@Override
-	public void init() throws Exception {
+	public void load() throws Exception {
 		clearConfig();
 		initBaseBeauty();
 		initBeautySkills();
@@ -54,6 +57,10 @@ public class StaticBeautyMgr extends BaseDataMgr {
 		allBeautyDateSkillList.clear();
 		allBeautyDate.clear();
 		allBeautyDateAward.clear();
+	}
+
+	@Override
+	public void init() throws Exception {
 	}
 
 	private void clearConfig() {

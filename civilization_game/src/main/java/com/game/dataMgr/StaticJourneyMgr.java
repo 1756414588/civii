@@ -1,5 +1,6 @@
 package com.game.dataMgr;
 
+import com.game.define.LoadData;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,16 +18,22 @@ import com.game.domain.s.StaticJourneyPrice;
 *StaticJourneyMgr.java
 **/
 @Component
+@LoadData(name = "远征")
 public class StaticJourneyMgr extends BaseDataMgr {
 	@Autowired
 	private StaticDataDao staticDataDao;
 
 	private Map<Integer, StaticJourney> journeyMap = new HashMap<Integer, StaticJourney>();
 	private Map<Integer, StaticJourneyPrice> journeyPriceMap = new HashMap<Integer, StaticJourneyPrice>();
-	
-	public void init() throws Exception{
+
+	@Override
+	public void load() throws Exception {
 		journeyMap = staticDataDao.selectStaticJourney();
 		journeyPriceMap = staticDataDao.selectStaticJourneyPrice();
+	}
+
+	public void init() throws Exception{
+
 	}
 	
 	public StaticJourney getStaticJourney(int journeyId) {

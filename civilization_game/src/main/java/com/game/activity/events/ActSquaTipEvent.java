@@ -6,6 +6,7 @@ import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
 import com.game.constant.NineCellConst;
 import com.game.domain.p.ActRecord;
+import org.springframework.stereotype.Component;
 
 //import com.game.dataMgr.StaticNineCellMgr;
 //import com.game.domain.s.StaticNineCell;
@@ -14,12 +15,13 @@ import com.game.domain.p.ActRecord;
  * @author zcp
  * @date 2021/9/8 16:05
  */
+@Component
 public class ActSquaTipEvent extends BaseActivityEvent {
-	private static ActSquaTipEvent inst = new ActSquaTipEvent();
-
-	public static ActSquaTipEvent getInst() {
-		return inst;
-	}
+	//private static ActSquaTipEvent inst = new ActSquaTipEvent();
+	//
+	//public static ActSquaTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {

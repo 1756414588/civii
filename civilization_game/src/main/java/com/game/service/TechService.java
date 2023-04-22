@@ -38,8 +38,6 @@ import com.game.log.domain.RoleResourceLog;
 import com.game.manager.*;
 import com.game.message.handler.ClientHandler;
 import com.game.pb.TechPb;
-import com.game.season.SeasonManager;
-import com.game.season.talent.entity.EffectType;
 import com.game.spring.SpringUtil;
 import com.game.util.SynHelper;
 import com.game.util.TimeHelper;
@@ -98,7 +96,8 @@ public class TechService {
 	private BroodWarManager broodWarManager;
 	@Autowired
 	HeroManager heroManager;
-
+	@Autowired
+	ActivityEventManager activityEventManager;
 	// 获取科技
 	public void getTechInfo(ClientHandler handler) {
 		Player player = playerManager.getPlayer(handler.getRoleId());
@@ -302,7 +301,7 @@ public class TechService {
 
 		// 该活动中科技研究类型为1000+techType,完成科技研究类型为2000+techType
 		activityManager.updActSeven(player, ActivityConst.TYPE_ADD, 1000 + techType, 0, 1);
-		ActivityEventManager.getInst().activityTip(EventEnum.TECH_UP, player, 1, 0);
+		activityEventManager.activityTip(EventEnum.TECH_UP, player, 1, 0);
 //		activityManager.updatePassPortTaskCond(player, ActPassPortTaskType.UP_TECH, 1);
 		SpringUtil.getBean(EventManager.class).tech_level_up(player, resourceCond, staticTechInfo.getKeyId(), staticTechInfo.getUpgradeLevelDesc(), staticTechInfo.getTechLv());
 		dailyTaskManager.record(DailyTaskId.RESEARCH_TECH, player, 1);
@@ -386,7 +385,7 @@ public class TechService {
 				doUpTech(player, techType, techInfo.getLevel(), techInfo.getProcess(), TaskType.START_TECH_UP);
 				doUpTech(player, techType, techInfo.getLevel(), techInfo.getProcess(), TaskType.FINISH_TECH);
 
-				ActivityEventManager.getInst().activityTip(EventEnum.TECH_UP_FINISH, player, techType, techInfo.getLevel());
+				activityEventManager.activityTip(EventEnum.TECH_UP_FINISH, player, techType, techInfo.getLevel());
 
 				// 英雄类型
 				if (techType == TechType.PRIMARY_HERO_NUM || techType == TechType.MIDDLE_HERO_NUM) {
@@ -581,9 +580,6 @@ public class TechService {
 		return true;
 	}
 
-	@Autowired
-	SeasonManager seasonManager;
-
 	// 研究秒cd请求
 	public void techKillCdRq(TechPb.TechKillCdRq req, ClientHandler handler) {
 
@@ -639,19 +635,15 @@ public class TechService {
 				handler.sendErrorMsgToPlayer(GameError.EMPLOYEE_CONFIG_ERROR);
 				return;
 			}
-			int reduceTime1 = staticEmployee.getReduceTime();
-			int buf = seasonManager.getBuf(player, EffectType.EFFECT_TYPE24);// EFFECT_TYPE24(24, "雇佣学者减免科技研究的时间增加（固定数值）"),
-			reduceTime1 += buf;
-
 			if (techQue.getSpeed() == 1) {
-				if (reduceTime1 * TimeHelper.SECOND_MS <= techQue.getSpeedTime()) {
+				if (staticEmployee.getReduceTime() * TimeHelper.SECOND_MS <= techQue.getSpeedTime()) {
 					handler.sendErrorMsgToPlayer(GameError.TECH_ALREADY_SPEED);
 					return;
 				}
 				// 可以免费加速
-				long reduceTime = reduceTime1 * TimeHelper.SECOND_MS - techQue.getSpeedTime();
+				long reduceTime = staticEmployee.getReduceTime() * TimeHelper.SECOND_MS - techQue.getSpeedTime();
 				techQue.setEndTime(techQue.getEndTime() - reduceTime);
-				techQue.setSpeedTime(reduceTime1 * TimeHelper.SECOND_MS);
+				techQue.setSpeedTime(staticEmployee.getReduceTime() * TimeHelper.SECOND_MS);
 
 				TechInfo techInfo = tech.getTechInfo(techQue.getTechType());
 				techInfo.addSpeed(1);
@@ -659,7 +651,7 @@ public class TechService {
 			} else {
 				// 可以免费加速
 				techQue.setSpeed(1);
-				long reduceTime = reduceTime1 * TimeHelper.SECOND_MS;
+				long reduceTime = staticEmployee.getReduceTime() * TimeHelper.SECOND_MS;
 				techQue.setEndTime(techQue.getEndTime() - reduceTime);
 				techQue.setSpeedTime(reduceTime);
 

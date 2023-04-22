@@ -2,13 +2,7 @@ package com.game.worldmap.fight.process;
 
 import com.game.activity.ActivityEventManager;
 import com.game.activity.define.EventEnum;
-import com.game.constant.ActPassPortTaskType;
-import com.game.constant.BattleEntityType;
-import com.game.constant.LostTargetReason;
-import com.game.constant.MailId;
-import com.game.constant.MarchReason;
-import com.game.constant.MarchState;
-import com.game.constant.Reason;
+import com.game.constant.*;
 import com.game.dataMgr.StaticHeroMgr;
 import com.game.define.Fight;
 import com.game.domain.Player;
@@ -17,8 +11,6 @@ import com.game.domain.p.Hero;
 import com.game.domain.p.Team;
 import com.game.domain.p.WorldMap;
 import com.game.domain.s.StaticWorldResource;
-import com.game.season.SeasonService;
-import com.game.season.seven.entity.SevenType;
 import com.game.util.LogHelper;
 import com.game.util.TimeHelper;
 import com.game.worldmap.Entity;
@@ -44,7 +36,8 @@ public class CollectResourceProcess extends FightProcess {
 	private WorldLogic worldLogic;
 	@Autowired
 	private StaticHeroMgr staticHeroMgr;
-
+	@Autowired
+	ActivityEventManager activityEventManager;
 	@Override
 	public void init(int[] warTypes, int[] marches) {
 		this.warTypes = warTypes;
@@ -132,6 +125,8 @@ public class CollectResourceProcess extends FightProcess {
 
 				playerManager.sendReportMail(player, battleMailManager.createCollectWarReport(attackerTeam, defenceTeam, player, defencer), battleMailManager.createReportMsg(attackerTeam, defenceTeam), MailId.ATK_COLLECT_WIN, new ArrayList<Award>(), attackRecMap, param);
 				resource.setPlayer(player);
+
+				achievementService.addAndUpdate(player,AchiType.AT_32,1);
 			} else {
 				// win, 防守成功
 				worldLogic.handleCollectWar(MailId.COLLECT_REPORT, hasMarch, defencer, player, true, resource, worldLogic.getCollectTime(hasMarch));
@@ -207,15 +202,12 @@ public class CollectResourceProcess extends FightProcess {
 		List<Award> awards = march.getAwards();
 		long count = 0;
 		int type = 0;
-		int id = 0;
 		if (awards != null && awards.size() == 1) {
 			count = awards.get(0).getCount();
 			type = awards.get(0).getType();
-			id = awards.get(0).getId();
 		}
 		battleMailManager.sendCollectDone(MailId.COLLECT_WIN, resource, collectTime, count, heroId, hero.getHeroLv(), player, false, null);
-		ActivityEventManager.getInst().activityTip(EventEnum.COLLECT, player, (int) count, type);
-		seasonService.addSevenScore(SevenType.RESOURCE, (int) count, player, id);
+		activityEventManager.activityTip(EventEnum.COLLECT, player, (int) count, type);
 		if (resource.getCount() > 0) {
 			List<Entity> list = new ArrayList<>();
 			resource.setFlush(1);
@@ -225,8 +217,7 @@ public class CollectResourceProcess extends FightProcess {
 		}
 //		LogHelper.MESSAGE_LOGGER.info("doCollectResource marchType:{} state:{}", march.getMarchType(), march.getState());
 	}
-	@Autowired
-	SeasonService seasonService;
+
 
 	public long getCollectMinTime(Resource resource, March march, Player player) {
 		List<Integer> heroIds = march.getHeroIds();
@@ -284,13 +275,20 @@ public class CollectResourceProcess extends FightProcess {
 
 		// 清除资源坐标
 		if (resource.getCount() <= 0) {
-			worldManager.clearResourcePos(mapInfo, march.getEndPos());
-			worldManager.synEntityRemove(resource, mapInfo.getMapId(), resource.getPos());
+//			worldManager.clearResourcePos(mapInfo, march.getEndPos());
+//			worldManager.synEntityRemove(resource, mapInfo.getMapId(), resource.getPos());
+
+			mapInfo.clearPos(resource.getPos());
 		}
 		marchManager.handleMarchReturn(march, MarchReason.CollectDone);
 		worldManager.synMarch(mapInfo.getMapId(), march);
 		resource.setStatus(0);//采集完成后设置状态为 0 未被采集
 		resource.setPlayer(null);
+
+		int count = award.getCount();
+		if(count>0){
+			achievementService.addAndUpdate(player, AchiType.AT_37,count);
+		}
 		return collectTime;
 
 	}

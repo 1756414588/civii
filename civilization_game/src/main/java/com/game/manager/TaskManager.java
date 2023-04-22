@@ -1,9 +1,11 @@
 package com.game.manager;
 
 import com.game.spring.SpringUtil;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -74,6 +76,9 @@ public class TaskManager {
     @Autowired
     private DailyTaskMgr dailyTaskMgr;
 
+    @Autowired
+    StaticHeroMgr staticHeroMgr;
+
     // 主线和支线
     public int getTaskType(int taskId) {
         StaticTask staticTask = staticTaskMgr.getStaticTask(taskId);
@@ -122,6 +127,9 @@ public class TaskManager {
 
     public int getMaxProcess(int taskId) {
         StaticTask staticTask = staticTaskMgr.getStaticTask(taskId);
+        if (staticTask == null) {
+            return 0;
+        }
         return staticTask.getProcess();
     }
 
@@ -145,11 +153,13 @@ public class TaskManager {
             } else {
                 commonInit(task);
             }
-
+            if (staticTask.getTypeChild() == TaskType.AUTO_CPM) {
+                task.setProcess(staticTask.getProcess());
+                task.setStatus(1);
+            }
         } else {
             LogHelper.CONFIG_LOGGER.info("taskId = " + taskId + " config is null.");
         }
-
         return task;
     }
 
@@ -181,6 +191,9 @@ public class TaskManager {
 
     public void checkTaskConfig(Task task) {
         StaticTask staticTask = staticTaskMgr.getStaticTask(task.getTaskId());
+        if (staticTask == null) {
+            return;
+        }
         if (staticTask.getTypeChild() == TaskType.AWARD_EQUIP) {
             checkAwardEquip(task);
         }
@@ -272,137 +285,186 @@ public class TaskManager {
         } else {
             taskMap.put(task.getTaskId(), task);
         }
-
         return task;
     }
 
     public List<List<Integer>> getParam(int taskId) {
         StaticTask staticTask = staticTaskMgr.getStaticTask(taskId);
+        if (staticTask == null) {
+            return new ArrayList<>();
+        }
+
         return staticTask.getParam();
     }
 
     // 选择任务执行
     public boolean selectTaskDo(Task task, Player player, List<Integer> triggers) {
         // 已经完成的不需要同步
+        boolean flag = false;
         if (task.isCondOk() && task.getStatus() >= 1) {
-            return false;
+            return flag;
         }
 
         int taskType = getTypeChild(task.getTaskId());
         if (taskType == TaskType.NEW_STATE) {
-            return doNewStateTask(task, getParam(task.getTaskId()), player);
+            flag = doNewStateTask(task, getParam(task.getTaskId()), player);
         } else if (taskType == TaskType.BUILDING_LEVELUP) {
-            return doUpBuilding(task, player, triggers);
+            flag = doUpBuilding(task, player, triggers);
         } else if (taskType == TaskType.START_TECH_UP || taskType == TaskType.FINISH_TECH) {
-            return doUpTech(task, triggers);
+            flag = doUpTech(task, triggers);
         } else if (taskType == TaskType.RES_BUILDING_LEVEL_UP) {
-            return doUpResBuilding(task, player);
+            flag = doUpResBuilding(task, player);
         } else if (taskType == TaskType.SINGLE_HERO_WEAR) {
-            return doWearEquip(task, triggers);
+            flag = doWearEquip(task, triggers);
         } else if (taskType == TaskType.POS_WEAR_EQUIP) {
-            return doWearEquip(task, triggers);
+            flag = doWearEquip(task, triggers);
         } else if (taskType == TaskType.GET_RESOURCE) {
-            return doGetResource(task);
+            flag = doGetResource(task);
         } else if (taskType == TaskType.START_HIRE_SOLDIER) {
-            return doStartHireSoldier(task, triggers);
+            flag = doStartHireSoldier(task, triggers);
         } else if (taskType == TaskType.START_MAKE_EQUIP || taskType == TaskType.MAKE_SECOND_EQUIP) {
-            return doStartMakeEquip(task, triggers);
+            flag = doStartMakeEquip(task, triggers);
         } else if (taskType == TaskType.DONE_MISSION) {
-            return doneMission(task, triggers);
+            flag = doneMission(task, triggers);
         } else if (taskType == TaskType.MISSION_HIRE_HERO) {
-            return missionHireHero(task, triggers);
+            flag = missionHireHero(task, triggers);
         } else if (taskType == TaskType.DONE_ANY_SUBTASK) {
-            return doSubTask(task, triggers);
+            flag = doSubTask(task, triggers);
         } else if (taskType == TaskType.EMBATTLE_HERO) {
-            return doEmbattle(task, triggers);
+            flag = doEmbattle(task, triggers);
         } else if (taskType == TaskType.AWARD_EQUIP) {
-            return doAwardEquip(task, triggers);
+            flag = doAwardEquip(task, triggers);
         } else if (taskType == TaskType.ARMMY_RETURN) {
-            return doArmmyReturn(task);
+            flag = doArmmyReturn(task);
         } else if (taskType == TaskType.HIRE_RESEARCHER) {
-            return doHireReseacher(task, triggers);
+            flag = doHireReseacher(task, triggers);
         } else if (taskType == TaskType.LORD_LEVEL_UP) {
-            return doLordLevelUp(task, triggers);
+            flag = doLordLevelUp(task, triggers);
         } else if (taskType == TaskType.HIRE_BLACKSMITH) {
-            return doHireEquiper(task, triggers);
+            flag = doHireEquiper(task, triggers);
         } else if (taskType == TaskType.SPEED_MAKE_EQUIP) {
-            return doSpeedMakeEquip(task);
+            flag = doSpeedMakeEquip(task);
         } else if (taskType == TaskType.HIRE_OFFIER) {
-            return doHireOfficer(task, triggers);
+            flag = doHireOfficer(task, triggers);
         } else if (taskType == TaskType.WASH_EQUIP) {
-            return doWashEquip(task, triggers);
+            flag = doWashEquip(task, triggers);
         } else if (taskType == TaskType.MAKE_KILL_EQUIP) {
-            return doMakeKillEquip(task, triggers);
+            flag = doMakeKillEquip(task, triggers);
         } else if (taskType == TaskType.LEVELUP_KILL_EQUIP) {
-            return doLevelupKillEquip(task, triggers);
+            flag = doLevelupKillEquip(task, triggers);
         } else if (taskType == TaskType.MAKE_PROP) {
-            return makeProp(task, triggers);
+            flag = makeProp(task, triggers);
         } else if (taskType == TaskType.ALL_HERO_WEARHAT) {
-            return doAllHeroWearHat(task, player, triggers);
+            flag = doAllHeroWearHat(task, player, triggers);
         } else if (taskType == TaskType.ALL_HERO_WEAR_TWO) {
-            return doAllHeroWearTwo(task, getParam(task.getTaskId()), player);
+            flag = doAllHeroWearTwo(task, getParam(task.getTaskId()), player);
         } else if (taskType == TaskType.HIRE_SOLDIER_NUM) {
-            return doHireSoldierNum(task, triggers);
+            flag = doHireSoldierNum(task, triggers);
         } else if (taskType == TaskType.HIRE_SOLDIER_TIMES) {
-            return doHireSoldierTimes(task, triggers);
+            flag = doHireSoldierTimes(task, triggers);
         } else if (taskType == TaskType.CAPTURE_CITY) {
-            return doCaptureCity(task, triggers);
+            flag = doCaptureCity(task, triggers);
         } else if (taskType == TaskType.KILL_REBEL) {
-            return doKillRebel(task, triggers);
+            flag = doKillRebel(task, triggers);
         } else if (taskType == TaskType.KILL_MUTIL_REBEL) {
-            return doKillMutilRebel(task);
+            flag = doKillMutilRebel(task);
         } else if (taskType == TaskType.START_LEVELUP_BUILDING) {
-            return doStartLevelBuilding(task, triggers);
+            flag = doStartLevelBuilding(task, triggers);
         } else if (taskType == TaskType.DEPOT) {
-            return doDepot(task);
+            flag = doDepot(task);
         } else if (taskType == TaskType.ANY_WEAR) {
-            return doAnyWear(task, triggers);
+            flag = doAnyWear(task, triggers);
         } else if (taskType == TaskType.MISSION_HIRE_ANY) {
-            return doAnyMisionHire(task, getParam(task.getTaskId()), player);
+            flag = doAnyMisionHire(task, getParam(task.getTaskId()), player);
         } else if (taskType == TaskType.HIRE_SOLDIER_TIMES_ANY) {
-            return doAnySoldierTimes(task);
+            flag = doAnySoldierTimes(task);
         } else if (taskType == TaskType.COMMON_HERO) {
-            return doCommonHeroTask(task, triggers);
+            flag = doCommonHeroTask(task, triggers);
         } else if (taskType == TaskType.GOOD_HERO) {
-            return doGoodHeroTask(task, triggers);
+            flag = doGoodHeroTask(task, triggers);
         } else if (taskType == TaskType.SAY_A_WORD) {
-            return doDoSayWord(task);
+            flag = doDoSayWord(task);
         } else if (taskType == TaskType.ADD_SOILIER_YUBEI) {
-            return doAddSoilier(task);
+            flag = doAddSoilier(task);
         } else if (taskType == TaskType.RECOVER_BUILDING) {
             if (player.buildings.getRecoverBuilds().contains(getParam(task.getTaskId()).get(0).get(0))) {
-                return doRecoverBuild(task);
+                flag = doRecoverBuild(task);
             }
         } else if (taskType == TaskType.REAUTY_SEEKING) {
-            return doReautySeeking(task);
+            flag = doReautySeeking(task);
         } else if (taskType == TaskType.HIRE_SCIENTIST) {
-            return doHireScientist(task);
+            flag = doHireScientist(task);
         } else if (taskType == TaskType.REAUTY_SGAME) {
-            return doReautysGame(task);
+            flag = doReautysGame(task);
         } else if (taskType == TaskType.LEARN_FROM_TEACHER) {
-            return doReautysGame(task);
+            flag = doReautysGame(task);
         } else if (taskType == TaskType.RECRUIT_STUDENTS) {
-            return doReautysGame(task);
+            flag = doReautysGame(task);
         } else if (taskType == TaskType.OMAMENT_WEARER) {
-            return doWearOmamen(task, player);
+            flag = doWearOmamen(task, player);
         } else if (taskType == TaskType.DONE_JOURNEY) {
-            return doneJourney(task, triggers);
-        }else if (taskType == TaskType.COMPLETE_TOWER_DEFENSE) {
-            return doTD(task,player);
+            flag = doneJourney(task, triggers);
+        } else if (taskType == TaskType.COMPLETE_TOWER_DEFENSE) {
+            flag = doTD(task, player);
+        } else if (taskType == TaskType.GOVER) {
+            flag = doGover(task);
+        } else if (taskType == TaskType.QUICK_MONSTER) {
+            flag = doQickMonster(task);
         }
-        return false;
+        //if (flag) {
+        //    updateMainTask(player, task);
+        //}
+        return flag;
     }
-    private boolean doTD(Task task, Player player){
+
+
+    public void updateMainTask(Player player, Task task) {
+        StaticTask staticTask1 = getStaticTask(task.getTaskId());
+        if (staticTask1.getType() == 2) {
+            StaticTask staticTask2 = getStaticTask(staticTask1.getChapter_task());
+            if (staticTask2 != null && staticTask2.getTypeChild() == TaskType.AUTO_S_TASK) {
+                Map<Integer, Task> taskMap = player.getTaskMap();
+                List<StaticTask> allChapTask = staticTaskMgr.getAllChapTask(staticTask2.getTaskId());
+                for (StaticTask staticTask3 : allChapTask) {
+                    Task task1 = taskMap.get(staticTask3.getTaskId());
+                    if (task1 == null || task1.getStatus() == 0 || task1.getStatus() == 1) {
+                        return;
+                    }
+                }
+                Task task1 = taskMap.get(staticTask2.getTaskId());
+                if (task1 != null && task1.getStatus() == 0) {
+                    task1.setStatus(1);
+                    task1.setProcess(1);
+                    synTask(task1, player);
+                }
+            }
+        }
+    }
+
+    public boolean doGover(Task task) {
+        updateTask(task);
+        task.doneCond();
+        return true;
+    }
+
+    public boolean doQickMonster(Task task) {
+        updateTask(task);
+        task.doneCond();
+        return true;
+    }
+
+
+    private boolean doTD(Task task, Player player) {
         List<List<Integer>> param = getParam(task.getTaskId());
         if (param == null || param.size() <= 0) {
             LogHelper.CONFIG_LOGGER.info("upbuilding param error");
             return false;
         }
         int targetLv = param.get(0).get(0);
-        TD td = player.getTdMap().values().stream().filter(e -> e.getLevelId() ==targetLv ).findFirst().orElse(null);
-        if (td!=null&&td.getStar()>0){
-            updateTask(task, 1, targetLv);
-            return  true;
+        TD td = player.getTdMap().values().stream().filter(e -> e.getLevelId() == targetLv).findFirst().orElse(null);
+        if (td != null && td.getStar() > 0) {
+            updateTask(task, 1);
+            return true;
         }
         return false;
     }
@@ -538,7 +600,7 @@ public class TaskManager {
                 synTask(task, player);
                 // 任务完成的时候触发
                 if (task.isCondOk()) {
-                    worldManager.flushTaskMonster1(player, task.getTaskId());
+
                     recordFinished(task, player);
                 }
             }
@@ -550,7 +612,7 @@ public class TaskManager {
         }
 
         // 检查完成任意两项支线任务的任务
-        checkSubTask(TaskType.DONE_ANY_SUBTASK, player, finishedTask);
+        //checkSubTask(TaskType.DONE_ANY_SUBTASK, player, finishedTask);
     }
 
     // 当前只有1个进度的任务
@@ -768,9 +830,9 @@ public class TaskManager {
             return false;
         }
 
-        if (heroId != config.get(0)) {
-            return false;
-        }
+        //if (heroId != config.get(0)) {
+        //    return false;
+        //}
 
         boolean needSync = false;
         for (int i = 1; i < config.size(); i++) {
@@ -965,47 +1027,47 @@ public class TaskManager {
     }
 
     // 主线任务: 完成支线任务触发任务
-    public boolean checkSubTask(int taskType, Player player, List<Integer> triggers) {
-        Map<Integer, Task> taskMap = player.getTaskMap();
-        if (taskMap == null) {
-            return false;
-        }
-
-        for (Map.Entry<Integer, Task> elem : taskMap.entrySet()) {
-            if (elem == null) {
-                continue;
-            }
-
-            Task task = elem.getValue();
-            if (task == null) {
-                continue;
-            }
-
-            if (!isMainTask(task)) {
-                continue;
-            }
-
-            if (getTypeChild(task.getTaskId()) != taskType) {
-                continue;
-            }
-
-            int taskId = task.getTaskId();
-            if (!isConfigOK(taskId)) {
-                continue;
-            }
-            task.setMaxProcess(getMaxProcess(taskId));
-            boolean isProcess = selectTaskDo(task, player, triggers);
-            // syn task
-            if (isProcess) {
-                synTask(task, player);
-                if (task.isCondOk()) {
-                    recordFinished(task, player);
-                }
-            }
-        }
-
-        return false;
-    }
+    //public boolean checkSubTask(int taskType, Player player, List<Integer> triggers) {
+    //    Map<Integer, Task> taskMap = player.getTaskMap();
+    //    if (taskMap == null) {
+    //        return false;
+    //    }
+    //
+    //    for (Map.Entry<Integer, Task> elem : taskMap.entrySet()) {
+    //        if (elem == null) {
+    //            continue;
+    //        }
+    //
+    //        Task task = elem.getValue();
+    //        if (task == null) {
+    //            continue;
+    //        }
+    //
+    //        if (!isMainTask(task)) {
+    //            continue;
+    //        }
+    //
+    //        if (getTypeChild(task.getTaskId()) != taskType) {
+    //            continue;
+    //        }
+    //
+    //        int taskId = task.getTaskId();
+    //        if (!isConfigOK(taskId)) {
+    //            continue;
+    //        }
+    //        task.setMaxProcess(getMaxProcess(taskId));
+    //        boolean isProcess = selectTaskDo(task, player, triggers);
+    //        // syn task
+    //        if (isProcess) {
+    //            synTask(task, player);
+    //            if (task.isCondOk()) {
+    //                recordFinished(task, player);
+    //            }
+    //        }
+    //    }
+    //
+    //    return false;
+    //}
 
     // 检查主线任务的支线任务
     public boolean doSubTask(Task task, List<Integer> triggers) {
@@ -1041,8 +1103,7 @@ public class TaskManager {
             LogHelper.CONFIG_LOGGER.info("trigger param size error");
             return false;
         }
-
-        int heroId = triggers.get(0);
+        int heroType = triggers.get(0);
         List<List<Integer>> param = getParam(task.getTaskId());
         if (param == null || param.size() != 1) {
             LogHelper.CONFIG_LOGGER.info("doEmbattle param error");
@@ -1054,21 +1115,19 @@ public class TaskManager {
             LogHelper.CONFIG_LOGGER.info("doEmbattle config error");
             return false;
         }
-
         boolean found = false;
         for (Integer configHeroId : config) {
-            if (configHeroId == heroId) {
+            StaticHero staticHero = staticHeroMgr.getStaticHero(configHeroId);
+            if (staticHero != null && staticHero.getSoldierType() == heroType) {
                 found = true;
                 break;
             }
         }
-
         if (found) {
             updateTask(task);
             task.doneCond();
             return true;
         }
-
         return false;
     }
 
@@ -1078,23 +1137,26 @@ public class TaskManager {
             LogHelper.CONFIG_LOGGER.info("doEmbattle param error");
             return false;
         }
-
-        List<Integer> config = param.get(0);
-        if (config == null || config.size() < 1) {
-            LogHelper.CONFIG_LOGGER.info("doEmbattle config error");
-            return false;
-        }
-
-        boolean found = false;
+        boolean flag = false;
         List<Integer> embattleList = player.getEmbattleList();
-        for (Integer configId : config) {
-            if (embattleList.contains(configId)) {
-                found = true;
+        for (List<Integer> list : param) {
+            Integer id = list.get(0);//目标
+            StaticHero staticHero = staticHeroMgr.getStaticHero(id);
+            flag = false;
+            if (staticHero != null) {
+                for (Integer heroId : embattleList) {
+                    StaticHero staticHero1 = staticHeroMgr.getStaticHero(heroId);
+                    if (staticHero != null && staticHero1 != null && staticHero1.getSoldierType() == staticHero.getSoldierType()) {
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+            if (!flag) {
                 break;
             }
         }
-
-        if (found) {
+        if (flag) {
             updateTask(task);
             task.doneCond();
             return true;
@@ -1949,8 +2011,14 @@ public class TaskManager {
         } else if (taskType == TaskType.START_HIRE_SOLDIER) {
             return startHireSoldier(task, param, player);
 
-        }else if (taskType == TaskType.COMPLETE_TOWER_DEFENSE) {
-                return doTD(task,player);
+        } else if (taskType == TaskType.COMPLETE_TOWER_DEFENSE) {
+            return doTD(task, player);
+        } else if (taskType == TaskType.QUICK_MONSTER) {
+            Item item = player.getItem(ItemId.QUICK_MONSTER);
+            if (item != null) {
+                updateTask(task);
+            }
+            return true;
         }
         return false;
     }
@@ -2621,10 +2689,10 @@ public class TaskManager {
 
         if (player.isLogin && player.getChannelId() != -1) {
             BasePb.Base.Builder msg =
-                PbHelper.createSynBase(
-                    BuildingPb.SynBuildingRq.EXT_FIELD_NUMBER,
-                    BuildingPb.SynBuildingRq.ext,
-                    builder.build());
+                    PbHelper.createSynBase(
+                            BuildingPb.SynBuildingRq.EXT_FIELD_NUMBER,
+                            BuildingPb.SynBuildingRq.ext,
+                            builder.build());
             checkOpenAutoBuild(openBuildingId, player, builder);
             GameServer.getInstance().sendMsgToPlayer(player, msg);
         }
@@ -2634,7 +2702,7 @@ public class TaskManager {
     }
 
     public void checkOpenAutoBuild(
-        List<Integer> openBuildingId, Player player, BuildingPb.SynBuildingRq.Builder builder) {
+            List<Integer> openBuildingId, Player player, BuildingPb.SynBuildingRq.Builder builder) {
         if (!openBuildingId.contains(36)) {
             return;
         }
@@ -2649,7 +2717,7 @@ public class TaskManager {
         Map<Integer, Task> taskMap = player.getTaskMap();
         for (Task task : taskMap.values()) {
             StaticTask staticTask = staticTaskMgr.getStaticTask(task.getTaskId());
-            if (staticTask == null) {
+            if (staticTask == null || task.getStatus() == 2) {
                 continue;
             }
             task.setMaxProcess(staticTask.getProcess());
@@ -2683,7 +2751,7 @@ public class TaskManager {
             if (task.isCondOk()) {
                 List<Integer> triggers = new ArrayList<Integer>();
                 triggers.add(task.getTaskId());
-                checkSubTask(TaskType.DONE_ANY_SUBTASK, player, triggers);
+                //checkSubTask(TaskType.DONE_ANY_SUBTASK, player, triggers);
                 recordFinished(task, player);
             }
         }
@@ -2693,58 +2761,58 @@ public class TaskManager {
     }
 
     // 检测当前条件,开启任务,已经完成和开启的任务就不要开启了
-    public Set<Integer> getMutiTriggerTask(int taskId, Player player) {
-        HashSet<Integer> openTask = new HashSet<Integer>();
-        HashBasedTable<Integer, HashSet<Integer>, HashSet<Integer>> taskCondTable =
-            staticTaskMgr.getTaskCondTable();
-        Map<Integer, Map<HashSet<Integer>, HashSet<Integer>>> colMap = taskCondTable.rowMap();
-        Map<HashSet<Integer>, HashSet<Integer>> checkMap = colMap.get(taskId);
-        if (checkMap == null) {
-            // LogHelper.CONFIG_LOGGER.info("check Map is null.");
-            return openTask;
-        }
-
-        // 当前已经完成的任务
-        TreeSet<Integer> finishedTask = player.getFinishedTask();
-        Map<Integer, Task> taskMap = player.getTaskMap();
-        if (checkMap.isEmpty()) {
-            // LogHelper.CONFIG_LOGGER.info("checkMap is isEmpty.");
-            return openTask;
-        }
-
-        // 检查任务是否完成，如果完成，则开启后续的任务
-        for (Map.Entry<HashSet<Integer>, HashSet<Integer>> entry : checkMap.entrySet()) {
-            HashSet<Integer> condKey = entry.getKey();
-            HashSet<Integer> openValue = entry.getValue();
-            boolean isOk = true;
-            // check cond
-            for (Integer checkTaskId : condKey) {
-                if (checkTaskId == 0) {
-                    continue;
-                }
-
-                // 只要有一个任务没有完成就不要开启任务
-                if (!finishedTask.contains(checkTaskId)) {
-                    isOk = false;
-                    break;
-                }
-            }
-
-            if (!isOk) {
-                continue;
-            }
-
-            // open task
-            for (Integer openTaskId : openValue) {
-                if (finishedTask.contains(openTaskId) || taskMap.containsKey(openTaskId)) {
-                    continue;
-                }
-                openTask.add(openTaskId);
-            }
-        }
-
-        return openTask;
-    }
+    //public Set<Integer> getMutiTriggerTask(int taskId, Player player) {
+    //    HashSet<Integer> openTask = new HashSet<Integer>();
+    //    HashBasedTable<Integer, HashSet<Integer>, HashSet<Integer>> taskCondTable =
+    //        staticTaskMgr.getTaskCondTable();
+    //    Map<Integer, Map<HashSet<Integer>, HashSet<Integer>>> colMap = taskCondTable.rowMap();
+    //    Map<HashSet<Integer>, HashSet<Integer>> checkMap = colMap.get(taskId);
+    //    if (checkMap == null) {
+    //        // LogHelper.CONFIG_LOGGER.info("check Map is null.");
+    //        return openTask;
+    //    }
+    //
+    //    // 当前已经完成的任务
+    //    TreeSet<Integer> finishedTask = player.getFinishedTask();
+    //    Map<Integer, Task> taskMap = player.getTaskMap();
+    //    if (checkMap.isEmpty()) {
+    //        // LogHelper.CONFIG_LOGGER.info("checkMap is isEmpty.");
+    //        return openTask;
+    //    }
+    //
+    //    // 检查任务是否完成，如果完成，则开启后续的任务
+    //    for (Map.Entry<HashSet<Integer>, HashSet<Integer>> entry : checkMap.entrySet()) {
+    //        HashSet<Integer> condKey = entry.getKey();
+    //        HashSet<Integer> openValue = entry.getValue();
+    //        boolean isOk = true;
+    //        // check cond
+    //        for (Integer checkTaskId : condKey) {
+    //            if (checkTaskId == 0) {
+    //                continue;
+    //            }
+    //
+    //            // 只要有一个任务没有完成就不要开启任务
+    //            if (!finishedTask.contains(checkTaskId)) {
+    //                isOk = false;
+    //                break;
+    //            }
+    //        }
+    //
+    //        if (!isOk) {
+    //            continue;
+    //        }
+    //
+    //        // open task
+    //        for (Integer openTaskId : openValue) {
+    //            if (finishedTask.contains(openTaskId) || taskMap.containsKey(openTaskId)) {
+    //                continue;
+    //            }
+    //            openTask.add(openTaskId);
+    //        }
+    //    }
+    //
+    //    return openTask;
+    //}
 
     public void recordFinished(Task task, Player player) {
         if (task.isCondOk()) {
@@ -2756,42 +2824,42 @@ public class TaskManager {
     // 则检查是否所有的除了这个任务意外的任务有没有
     // 完成，如果有完成，则开启当前的任务
     // 如果开启的任务已经完成则return
-    public Set<Integer> getOpenTask(int curTaskId, Player player) {
-        TreeSet<Integer> finishedTask = player.getFinishedTask();
-        Map<Integer, StaticTask> taskConfig = staticTaskMgr.getTaskMap();
-        Set<Integer> openTask = new HashSet<Integer>();
-        // 1.遍历配置, 查找MutiTrigger
-        for (StaticTask staticTask : taskConfig.values()) {
-            if (staticTask == null) {
-                continue;
-            }
-            List<Integer> mulTriggerId = staticTask.getMulTriggerId();
-            // 2.如果MutiTigger里面没有这个任务
-            if (!mulTriggerId.contains(curTaskId)) {
-                continue;
-            }
-
-            // 3.则检查是否所有的除了这个任务意外的任务有没有完成
-            boolean isAllOk = true;
-            for (Integer taskId : mulTriggerId) {
-                if (curTaskId == taskId) {
-                    continue;
-                }
-
-                // 4.只要有一个任务没有完成，则不开启任务
-                if (!finishedTask.contains(taskId)) {
-                    isAllOk = false;
-                    break;
-                }
-            }
-
-            if (isAllOk) {
-                openTask.add(staticTask.getTaskId());
-            }
-        }
-
-        return openTask;
-    }
+    //public Set<Integer> getOpenTask(int curTaskId, Player player) {
+    //    TreeSet<Integer> finishedTask = player.getFinishedTask();
+    //    Map<Integer, StaticTask> taskConfig = staticTaskMgr.getTaskMap();
+    //    Set<Integer> openTask = new HashSet<Integer>();
+    //    // 1.遍历配置, 查找MutiTrigger
+    //    for (StaticTask staticTask : taskConfig.values()) {
+    //        if (staticTask == null) {
+    //            continue;
+    //        }
+    //        List<Integer> mulTriggerId = staticTask.getMulTriggerId();
+    //        // 2.如果MutiTigger里面没有这个任务
+    //        if (!mulTriggerId.contains(curTaskId)) {
+    //            continue;
+    //        }
+    //
+    //        // 3.则检查是否所有的除了这个任务意外的任务有没有完成
+    //        boolean isAllOk = true;
+    //        for (Integer taskId : mulTriggerId) {
+    //            if (curTaskId == taskId) {
+    //                continue;
+    //            }
+    //
+    //            // 4.只要有一个任务没有完成，则不开启任务
+    //            if (!finishedTask.contains(taskId)) {
+    //                isAllOk = false;
+    //                break;
+    //            }
+    //        }
+    //
+    //        if (isAllOk) {
+    //            openTask.add(staticTask.getTaskId());
+    //        }
+    //    }
+    //
+    //    return openTask;
+    //}
 
     public List<StaticTask> getLineTask() {
         return staticTaskMgr.getTaskMap().values().stream().filter(e -> e.getType() == 3).collect(Collectors.toList());

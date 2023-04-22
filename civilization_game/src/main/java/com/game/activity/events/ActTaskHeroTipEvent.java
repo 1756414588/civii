@@ -9,7 +9,6 @@ import com.game.activity.facede.IActivityActor;
 import com.game.constant.ActivityConst;
 import com.game.constant.Quality;
 import com.game.constant.TaskType;
-import com.game.dataMgr.StaticActivityMgr;
 import com.game.domain.Player;
 import com.game.domain.p.ActPassPortTask;
 import com.game.domain.p.ActRecord;
@@ -18,9 +17,8 @@ import com.game.domain.p.TechInfo;
 import com.game.domain.s.ActivityBase;
 import com.game.domain.s.StaticEquip;
 import com.game.domain.s.StaticHeroTask;
-import com.game.manager.ActivityManager;
-import com.game.manager.PlayerManager;
-import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,13 +30,14 @@ import java.util.Optional;
  * @author zcp
  * @date 2021/9/6 14:11
  */
+@Component
 public class ActTaskHeroTipEvent extends BaseActivityEvent {
-
-	private static ActTaskHeroTipEvent inst = new ActTaskHeroTipEvent();
-
-	public static ActTaskHeroTipEvent getInst() {
-		return inst;
-	}
+	//
+	//private static ActTaskHeroTipEvent inst = new ActTaskHeroTipEvent();
+	//
+	//public static ActTaskHeroTipEvent getInst() {
+	//	return inst;
+	//}
 
 	@Override
 	public void listen() {
@@ -54,7 +53,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 	public void subGold(EventEnum activityEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
 		Map<Integer, ActPassPortTask> tasks = actRecord.getTasks();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticHeroTask> condList = new ArrayList<>(staticActivityMgr.getStaticHeroTaskMap().values());
 		if (condList == null || condList.size() == 0) {
 			return;
@@ -96,7 +94,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 	public void killMonster(EventEnum activityEnum, IActivityActor actor) {
 		ActRecord actRecord = actor.getActRecord();
 		Map<Integer, ActPassPortTask> tasks = actRecord.getTasks();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticHeroTask> condList = new ArrayList<>(staticActivityMgr.getStaticHeroTaskMap().values());
 		if (condList == null || condList.size() == 0) {
 			return;
@@ -144,7 +141,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 	 * @param actor
 	 */
 	public void equipAdd(EventEnum activityEnum, IActivityActor actor) {
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 		EquipAddActor equipAddActor = (EquipAddActor) actor;
 		Player player = actor.getPlayer();
 
@@ -165,7 +161,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 
 		Map<Integer, ActPassPortTask> tasks = actRecord.getTasks();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticHeroTask> condList = new ArrayList<>(staticActivityMgr.getStaticHeroTaskMap().values());
 		if (condList == null || condList.size() == 0) {
 			return;
@@ -205,7 +200,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 	}
 
 	public void buildLvUp(EventEnum activityEnum, IActivityActor actor) {
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 
 		Player player = actor.getPlayer();
 		int buildType = actor.getChange();
@@ -223,7 +217,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 
 		Map<Integer, ActPassPortTask> tasks = actRecord.getTasks();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticHeroTask> condList = new ArrayList<>(staticActivityMgr.getStaticHeroTaskMap().values());
 		if (condList == null || condList.size() == 0) {
 			return;
@@ -267,7 +260,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 	}
 
 	public void techUpFinish(EventEnum activityEnum, IActivityActor actor) {
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 
 		Player player = actor.getPlayer();
 		int techType = actor.getChange();
@@ -285,7 +277,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 
 		Map<Integer, ActPassPortTask> tasks = actRecord.getTasks();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticHeroTask> condList = new ArrayList<>(staticActivityMgr.getStaticHeroTaskMap().values());
 		if (condList == null || condList.size() == 0) {
 			return;
@@ -325,7 +316,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 	}
 
 	public void camptureCity(EventEnum activityEnum, IActivityActor actor) {
-		ActivityManager activityManager = SpringUtil.getBean(ActivityManager.class);
 
 		Player player = actor.getPlayer();
 		int cityType = actor.getChange();
@@ -342,7 +332,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 
 		Map<Integer, ActPassPortTask> tasks = actRecord.getTasks();
 
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticHeroTask> condList = new ArrayList<>(staticActivityMgr.getStaticHeroTaskMap().values());
 		if (condList == null || condList.size() == 0) {
 			return;
@@ -386,7 +375,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 		Player player = actor.getPlayer();
 		ActRecord actRecord = actor.getActRecord();
 		ActivityBase activityBase = actor.getActivityBase();
-		StaticActivityMgr staticActivityMgr = SpringUtil.getBean(StaticActivityMgr.class);
 		List<StaticHeroTask> condList = new ArrayList<>(staticActivityMgr.getStaticHeroTaskMap().values());
 		if (condList == null || condList.size() == 0) {
 			return;
@@ -422,7 +410,6 @@ public class ActTaskHeroTipEvent extends BaseActivityEvent {
 				}
 			}
 
-			PlayerManager playerManager = SpringUtil.getBean(PlayerManager.class);
 			playerManager.synActivity(player, ActivityConst.ACT_TASK_HERO);
 
 		}

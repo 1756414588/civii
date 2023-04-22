@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- *
+ * @Author 陈奎
  * @Description
  * @Date 2022/9/22 10:36
  **/
@@ -53,7 +53,12 @@ public class EventAction implements IAction {
 	}
 
 	@Override
-	public RobotMessage getRobotMessage() {
+	public int getGroup() {
+		return 0;
+	}
+
+	@Override
+	public byte[] getMessage() {
 		return null;
 	}
 }

@@ -43,6 +43,8 @@ public class DailyTaskService {
 	private ActivityManager activityManager;
 	@Autowired
 	private EventManager eventManager;
+	@Autowired
+	ActivityEventManager activityEventManager;
 
 	/**
 	 * 每日任务列表
@@ -138,7 +140,7 @@ public class DailyTaskService {
 		));
 		//更新通行证任务
 //        activityManager.updatePassPort(player,playerDailyTask.getActive());
-		ActivityEventManager.getInst().activityTip(EventEnum.DAILY_ACTIVITY, player, staticTaskDaily.getAward(), 0);
+		activityEventManager.activityTip(EventEnum.DAILY_ACTIVITY, player, staticTaskDaily.getAward(), 0);
 	}
 
 	/**

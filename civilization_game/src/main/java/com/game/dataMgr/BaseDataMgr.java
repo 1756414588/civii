@@ -1,8 +1,8 @@
 package com.game.dataMgr;
 
-import javax.annotation.PostConstruct;
+import com.game.load.ILoadData;
 
-public abstract class BaseDataMgr {
-	@PostConstruct
+public abstract class BaseDataMgr implements ILoadData {
+
 	abstract public void init() throws Exception;
 }

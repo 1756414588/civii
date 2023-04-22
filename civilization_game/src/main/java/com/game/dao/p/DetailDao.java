@@ -9,7 +9,7 @@ import com.game.domain.p.Detail;
 public interface DetailDao {
 	public Detail selectDetail(Long lordId);
 
-    public Detail selectDetail(long lordId);
+    //public Detail selectDetail(long lordId);
 
     public void updateDetail(Detail detail);
 

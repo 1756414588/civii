@@ -42,11 +42,11 @@ public class March {
 	private long buildId;
 
     public void setStartPos(Pos startPos) {
-        this.startPos = startPos.clone();
+        this.startPos = startPos;
     }
 
     public void setEndPos(Pos endPos) {
-        this.endPos = endPos.clone();
+        this.endPos = endPos;
     }
 
 
