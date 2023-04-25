@@ -131,7 +131,7 @@ abstract public class Handler implements ICommand {
 		return clientIp;
 	}
 
-	public abstract void event(Base msg, Player player);
-
-	public abstract void reg();
+//	public abstract void event(Base msg, Player player);
+//
+//	public abstract void reg();
 }

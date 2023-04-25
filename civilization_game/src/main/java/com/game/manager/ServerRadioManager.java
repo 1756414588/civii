@@ -31,19 +31,19 @@ public class ServerRadioManager {
     //最近一次更新时间
     public long lastSaveTime = System.currentTimeMillis();
 
-    @PostConstruct
-    public void addAllServerRadio() {
-        List<ServerRadio> selectAllServerRadio = serverRadioDao.selectAllServerRadio();
-        if (!CollectionUtils.isEmpty(selectAllServerRadio)) {
-            for (ServerRadio serverRadio : selectAllServerRadio) {
-                serverRadio.setLastSendTime(System.currentTimeMillis());
-                if (!StringUtil.isNullOrEmpty(serverRadio.getChannel())) {
-                    //serverRadio.setChannelList(StringUtil.stringToList(serverRadio.getChannel()));
-                }
-                serverRadioMap.put(serverRadio.getKeyId(), serverRadio);
-            }
-        }
-    }
+//    @PostConstruct
+//    public void addAllServerRadio() {
+//        List<ServerRadio> selectAllServerRadio = serverRadioDao.selectAllServerRadio();
+//        if (!CollectionUtils.isEmpty(selectAllServerRadio)) {
+//            for (ServerRadio serverRadio : selectAllServerRadio) {
+//                serverRadio.setLastSendTime(System.currentTimeMillis());
+//                if (!StringUtil.isNullOrEmpty(serverRadio.getChannel())) {
+//                    //serverRadio.setChannelList(StringUtil.stringToList(serverRadio.getChannel()));
+//                }
+//                serverRadioMap.put(serverRadio.getKeyId(), serverRadio);
+//            }
+//        }
+//    }
 
     public ConcurrentHashMap<Long, ServerRadio> selectServerRadio() {
         return serverRadioMap;

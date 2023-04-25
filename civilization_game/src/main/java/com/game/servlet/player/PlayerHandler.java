@@ -252,4 +252,10 @@ public class PlayerHandler {
 
         return new Message(UcCodeEnum.SUCCESS);
     }
+
+    @ResponseBody
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    public String test() {
+        return "SUCCESS";
+    }
 }

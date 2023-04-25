@@ -29,53 +29,53 @@ public class AchievementBoxAwardHandler extends ClientHandler {
     @Autowired
     StaticAchiMgr staticAchiMgr;
 
-    @Override
-    public void event(BasePb.Base msg, Player player) {
-//        Channel channel = ctx.channel();
-
-
-        ActivityPb.AchievementBoxAwardRq req = msg.getExtension(ActivityPb.AchievementBoxAwardRq.ext);
-        int id = req.getId();
-        StaticAchiAwardBox staticAchiAwardBoxById = staticAchiMgr.getStaticAchiAwardBoxById(id);
-        if (staticAchiAwardBoxById == null) {
-            sendErrorMsgToPlayer(GameError.PARAM_ERROR);
-            return;
-        }
-        AchievementInfo achievementInfo = player.getAchievementInfo();
-        if (achievementInfo.getScoreAwardMap().containsKey(id)) {
-            sendErrorMsgToPlayer(GameError.TARGET_AWARD_IS_AWARD);
-            return;
-        }
-        boolean flag = false;
-        if (staticAchiAwardBoxById.getChildType() == 0) {
-            if (achievementInfo.getScore() >= staticAchiAwardBoxById.getCond()) {
-                flag = true;
-            }
-        } else {
-            int orDefault = achievementInfo.getTypeScoreMap().getOrDefault(staticAchiAwardBoxById.getType(), 0);
-            if (orDefault >= staticAchiAwardBoxById.getCond()) {
-                flag = true;
-            }
-        }
-        if (!flag) {
-            sendErrorMsgToPlayer(GameError.SCORE_NOT_ENOUGH);
-            return;
-        }
-        achievementInfo.getScoreAwardMap().put(id, 1);
-        List<List<Integer>> award = staticAchiAwardBoxById.getAward();
-        ActivityPb.AchievementBoxAwardRs.Builder builder = ActivityPb.AchievementBoxAwardRs.newBuilder();
-        if (award != null) {
-            award.forEach(x -> {
-                playerManager.addAward(player, x.get(0), x.get(1), x.get(2), Reason.ACHI);
-                builder.addAward(PbHelper.createAward(x.get(0), x.get(1), x.get(2)));
-            });
-        }
-        sendMsgToPlayer(ctx, ActivityPb.AchievementBoxAwardRs.ext, builder.build());
-
-    }
-
-    @Override
-    public void reg() {
-        add(ActivityPb.AchievementBoxAwardRq.EXT_FIELD_NUMBER, ActivityPb.AchievementBoxAwardRs.EXT_FIELD_NUMBER, this);
-    }
+//    @Override
+//    public void event(BasePb.Base msg, Player player) {
+////        Channel channel = ctx.channel();
+//
+//
+//        ActivityPb.AchievementBoxAwardRq req = msg.getExtension(ActivityPb.AchievementBoxAwardRq.ext);
+//        int id = req.getId();
+//        StaticAchiAwardBox staticAchiAwardBoxById = staticAchiMgr.getStaticAchiAwardBoxById(id);
+//        if (staticAchiAwardBoxById == null) {
+//            sendErrorMsgToPlayer(GameError.PARAM_ERROR);
+//            return;
+//        }
+//        AchievementInfo achievementInfo = player.getAchievementInfo();
+//        if (achievementInfo.getScoreAwardMap().containsKey(id)) {
+//            sendErrorMsgToPlayer(GameError.TARGET_AWARD_IS_AWARD);
+//            return;
+//        }
+//        boolean flag = false;
+//        if (staticAchiAwardBoxById.getChildType() == 0) {
+//            if (achievementInfo.getScore() >= staticAchiAwardBoxById.getCond()) {
+//                flag = true;
+//            }
+//        } else {
+//            int orDefault = achievementInfo.getTypeScoreMap().getOrDefault(staticAchiAwardBoxById.getType(), 0);
+//            if (orDefault >= staticAchiAwardBoxById.getCond()) {
+//                flag = true;
+//            }
+//        }
+//        if (!flag) {
+//            sendErrorMsgToPlayer(GameError.SCORE_NOT_ENOUGH);
+//            return;
+//        }
+//        achievementInfo.getScoreAwardMap().put(id, 1);
+//        List<List<Integer>> award = staticAchiAwardBoxById.getAward();
+//        ActivityPb.AchievementBoxAwardRs.Builder builder = ActivityPb.AchievementBoxAwardRs.newBuilder();
+//        if (award != null) {
+//            award.forEach(x -> {
+//                playerManager.addAward(player, x.get(0), x.get(1), x.get(2), Reason.ACHI);
+//                builder.addAward(PbHelper.createAward(x.get(0), x.get(1), x.get(2)));
+//            });
+//        }
+//        sendMsgToPlayer(ctx, ActivityPb.AchievementBoxAwardRs.ext, builder.build());
+//
+//    }
+//
+//    @Override
+//    public void reg() {
+//        add(ActivityPb.AchievementBoxAwardRq.EXT_FIELD_NUMBER, ActivityPb.AchievementBoxAwardRs.EXT_FIELD_NUMBER, this);
+//    }
 }

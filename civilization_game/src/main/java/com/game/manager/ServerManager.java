@@ -57,40 +57,40 @@ public class ServerManager {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@PostConstruct
-	public void initServer() {
-		try {
-			Message message = ucHttpService.getServer(serverId);
-			if (message.getCode() != UcCodeEnum.SUCCESS.getCode()) {
-				LogHelper.GAME_LOGGER.error("ServerManager initServer error msg {}", message.toString());
-				System.exit(-1);
-				return;
-			}
-			server = JSONObject.parseObject(message.getData(), Server.class);
-			if (server.getHttpPort() != httpPort) {
-				LogHelper.GAME_LOGGER.error("ServerManager http port error ucPort {},properties port {}", server.getPort(), httpPort);
-				System.exit(-1);
-				return;
-			}
-			//设置日志级别
-			//设置日志级别
-//            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-//            if (loggerContext.getLogger("profile") != null) {
-//                if (server.getServerType() == 0) {
-//                    loggerContext.getLogger("profile").setLevel(Level.valueOf("DEBUG"));
-//                } else {
-//                    loggerContext.getLogger("profile").setLevel(Level.valueOf("ERROR"));
-//                }
-//            }
-			initBootStrap();
-			LogHelper.GAME_LOGGER.error("Server init Success : {}", server.toString());
-			LogHelper.GAME_LOGGER.error("database config url : {}", jdbcConfigUrl);
-		} catch (Exception e) {
-			logger.error("ServerManager initServer error  {}", e);
-			System.exit(-1);
-		}
-
-	}
+//	@PostConstruct
+//	public void initServer() {
+//		try {
+//			Message message = ucHttpService.getServer(serverId);
+//			if (message.getCode() != UcCodeEnum.SUCCESS.getCode()) {
+//				LogHelper.GAME_LOGGER.error("ServerManager initServer error msg {}", message.toString());
+//				System.exit(-1);
+//				return;
+//			}
+//			server = JSONObject.parseObject(message.getData(), Server.class);
+//			if (server.getHttpPort() != httpPort) {
+//				LogHelper.GAME_LOGGER.error("ServerManager http port error ucPort {},properties port {}", server.getPort(), httpPort);
+//				System.exit(-1);
+//				return;
+//			}
+//			//设置日志级别
+//			//设置日志级别
+////            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+////            if (loggerContext.getLogger("profile") != null) {
+////                if (server.getServerType() == 0) {
+////                    loggerContext.getLogger("profile").setLevel(Level.valueOf("DEBUG"));
+////                } else {
+////                    loggerContext.getLogger("profile").setLevel(Level.valueOf("ERROR"));
+////                }
+////            }
+//			initBootStrap();
+//			LogHelper.GAME_LOGGER.error("Server init Success : {}", server.toString());
+//			LogHelper.GAME_LOGGER.error("database config url : {}", jdbcConfigUrl);
+//		} catch (Exception e) {
+//			logger.error("ServerManager initServer error  {}", e);
+//			System.exit(-1);
+//		}
+//
+//	}
 
 	public void initBootStrap() {
 		LogHelper.GAME_LOGGER.error("加载引导记录");

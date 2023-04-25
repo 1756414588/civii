@@ -10,12 +10,15 @@ import com.game.network.NetManager;
 import com.game.packet.Packet;
 import com.game.packet.PacketCreator;
 import com.game.pb.BasePb.Base;
+import com.game.register.PBFile;
 import com.game.server.netserver.MessageFilter;
 import com.game.server.netserver.NetServer;
 import com.game.service.WorldActPlanService;
+import com.game.servlet.jetty.JettyServer;
 import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
 import com.game.util.TimeHelper;
+import com.google.common.util.concurrent.AbstractIdleService;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.IOException;
@@ -30,7 +33,7 @@ import lombok.Setter;
  * @Date 2022/9/9 11:30
  **/
 @Setter
-public class GameServer extends AbsServer {
+public class GameServer extends AbstractIdleService {
 
 	public NetServer hostServer;
 	/**
@@ -51,9 +54,9 @@ public class GameServer extends AbsServer {
 
 	public ConcurrentHashMap<Long, ChannelHandlerContext> userChannels = new ConcurrentHashMap<Long, ChannelHandlerContext>();
 
-	private GameServer() {
-		super("GameServer");
-	}
+//	private GameServer() {
+//		super("GameServer");
+//	}
 
 	private static GameServer gameServer = new GameServer();
 
@@ -74,94 +77,6 @@ public class GameServer extends AbsServer {
 			}
 		}
 	}
-
-	@Override
-	public void run() {
-		super.run();
-
-		startOn();
-		try {
-
-			currentDay = TimeHelper.getCurrentDay();
-
-			// 加载pb
-			this.registerPbFile();
-
-			//TODO 优化此处待优化
-			ServerManager serverManager = SpringUtil.getBean(ServerManager.class);
-//			mainLogicServer = new LogicServer(serverManager.getServer().getServerName(), 500, 100);
-			mainLogicServer = SpringUtil.getBean(LogicServer.class);
-			// 数据存储服务
-			dataFacedeServer = new DataFacedeServer();
-			dataFacedeServer.start();
-
-			// 加载服务
-			Loading.getInst().load();
-
-			// 网络服务
-			hostServer = new NetServer();
-			startServerThread(hostServer);
-			startServerThread(mainLogicServer);
-
-			// 兼容世界活动
-			SpringUtil.getBean(WorldActPlanService.class).openWorldAct();
-
-		} catch (Exception e) {
-			LogHelper.GAME_LOGGER.error(e.getMessage(), e);
-			startInterrupted();
-			System.exit(-1);
-		}
-		LogHelper.GAME_LOGGER.info("GameServer " + SpringUtil.getBean(ServerManager.class).getServer().getServerName() + " Started SUCCESS");
-
-		startComplete();
-	}
-
-	/**
-	 * Overriding: stop
-	 *
-	 * @see AbsServer#stop()
-	 */
-	@Override
-	public void stop() {
-		LogHelper.GAME_LOGGER.info("GAME SERVER STOP..");
-		hostServer.stop();
-		try {
-
-
-			mainLogicServer.shutDownGraceful();
-			LogHelper.GAME_LOGGER.info("【业务线程】关闭..");
-
-			// 优雅关闭数据服务
-			dataFacedeServer.shutDownGraceful();
-			LogHelper.GAME_LOGGER.info("【数据服务】关闭..");
-
-			//loggerConsumer.stop();
-
-			URL location = getClass().getProtectionDomain().getCodeSource().getLocation();
-			String runname = ManagementFactory.getRuntimeMXBean().getName();
-			String pid = runname.substring(0, runname.indexOf("@"));
-			if (dataFacedeServer.allSaveDone()) {
-				LogHelper.SAVE_LOGGER.error("GameServer-->" + location + "|" + runname + "|" + pid + "|" + "all saved!");
-			} else {
-				LogHelper.SAVE_LOGGER.error("GameServer-->" + location + "|" + runname + "|" + pid + "|" + "part saved!");
-			}
-
-		} catch (Exception e) {
-			LogHelper.ERROR_LOGGER.error(e.getMessage(), e);
-		}
-	}
-
-	/**
-	 * Overriding: getGameType
-	 *
-	 * @return
-	 * @see AbsServer#getGameType()
-	 */
-	@Override
-	public String getGameType() {
-		return "game";
-	}
-
 
 	private void startServerThread(Runnable runnable) {
 		Thread thread = new Thread(runnable);
@@ -243,4 +158,70 @@ public class GameServer extends AbsServer {
 	}
 
 
+	@Override
+	protected void startUp() throws Exception {
+		startOn();
+		try {
+			currentDay = TimeHelper.getCurrentDay();
+			// 加载pb
+			PBFile.getInst().register();
+//			ServerManager serverManager = SpringUtil.getBean(ServerManager.class);
+//			mainLogicServer = new LogicServer(serverManager.getServer().getServerName(), 500, 100);
+			mainLogicServer = SpringUtil.getBean(LogicServer.class);
+			// 数据存储服务
+			dataFacedeServer = new DataFacedeServer();
+			dataFacedeServer.start();
+
+			// 加载服务
+			//Loading.getInst().load();
+
+			// 网络服务
+			hostServer = new NetServer();
+			startServerThread(hostServer);
+//			startServerThread(mainLogicServer);
+//			mainLogicServer.startAsync();
+			// 兼容世界活动
+			//SpringUtil.getBean(WorldActPlanService.class).openWorldAct();
+
+			SpringUtil.getBean(JettyServer.class).startAsync();
+
+		} catch (Exception e) {
+			LogHelper.GAME_LOGGER.error(e.getMessage(), e);
+			startInterrupted();
+			System.exit(-1);
+		}
+		LogHelper.GAME_LOGGER.info("GameServer " + SpringUtil.getBean(ServerManager.class).getServer().getServerName() + " Started SUCCESS");
+
+		startComplete();
+	}
+
+	@Override
+	protected void shutDown() throws Exception {
+		LogHelper.GAME_LOGGER.info("GAME SERVER STOP..");
+		hostServer.stop();
+		try {
+			mainLogicServer.stopAsync();
+
+			LogHelper.GAME_LOGGER.info("【业务线程】关闭..");
+
+			// 优雅关闭数据服务
+			dataFacedeServer.shutDownGraceful();
+			LogHelper.GAME_LOGGER.info("【数据服务】关闭..");
+
+			//loggerConsumer.stop();
+
+			URL location = getClass().getProtectionDomain().getCodeSource().getLocation();
+			String runname = ManagementFactory.getRuntimeMXBean().getName();
+			String pid = runname.substring(0, runname.indexOf("@"));
+			if (dataFacedeServer.allSaveDone()) {
+				LogHelper.SAVE_LOGGER.error("GameServer-->" + location + "|" + runname + "|" + pid + "|" + "all saved!");
+			} else {
+				LogHelper.SAVE_LOGGER.error("GameServer-->" + location + "|" + runname + "|" + pid + "|" + "part saved!");
+			}
+
+		} catch (Exception e) {
+			LogHelper.ERROR_LOGGER.error(e.getMessage(), e);
+		}
+
+	}
 }

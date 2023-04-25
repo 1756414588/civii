@@ -180,18 +180,18 @@ public class MailManager {
         }
     }
 
-    @PostConstruct
-    public void addAllServerMail() {
-        List<SendMail> selectAllServerMail = sendMailMapper.selectAllServerMail();
-        if (!CollectionUtils.isEmpty(selectAllServerMail)) {
-            for (SendMail sendMail : selectAllServerMail) {
-                if (!StringUtil.isNullOrEmpty(sendMail.getChannelList())) {
-                    sendMail.setChannel(StringUtil.stringToList(sendMail.getChannelList()));
-                }
-                allServerMail.put(sendMail.getKeyId(), sendMail);
-            }
-        }
-    }
+//    @PostConstruct
+//    public void addAllServerMail() {
+//        List<SendMail> selectAllServerMail = sendMailMapper.selectAllServerMail();
+//        if (!CollectionUtils.isEmpty(selectAllServerMail)) {
+//            for (SendMail sendMail : selectAllServerMail) {
+//                if (!StringUtil.isNullOrEmpty(sendMail.getChannelList())) {
+//                    sendMail.setChannel(StringUtil.stringToList(sendMail.getChannelList()));
+//                }
+//                allServerMail.put(sendMail.getKeyId(), sendMail);
+//            }
+//        }
+//    }
 
     public ConcurrentHashMap<Long, SendMail> selectAllServerMail() {
         return allServerMail;

@@ -220,7 +220,7 @@ public class NetServer extends AbsServer {
             handler.setCtx(ctx);
             handler.setMsg(msg);
             handler.action();
-            handler.event(msg, ctx, player);
+            //handler.event(msg, ctx, player);
         } catch (Exception e) {
         }
     }

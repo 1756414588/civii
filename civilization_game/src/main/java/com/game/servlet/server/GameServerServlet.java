@@ -58,7 +58,7 @@ public class GameServerServlet {
 		response.flushBuffer();
 
 		// 关闭服务器
-		GameServer.getInstance().stop();
+//		GameServer.getInstance().stop();
 
 		Thread.sleep(1000);
 		//SpringContextLoader.getContext().destroy();

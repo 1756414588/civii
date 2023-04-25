@@ -39,9 +39,9 @@
 
     <!--定义jetty -->
     <!-- jetty server start -->
-    <bean id="jettyRunner" class="com.game.servlet.jetty.JettyServer" init-method="start">
-        <property name="port" value="${http.server.jetty.port}"/>
-    </bean>
+<!--    <bean id="jettyRunner" class="com.game.servlet.jetty.JettyServer" init-method="start">-->
+<!--        <property name="port" value="${http.server.jetty.port}"/>-->
+<!--    </bean>-->
 
     <import resource="spring-game-mybatis.xml"/>
     <import resource="spring-ini-mybatis.xml"/>

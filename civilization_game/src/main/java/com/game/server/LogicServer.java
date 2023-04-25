@@ -47,6 +47,7 @@ import com.game.timer.ZergTimer;
 import com.game.timer.TimerEvent;
 import com.game.spring.SpringUtil;
 import com.game.util.LogHelper;
+import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.util.HashMap;
@@ -67,7 +68,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 @Component
-public class LogicServer implements Runnable {
+public class LogicServer extends AbstractIdleService {
 
     static Logger logger = LoggerFactory.getLogger(LogicServer.class);
 
@@ -88,26 +89,65 @@ public class LogicServer implements Runnable {
         threadPool.put(dealType.getCode(), serverThread);
     }
 
-    public void stop() {
-        Iterator<ServerThread> it = threadPool.values().iterator();
-        while (it.hasNext()) {
-            it.next().stop(true);
-        }
-        executor.shutdown();
-    }
+//    public void stop() {
+//
+//    }
 
     public boolean isStopped() {
         return true && executor.isTerminated();
     }
 
+
+
+    public void addTimer(TimerEvent event) {
+        threadPool.get(DealType.MAIN.getCode()).addTimerEvent(event);
+    }
+
+    public void removeTimer(TimerEvent event) {
+        threadPool.get(DealType.MAIN.getCode()).removeTimerEvent(event);
+    }
+
+    public void addCommand(Runnable runnable) {
+        executor.execute(runnable);
+    }
+
+    public void addCommand(ICommand command, DealType dealType) {
+        ServerThread thread = threadPool.get(dealType.getCode());
+        if (thread != null) {
+            thread.addCommand(command);
+        } else {
+            command.action();
+        }
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    public static void setLogger(Logger logger) {
+        LogicServer.logger = logger;
+    }
+
+//    public void shutDownGraceful() {
+//        try {
+//            stop();
+//            while (!isStopped()) {
+//                Thread.sleep(1);
+//                stop();
+//            }
+//        } catch (Exception e) {
+//            LogHelper.ERROR_LOGGER.error("LogicServer stop:{}", e.getMessage(), e);
+//        }
+//    }
+
     @Override
-    public void run() {
-		this.heart = 500;
-		threadFactory = new ThreadFactoryBuilder().setNameFormat("thread-pool-%d").build();
-		executor = new ThreadPoolExecutor(1, 1, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(4096), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
-		threadGroup = new ThreadGroup(serverManager.getServer().getServerName());
-		createServerThread(DealType.MAIN);
-		createServerThread(DealType.SAVE_DATA);
+    protected void startUp() throws Exception {
+        this.heart = 500;
+        threadFactory = new ThreadFactoryBuilder().setNameFormat("thread-pool-%d").build();
+        executor = new ThreadPoolExecutor(1, 1, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(4096), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
+        threadGroup = new ThreadGroup(serverManager.getServer().getServerName());
+        createServerThread(DealType.MAIN);
+        createServerThread(DealType.SAVE_DATA);
 
         Iterator<ServerThread> it = threadPool.values().iterator();
         while (it.hasNext()) {
@@ -168,45 +208,12 @@ public class LogicServer implements Runnable {
         threadPool.get(DealType.MAIN.getCode()).addTimerEvent(new FishingQueueTimer());
     }
 
-
-    public void addTimer(TimerEvent event) {
-        threadPool.get(DealType.MAIN.getCode()).addTimerEvent(event);
-    }
-
-    public void removeTimer(TimerEvent event) {
-        threadPool.get(DealType.MAIN.getCode()).removeTimerEvent(event);
-    }
-
-    public void addCommand(Runnable runnable) {
-        executor.execute(runnable);
-    }
-
-    public void addCommand(ICommand command, DealType dealType) {
-        ServerThread thread = threadPool.get(dealType.getCode());
-        if (thread != null) {
-            thread.addCommand(command);
-        } else {
-            command.action();
+    @Override
+    protected void shutDown() throws Exception {
+        Iterator<ServerThread> it = threadPool.values().iterator();
+        while (it.hasNext()) {
+            it.next().stop(true);
         }
-    }
-
-    public static Logger getLogger() {
-        return logger;
-    }
-
-    public static void setLogger(Logger logger) {
-        LogicServer.logger = logger;
-    }
-
-    public void shutDownGraceful() {
-        try {
-            stop();
-            while (!isStopped()) {
-                Thread.sleep(1);
-                stop();
-            }
-        } catch (Exception e) {
-            LogHelper.ERROR_LOGGER.error("LogicServer stop:{}", e.getMessage(), e);
-        }
+        executor.shutdown();
     }
 }
