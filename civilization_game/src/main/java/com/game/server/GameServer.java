@@ -1,9 +1,8 @@
 package com.game.server;
 
-import com.game.Loading;
 import com.game.domain.Player;
 import com.game.log.consumer.LoggerConsumer;
-import com.game.manager.*;
+import com.game.manager.ServerManager;
 import com.game.message.pool.MessagePool;
 import com.game.network.INet;
 import com.game.network.NetManager;
@@ -13,19 +12,18 @@ import com.game.pb.BasePb.Base;
 import com.game.register.PBFile;
 import com.game.server.netserver.MessageFilter;
 import com.game.server.netserver.NetServer;
-import com.game.service.WorldActPlanService;
 import com.game.servlet.jetty.JettyServer;
-import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
+import com.game.util.LogHelper;
 import com.game.util.TimeHelper;
 import com.google.common.util.concurrent.AbstractIdleService;
 import io.netty.channel.ChannelHandlerContext;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
-import lombok.Setter;
 
 /**
  *
@@ -179,7 +177,7 @@ public class GameServer extends AbstractIdleService {
 			hostServer = new NetServer();
 			startServerThread(hostServer);
 //			startServerThread(mainLogicServer);
-//			mainLogicServer.startAsync();
+			mainLogicServer.startAsync();
 			// 兼容世界活动
 			//SpringUtil.getBean(WorldActPlanService.class).openWorldAct();
 
