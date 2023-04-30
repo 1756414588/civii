@@ -1,5 +1,5 @@
 package com.game.log.domain;
-/** 2020年6月1日 @CaoBing halo_game vipExpLog.java */
+/** 2020年6月1日    halo_game vipExpLog.java */
 
 import com.game.util.DateHelper;
 import lombok.Data;

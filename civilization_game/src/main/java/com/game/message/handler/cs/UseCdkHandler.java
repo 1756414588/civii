@@ -5,7 +5,7 @@ import com.game.pb.RolePb;
 import com.game.service.AccountService;
 
 /**
- * @author jyb
+ *
  * @date 2020/6/2 14:05
  * @description
  */

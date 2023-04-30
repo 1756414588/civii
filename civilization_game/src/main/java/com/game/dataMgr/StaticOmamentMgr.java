@@ -19,7 +19,7 @@ import com.game.domain.s.StaticOmament;
 /**
  * 2020年8月5日
  *
- * @CaoBing halo_game StaticOmTypeMgr.java
+ *    halo_game StaticOmTypeMgr.java
  **/
 @Component
 @LoadData(name = "饰品配置表")

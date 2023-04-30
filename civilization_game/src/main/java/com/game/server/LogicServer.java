@@ -23,7 +23,7 @@ public class LogicServer extends AbstractIdleService {
     protected HashMap<Integer, ServerThread> threadPool = new HashMap<Integer, ServerThread>();
     private ThreadGroup threadGroup;
 
-    ThreadFactory threadFactory = null;
+//    ThreadFactory threadFactory = null;
     ExecutorService executor = null;
 
     public ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
@@ -38,10 +38,6 @@ public class LogicServer extends AbstractIdleService {
         ServerThread serverThread = new ServerThread(threadGroup, dealType.getName(), heart);
         threadPool.put(dealType.getCode(), serverThread);
     }
-
-//    public void stop() {
-//
-//    }
 
     public boolean isStopped() {
         return true && executor.isTerminated();
@@ -70,23 +66,11 @@ public class LogicServer extends AbstractIdleService {
         }
     }
 
-//    public void shutDownGraceful() {
-//        try {
-//            stop();
-//            while (!isStopped()) {
-//                Thread.sleep(1);
-//                stop();
-//            }
-//        } catch (Exception e) {
-//            LogHelper.ERROR_LOGGER.error("LogicServer stop:{}", e.getMessage(), e);
-//        }
-//    }
-
     @Override
     protected void startUp() throws Exception {
         this.heart = 500;
-        threadFactory = new ThreadFactoryBuilder().setNameFormat("thread-pool-%d").build();
-        executor = new ThreadPoolExecutor(1, 1, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(4096), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
+//        threadFactory = ;
+        executor = new ThreadPoolExecutor(1, 1, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(4096), new ThreadFactoryBuilder().setNameFormat("thread-pool-%d").build(), new ThreadPoolExecutor.CallerRunsPolicy());
         //threadGroup = new ThreadGroup(serverManager.getServer().getServerName());
         createServerThread(DealType.MAIN);
         createServerThread(DealType.SAVE_DATA);

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * 2020年5月29日
  *
- * @CaoBing halo_game StaticBeautyMgr.java
+ *    halo_game StaticBeautyMgr.java
  **/
 @Component
 @LoadData(name = "战斗数据")

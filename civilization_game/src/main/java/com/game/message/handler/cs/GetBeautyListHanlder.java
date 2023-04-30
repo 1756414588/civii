@@ -7,7 +7,7 @@ import com.game.service.BeautyService;
 /**
  * 2020年5月29日
  * 
- * @CaoBing halo_game GetBeautyListHanlder.java
+ *    halo_game GetBeautyListHanlder.java
  **/
 public class GetBeautyListHanlder extends ClientHandler {
 

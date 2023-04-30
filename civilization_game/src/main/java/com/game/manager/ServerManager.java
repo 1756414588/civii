@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 /**
- * @author jyb
+ *
  * @date 2020/4/15 14:50
  * @description
  */

@@ -41,7 +41,7 @@ import com.game.util.LogHelper;
 /**
  * 2020年8月17日
  *
- * @CaoBing halo_game JourneyService.java
+ *    halo_game JourneyService.java
  **/
 @Service
 public class JourneyService {

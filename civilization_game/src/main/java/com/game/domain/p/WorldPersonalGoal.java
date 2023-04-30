@@ -3,7 +3,7 @@ package com.game.domain.p;
 import com.game.pb.CommonPb;
 
 /**
- * @author jyb
+ *
  * @date 2019/12/24 15:13
  * @description 世界目标 个人目标进度
  */

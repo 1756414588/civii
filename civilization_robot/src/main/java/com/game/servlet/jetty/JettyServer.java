@@ -25,7 +25,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 /**
  * Jetty启动类
  *
- * @author jyb
+ *
  */
 //public class JettyServer implements ApplicationContextAware {
 public class JettyServer {

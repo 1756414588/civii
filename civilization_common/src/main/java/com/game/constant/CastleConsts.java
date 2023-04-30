@@ -1,7 +1,7 @@
 package com.game.constant;
 
 /**
- * @author jyb
+ *
  * @date 2019/12/12 14:03
  * @description
  */

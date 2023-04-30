@@ -19,7 +19,7 @@ import com.game.recharge.dao.ifs.s.StaticChanelConfigDao;
 /**
  * 2020年7月4日
  *
- * @CaoBing halo_recharge ChannelConfigManager.java
+ *    halo_recharge ChannelConfigManager.java
  **/
 @Component
 public class ChannelConfigManager {

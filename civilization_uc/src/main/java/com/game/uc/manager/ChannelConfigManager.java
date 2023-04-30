@@ -21,7 +21,7 @@ import com.game.uc.dao.ifs.p.StaticChanelConfigDao;
 /**
  * 2020年5月19日
  *
- * @CaoBing halo_uc ChannelConfigManager.java
+ *    halo_uc ChannelConfigManager.java
  **/
 @Service
 public class ChannelConfigManager {

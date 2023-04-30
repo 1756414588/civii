@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Jetty启动类
  *
- * @author jyb
+ *
  */
 //public class JettyServer implements ApplicationContextAware {
 @Component

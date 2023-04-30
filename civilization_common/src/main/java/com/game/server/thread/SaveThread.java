@@ -27,7 +27,7 @@ public abstract class SaveThread<T> extends Thread {
 		this.threadName = threadName;
 	}
 
-	abstract public void run();
+//	abstract public void run();
 
 	abstract public void add(T t);
 

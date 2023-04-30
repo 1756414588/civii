@@ -3,7 +3,7 @@ package com.game.constant;
 /**
  * 2020年6月4日
  * 
- * @CaoBing halo_common BeautyPropertyType.java
+ *    halo_common BeautyPropertyType.java
  **/
 public interface BeautyPropertyType {
 	int EXP = 1;// 美女经验值

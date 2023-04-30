@@ -3,7 +3,7 @@ package com.game.dao.uc;
 /**
  * 2020年5月19日
  *
- * @CaoBing halo_uc
+ *    halo_uc
  * StaticChanelConfigDao.java
  **/
 

@@ -1,7 +1,7 @@
 package com.game.uc.log.domain;
 /**
 *2020年5月14日
-*@CaoBing
+*
 *halo_uc
 *AccountloginLog.java
 **/

@@ -5,7 +5,7 @@ import com.game.pb.WorldPb;
 import com.game.service.WorldTargetTaskService;
 
 /**
- * @author jyb
+ *
  * @date 2019/12/25 16:54
  * @description
  */

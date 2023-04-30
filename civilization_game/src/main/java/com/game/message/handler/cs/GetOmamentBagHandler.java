@@ -6,7 +6,7 @@ import com.game.service.OmamentService;
 
 /**
 *2020年8月5日
-*@CaoBing
+*
 *halo_game
 *GetOmamentBagHandler.java
 *

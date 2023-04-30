@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 /**
 *2020年5月29日
-*@CaoBing
+*
 *halo_game
 *BeautyRecord.java
 **/

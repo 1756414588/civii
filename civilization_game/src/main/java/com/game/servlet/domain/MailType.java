@@ -1,7 +1,7 @@
 package com.game.servlet.domain;
 /**
 *2020年4月27日
-*@CaoBing
+*
 *halo_game
 *MailType.java
 **/

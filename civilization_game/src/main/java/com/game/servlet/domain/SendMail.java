@@ -10,7 +10,7 @@ import com.game.domain.Award;
 /**
  * 2020年4月27日
  * 
- * @CaoBing halo_common SendMail.java
+ *    halo_common SendMail.java
  **/
 public class SendMail {
 	public static final int UN_SEND = 0;

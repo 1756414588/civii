@@ -7,7 +7,7 @@ import com.game.service.ActivityService;
 
 /**
 *2020年5月27日
-*@CaoBing
+*
 *halo_game
 *GetMonthCardAwardHandler.java
 **/

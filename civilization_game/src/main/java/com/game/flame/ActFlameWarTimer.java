@@ -52,6 +52,5 @@ public class ActFlameWarTimer extends TimerEvent {
 //            return;
 //        }
 //        flameWarManager.checkActPlan(worldActPlan);
-        System.err.println("aaaa");
     }
 }

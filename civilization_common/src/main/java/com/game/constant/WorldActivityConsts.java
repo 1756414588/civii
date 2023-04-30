@@ -1,7 +1,7 @@
 package com.game.constant;
 
 /**
- * @author jyb
+ *
  * @date 2020/3/31 17:45
  * @description 世界活动
  */

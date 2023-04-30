@@ -6,7 +6,7 @@ import com.game.service.JourneyService;
 
 /**
 *2020年8月17日
-*@CaoBing
+*
 *halo_game
 *JourneyDoneHandler.java
 **/

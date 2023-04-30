@@ -3,7 +3,7 @@ package com.game.rank;
 import java.io.Serializable;
 
 /**
- * @author jyb
+ *
  * @date 2020/5/6 17:09
  * @description
  */

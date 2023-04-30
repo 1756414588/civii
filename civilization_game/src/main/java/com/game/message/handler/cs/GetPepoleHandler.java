@@ -6,7 +6,7 @@ import com.game.service.AccountService;
 
 /**
 *2020年6月20日
-*@CaoBing
+*
 *halo_game
 *GetPepoleHandler.java
 **/

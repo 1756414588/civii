@@ -4,6 +4,8 @@ import com.game.domain.p.Activity;
 import com.game.manager.ActivityManager;
 import com.game.util.LogHelper;
 import com.game.spring.SpringUtil;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -24,6 +26,7 @@ public class SaveActivityThread extends SaveThread<Activity> {
 		super(threadName);
 	}
 
+	@Override
 	public void run() {
 		stop = false;
 		done = false;

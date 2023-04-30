@@ -39,7 +39,7 @@ import com.game.util.PbHelper;
 /**
  * 2020年8月5日
  *
- * @CaoBing halo_game OmamentService.java
+ *    halo_game OmamentService.java
  **/
 @Service
 public class OmamentService {

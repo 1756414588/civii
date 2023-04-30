@@ -11,7 +11,7 @@ import com.game.uc.PayOrder;
 /**
  * 2020年5月12日
  * 
- * @CaoBing halo_uc PayOrderManager.java
+ *    halo_uc PayOrderManager.java
  **/
 @Component
 public class PayOrderManager {

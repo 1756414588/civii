@@ -3,7 +3,7 @@ package com.game.domain.s;
 /**
  * 2020年8月5日
  * 
- * @CaoBing halo_game StaticOmType.java
+ *    halo_game StaticOmType.java
  *
  *          配饰类型的配置实体类
  **/

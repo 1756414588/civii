@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * 2020年6月6日
  * 
- * @CaoBing halo_game StaticBeautyKills.java
+ *    halo_game StaticBeautyKills.java
  **/
 public class StaticBeautySkills {
 	private int keyId;// '索引ID',

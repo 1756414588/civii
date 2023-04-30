@@ -1,7 +1,7 @@
 package com.game.domain.p;
 
 /**
- * @author jyb
+ *
  * @date 2019/12/18 11:12
  * @description 参谋部提供的城墙英雄
  */

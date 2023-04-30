@@ -3,7 +3,7 @@ package com.game.log.constant;
 /**
  * 2020年4月27日
  * 
- * @CaoBing halo_game ResourceType.java
+ *    halo_game ResourceType.java
  * 
  * 资源产出和消耗的类型
  **/

@@ -7,7 +7,7 @@ import com.game.service.BeautyService;
 /**
  * 2020年6月6日
  *
- * @CaoBing halo_game
+ *    halo_game
  * UpBeautySkillHandler.java
  **/
 public class UpBeautySkillHandler extends ClientHandler {

@@ -7,7 +7,7 @@ import java.util.Random;
 /**
  * 2020年8月17日
  *
- * @CaoBing halo_common
+ *    halo_common
  * WeightRandom.java
  **/
 public class WeightRandom {

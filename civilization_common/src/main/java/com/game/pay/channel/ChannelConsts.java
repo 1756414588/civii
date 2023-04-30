@@ -3,7 +3,7 @@ package com.game.pay.channel;
 /**
  * 2020年5月19日
  *
- * @CaoBing halo_common
+ *    halo_common
  * ChannelConst.java
  **/
 public class ChannelConsts {

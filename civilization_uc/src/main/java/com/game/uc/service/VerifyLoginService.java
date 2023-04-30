@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 2020年5月19日
  *
- * @CaoBing halo_uc ValidateLoginService.java
+ *    halo_uc ValidateLoginService.java
  **/
 @Service
 @Slf4j

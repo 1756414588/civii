@@ -10,7 +10,7 @@ import lombok.Setter;
 /**
  * 2020年5月19日
  *
- * @CaoBing halo_common
+ *    halo_common
  * KaiYouConfig.java
  * <p>
  * 新快SDK的配置信息

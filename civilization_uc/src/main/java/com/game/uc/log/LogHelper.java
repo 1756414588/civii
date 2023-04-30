@@ -8,7 +8,7 @@ import com.game.uc.log.domain.AccountloginLog;
 import com.game.uc.util.DateHelper;
 
 /**
- * @author jyb
+ *
  * @date 2019/12/30 11:08
  * @description 日志帮助类
  */

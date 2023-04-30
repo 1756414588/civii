@@ -1,7 +1,7 @@
 package com.game.domain.s;
 
 /**
- * @author jyb
+ *
  * @date 2019/12/11 15:41
  * @description 参谋部指挥学任务配置
  */

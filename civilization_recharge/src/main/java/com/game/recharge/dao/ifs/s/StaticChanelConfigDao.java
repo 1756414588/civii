@@ -1,7 +1,7 @@
 package com.game.recharge.dao.ifs.s;
 /**
 *2020年5月19日
-*@CaoBing
+*
 *halo_uc
 *StaticChanelConfigDao.java
 **/

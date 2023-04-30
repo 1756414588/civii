@@ -18,7 +18,7 @@ import com.game.servlet.domain.ServerRadio;
 /**
  * 2020年6月29日
  *
- * @CaoBing halo_game
+ *    halo_game
  * ServerRadioManager.java
  **/
 @Component

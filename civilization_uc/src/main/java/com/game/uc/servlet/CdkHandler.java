@@ -12,7 +12,7 @@ import com.game.uc.manager.CdkManager;
 import com.game.uc.service.CdkService;
 
 /**
- * @author jyb
+ *
  * @date 2020/6/1 16:52
  * @description
  */

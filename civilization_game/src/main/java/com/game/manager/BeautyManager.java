@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 /**
  * 2020年5月29日
  *
- * @CaoBing halo_game BeautyManager.java
+ *    halo_game BeautyManager.java
  **/
 @Component
 public class BeautyManager {

@@ -5,7 +5,7 @@ import com.game.service.BuildingService;
 
 /**
 *2020年7月6日
-*@CaoBing
+*
 *halo_game
 *DoAllRescoureHandler.java
 **/

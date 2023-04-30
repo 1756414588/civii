@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
 *2020年8月17日
-*@CaoBing
+*
 *halo_game
 *StaticJourney.java
 **/

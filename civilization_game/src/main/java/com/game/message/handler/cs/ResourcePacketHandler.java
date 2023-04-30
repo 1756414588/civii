@@ -5,7 +5,7 @@ import com.game.pb.DepotPb;
 import com.game.service.DepotService;
 
 /**
- * @author jyb
+ *
  * @date 2020/1/13 14:47
  * @description
  */

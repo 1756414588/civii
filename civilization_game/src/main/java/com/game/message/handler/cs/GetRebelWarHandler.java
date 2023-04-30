@@ -4,7 +4,7 @@ import com.game.message.handler.ClientHandler;
 import com.game.service.WorldService;
 
 /**
- * @author jyb
+ *
  * @date 2020/5/13 9:30
  * @description
  */

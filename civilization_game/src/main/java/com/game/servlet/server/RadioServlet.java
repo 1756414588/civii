@@ -21,7 +21,7 @@ import com.game.uc.Message;
 /**
  * 2020年6月29日
  *
- * @CaoBing halo_game
+ *    halo_game
  * RadioServlet.java
  * 广播接口类
  **/

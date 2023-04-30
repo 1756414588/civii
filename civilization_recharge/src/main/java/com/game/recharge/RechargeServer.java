@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * @author jyb
+ *
  * @date 2020/5/18 11:30
  * @description
  */

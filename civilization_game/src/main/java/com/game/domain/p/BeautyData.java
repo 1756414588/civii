@@ -7,7 +7,7 @@ import com.game.util.TimeHelper;
 /**
  * 2020年5月29日
  *
- * @CaoBing halo_game
+ *    halo_game
  * BeautyData.java
  **/
 

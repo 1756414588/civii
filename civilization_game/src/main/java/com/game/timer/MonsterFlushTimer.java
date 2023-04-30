@@ -19,8 +19,8 @@ public class MonsterFlushTimer extends TimerEvent {
     @Autowired
     WorldService worldService;
 
-    public MonsterFlushTimer(long time) {
-        super(-1, time);
+    public MonsterFlushTimer() {
+        super(-1, 5 * 1000);
     }
 
     @Override

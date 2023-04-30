@@ -24,7 +24,7 @@ import com.game.util.random.WeightRandom;
 /**
  * 2020年8月17日
  * 
- * @CaoBing halo_game JourneyManager.java
+ *    halo_game JourneyManager.java
  **/
 @Component
 public class JourneyManager {

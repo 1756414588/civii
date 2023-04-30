@@ -3,7 +3,7 @@ package com.game.pay.channel;
 /**
  * 2020年5月19日
  * 
- * @CaoBing halo_common SChannelConfig.java
+ *    halo_common SChannelConfig.java
  **/
 public class SChannelConfig {
 	private int keyId;

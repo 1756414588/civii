@@ -3,7 +3,7 @@ package com.game.constant;
 /**
  * 2020年6月8日
  * 
- * @CaoBing halo_common BeautSkillType.java
+ *    halo_common BeautSkillType.java
  **/
 public interface BeautySkillType {
 	/**

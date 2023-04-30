@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * 2020年8月5日
  * 
- * @CaoBing halo_game StaticOmament.java
+ *    halo_game StaticOmament.java
  *
  *          配饰的配置实体类
  **/

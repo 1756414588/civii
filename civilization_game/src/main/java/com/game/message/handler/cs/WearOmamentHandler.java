@@ -6,7 +6,7 @@ import com.game.service.OmamentService;
 
 /**
 *2020年8月7日
-*@CaoBing
+*
 *halo_game
 *WearOmamentHandler.java
 **/

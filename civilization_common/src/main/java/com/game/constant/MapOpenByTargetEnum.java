@@ -1,7 +1,7 @@
 package com.game.constant;
 
 /**
- * @author jyb
+ *
  * @date 2020/5/14 15:18
  * @description 世界地图开启规则 4 个阶段对应的世界进程id
  */

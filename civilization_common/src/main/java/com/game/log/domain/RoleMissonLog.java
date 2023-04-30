@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
 *2020年6月1日
-*@CaoBing
+*
 *halo_game
 *RoleMissonLog.java
 **/

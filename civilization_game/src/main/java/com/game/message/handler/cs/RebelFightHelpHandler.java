@@ -5,7 +5,7 @@ import com.game.pb.WorldPb;
 import com.game.service.WorldService;
 
 /**
- * @author jyb
+ *
  * @date 2020/5/22 9:54
  * @description
  */

@@ -34,7 +34,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @author jyb
+ *
  * @date 2020/4/8 15:24 服务器列表
  */
 @Service

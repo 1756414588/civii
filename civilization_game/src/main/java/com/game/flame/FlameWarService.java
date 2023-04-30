@@ -330,7 +330,7 @@ public class FlameWarService {
                 return;
             }
 
-            MapInfo mapInfo = worldManager.getMapInfo(mapId);
+
             Pos oldPos = player.getPos();
 
             Pos safePos = flameMap.getSafePos(player.getCountry());
@@ -367,7 +367,7 @@ public class FlameWarService {
         marches.forEach(x -> {
             builder.addMarch(worldManager.wrapMarchPb(x));
         });
-        builder.setPos(CommonPb.Pos.newBuilder().setX(player.getLord().getPosX()).setY(player.getLord().getPosY()));
+        builder.setPos(player.getPos().wrapPb());
         handler.sendMsgToPlayer(FlameWarPb.OpenFlameMapRs.ext, builder.build());
         synCountryInfo();
         heroManager.synBattleScoreAndHeroList(player, player.getAllHeroList());

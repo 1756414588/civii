@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * 2020年6月1日
  * 
- * @CaoBing halo_game RoleGuideLog.java
+ *    halo_game RoleGuideLog.java
  **/
 @Data
 public class RoleGuideLog {

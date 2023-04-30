@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * 2020年5月29日
  *
- * @CaoBing halo_game StaticBeautyBase.java
+ *    halo_game StaticBeautyBase.java
  * <p>
  * 美女的配置信息
  **/

@@ -26,7 +26,7 @@ import com.game.util.SynHelper;
 /**
  * 2020年8月5日
  *
- * @CaoBing halo_game OmamentManager.java
+ *    halo_game OmamentManager.java
  **/
 @Component
 public class OmamentManager {

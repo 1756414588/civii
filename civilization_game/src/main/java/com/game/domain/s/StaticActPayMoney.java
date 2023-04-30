@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 直购物品的计费点 2020年5月27日
  *
- * @CaoBing halo_game StaticActPayMoney.java
+ *    halo_game StaticActPayMoney.java
  **/
 @Getter
 @Setter

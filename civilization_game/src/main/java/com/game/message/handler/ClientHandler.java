@@ -77,21 +77,4 @@ abstract public class ClientHandler extends Handler {
         getCtx().writeAndFlush(builder);
     }
 
-    //public abstract void action(ChannelHandlerContext ctx, Packet packet, long roleId);
-
-
-//    @Override
-//    public void event(Base msg, Player player) {
-//
-//    }
-//
-//    @Override
-//    public void reg() {
-//
-//    }
-
-    @Override
-    public void action() {
-
-    }
 }

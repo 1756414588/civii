@@ -45,7 +45,7 @@ import com.game.util.Md5Util;
 import io.netty.util.internal.StringUtil;
 
 /**
- * @author jyb
+ *
  * @date 2020/4/8 9:55
  * @description
  */

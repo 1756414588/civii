@@ -3,7 +3,7 @@ package com.game.domain.s;
 /**
  * 2020年8月17日
  * 
- * @CaoBing halo_game StaticJourneyPrice.java
+ *    halo_game StaticJourneyPrice.java
  **/
 public class StaticJourneyPrice {
 	private int journeyTimes;	//次数					

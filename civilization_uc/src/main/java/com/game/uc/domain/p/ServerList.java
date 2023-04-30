@@ -5,7 +5,7 @@ import com.game.pb.AccountLoginPb;
 import java.util.List;
 
 /**
- * @author jyb
+ *
  * @date 2020/4/8 14:06
  * @description
  */

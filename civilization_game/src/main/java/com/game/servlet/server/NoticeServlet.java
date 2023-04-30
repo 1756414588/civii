@@ -19,7 +19,7 @@ import com.game.uc.Message;
 
 /**
 *2020年7月9日
-*@CaoBing
+*
 *halo_game
 *NoticeServlet.java
 **/

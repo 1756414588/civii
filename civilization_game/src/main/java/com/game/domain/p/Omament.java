@@ -5,7 +5,7 @@ import com.game.pb.CommonPb;
 /**
  * 2020年8月1日
  *
- * @CaoBing halo_game Omament.java
+ *    halo_game Omament.java
  * 配饰
  **/
 

@@ -1,7 +1,7 @@
 package com.game.domain.p;
 
 /**
- * @author jyb
+ *
  * @date 2020/1/6 9:36
  * @description
  */

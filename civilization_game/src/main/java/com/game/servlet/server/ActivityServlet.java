@@ -35,7 +35,7 @@ import com.game.uc.Message;
 /**
  * 2020年5月8日
  *
- * @CaoBing halo_game ActivityServlet.java
+ *    halo_game ActivityServlet.java
  * <p>
  * 活动计划接口
  **/

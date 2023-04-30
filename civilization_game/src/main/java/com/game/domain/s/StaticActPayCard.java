@@ -9,7 +9,7 @@ import java.util.List;
  * 购买月卡的计费点
  * 2020年5月26日
  *
- * @CaoBing halo_game StaticActPayCard.java
+ *    halo_game StaticActPayCard.java
  **/
 @Getter
 @Setter

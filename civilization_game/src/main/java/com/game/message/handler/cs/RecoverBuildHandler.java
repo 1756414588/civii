@@ -5,7 +5,7 @@ import com.game.pb.BuildingPb;
 import com.game.service.BuildingService;
 
 /**
- * @author jyb
+ *
  * @date 2020/6/30 19:13
  * @description
  */

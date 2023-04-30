@@ -36,7 +36,7 @@ import com.game.util.PbHelper;
 /**
  * 2020年4月27日
  *
- * @CaoBing halo_game
+ *    halo_game
  * <p>
  * MailServlet.java 邮件相关接口
  **/

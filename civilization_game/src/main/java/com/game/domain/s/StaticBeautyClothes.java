@@ -1,7 +1,7 @@
 package com.game.domain.s;
 /**
 *2020年6月2日
-*@CaoBing
+*
 *halo_game
 *StaticBeautyClothes.java
 **/

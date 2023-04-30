@@ -4,7 +4,7 @@ import lombok.Data;
 
 import java.util.Date;
 
-/** 2020年5月13日 @CaoBing halo_game EquipWash.java 装备洗练日志类 */
+/** 2020年5月13日    halo_game EquipWash.java 装备洗练日志类 */
 @Data
 public class EquipWashLog {
 
