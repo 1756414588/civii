@@ -6,7 +6,7 @@ import lombok.Setter;
 /**
  * 独裁者信息
  *
- * @author zcp
+ *
  * @date 2021/7/19 15:23
  */
 @Getter

@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author zcp
+ *
  * @date 2021/8/7 23:26
  */
 public class EmojiUtil {

@@ -1,7 +1,7 @@
 package com.game.pay;
 
 /**
- * @author zcp
+ *
  * @date 2021/6/16 18:09
  */
 public class BaseOrderConfig {

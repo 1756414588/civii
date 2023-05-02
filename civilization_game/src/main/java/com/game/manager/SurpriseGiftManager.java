@@ -28,8 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @author zcp
- * @date 2021/3/9 14:02 诵我真名者,永不见bug 惊喜礼包
+ *
+ * @date 2021/3/9 14:02      惊喜礼包
  */
 @Component
 public class SurpriseGiftManager {

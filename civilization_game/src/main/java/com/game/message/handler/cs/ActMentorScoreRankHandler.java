@@ -5,7 +5,7 @@ import com.game.pb.ActivityPb;
 import com.game.service.ActivityService;
 
 /**
- * @author liyue
+ *
  */
 public class ActMentorScoreRankHandler extends ClientHandler {
     @Override

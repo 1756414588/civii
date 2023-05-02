@@ -1,9 +1,9 @@
 package com.game.constant;
 
 /**
- * @author zcp
+ *
  * @date 2021/3/11 21:14
- * 诵我真名者,永不见bug
+ *
  */
 public enum DailyTaskId {
     LOGIN(1, "每日登陆"),

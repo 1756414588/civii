@@ -6,9 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @author zcp
+ *
  * @date 2021/3/11 17:15
- * 诵我真名者,永不见bug
+ *
  * 记录周卡过期时间
  */
 @Getter

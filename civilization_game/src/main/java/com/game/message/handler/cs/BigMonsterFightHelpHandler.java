@@ -5,9 +5,9 @@ import com.game.pb.WorldPb;
 import com.game.service.BigMonsterService;
 
 /**
- * @author zcp
+ *
  * @date 2021/4/12 10:29
- * 诵我真名者,永不见bug
+ *
  */
 public class BigMonsterFightHelpHandler extends ClientHandler {
     @Override

@@ -5,9 +5,9 @@ import com.game.pb.ActivityPb;
 import com.game.service.ActivityService;
 
 /**
- * @author zcp
+ *
  * @date 2021/3/22 9:54
- * 诵我真名者,永不见bug
+ *
  */
 public class ActWellCrownThreeArmyHandler extends ClientHandler {
 

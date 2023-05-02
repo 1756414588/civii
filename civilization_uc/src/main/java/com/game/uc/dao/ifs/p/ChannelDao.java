@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author zcp
+ *
  * @date 2021/6/7 17:58
- * 诵我真名者,永不见bug
+ *
  */
 public interface ChannelDao {
 

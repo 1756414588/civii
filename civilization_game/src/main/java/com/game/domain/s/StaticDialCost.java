@@ -1,7 +1,7 @@
 package com.game.domain.s;
 
 /**
- * @author liyue
+ *
  */
 public class StaticDialCost {
     int id;

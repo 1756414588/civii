@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 /**
  * 自动模块 清剿虫族
  *
- * @author zcp
+ *
  * @date 2021/4/1 13:58
- * 诵我真名者,永不见bug
+ *
  */
 @Service
 public class AutoService {

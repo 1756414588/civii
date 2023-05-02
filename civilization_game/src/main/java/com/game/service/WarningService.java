@@ -18,8 +18,8 @@ import java.nio.charset.Charset;
 /**
  * 预警管理
  *
- * @author zcp
- * @date 2021/6/4 14:43 诵我真名者,永不见bug
+ *
+ * @date 2021/6/4 14:43
  */
 @Service
 public class WarningService {

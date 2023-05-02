@@ -5,9 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @author zcp
+ *
  * @date 2021/3/9 15:15
- * 诵我真名者,永不见bug
+ *
  * 活动记录
  */
 @Getter

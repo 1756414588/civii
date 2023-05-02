@@ -6,9 +6,9 @@ import com.game.server.GameServer;
 import com.game.service.BigMonsterService;
 
 /**
- * @author zcp
+ *
  * @date 2021/4/12 10:08
- * 诵我真名者,永不见bug
+ *
  */
 public class GetBigMonsterWarHandler extends ClientHandler {
     @Override

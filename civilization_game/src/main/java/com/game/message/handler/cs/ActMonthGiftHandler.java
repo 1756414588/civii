@@ -4,7 +4,7 @@ import com.game.message.handler.ClientHandler;
 import com.game.service.ActivityService;
 
 /**
- * @author liyue
+ *
  */
 public class ActMonthGiftHandler extends ClientHandler {
     @Override

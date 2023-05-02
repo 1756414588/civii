@@ -10,7 +10,7 @@ import com.game.service.BroodWarService;
 import com.game.util.LogHelper;
 
 /**
- * @author zcp
+ *
  * @date 2021/7/5 9:29
  */
 public class FightNowHandler extends ClientHandler {

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 //import com.game.domain.s.StaticNineCell;
 
 /**
- * @author zcp
+ *
  * @date 2021/9/8 16:05
  */
 @Component

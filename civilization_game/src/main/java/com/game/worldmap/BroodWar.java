@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @author zcp
+ *
  * @date 2021/6/17 14:59 母巢之战实体类
  */
 @Getter

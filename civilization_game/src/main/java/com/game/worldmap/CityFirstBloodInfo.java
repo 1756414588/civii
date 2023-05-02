@@ -9,7 +9,7 @@ import com.game.util.PbHelper;
 import java.util.*;
 
 /**
- * @author liyue
+ *
  */
 public class CityFirstBloodInfo {
 

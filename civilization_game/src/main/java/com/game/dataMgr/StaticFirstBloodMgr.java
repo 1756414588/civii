@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author liyue
+ *
  */
 @Component
 @LoadData(name = "首杀")

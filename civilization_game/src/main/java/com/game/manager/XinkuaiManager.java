@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author zcp
+ *
  * @date 2021/6/29 15:09 新快活动管理器
  */
 @Component

@@ -1,9 +1,9 @@
 package com.game.constant;
 
 /**
- * @author zcp
+ *
  * @date 2021/3/9 14:22
- * 诵我真名者,永不见bug
+ *
  */
 public enum SuripriseId {
     MarkerFlop(1, "市场翻牌"),

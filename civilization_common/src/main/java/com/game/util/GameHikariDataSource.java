@@ -3,7 +3,7 @@ package com.game.util;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * @author zcp
+ *
  * @date 2021/8/11 15:56
  */
 public class GameHikariDataSource extends HikariDataSource {

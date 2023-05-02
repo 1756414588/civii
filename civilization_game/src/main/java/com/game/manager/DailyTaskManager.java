@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @author zcp
- * @date 2021/3/11 21:13 诵我真名者,永不见bug
+ *
+ * @date 2021/3/11 21:13
  */
 @Component
 @LoadData(name = "日常任务", type = Loading.LOAD_USER_DB)

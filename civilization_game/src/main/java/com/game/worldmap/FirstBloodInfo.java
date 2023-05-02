@@ -2,7 +2,7 @@ package com.game.worldmap;
 
 
 /**
- * @author liyue
+ *
  */
 public class FirstBloodInfo {
     private int mapId;

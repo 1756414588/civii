@@ -9,7 +9,7 @@ import com.game.domain.s.ActivityBase;
 /**
  * 游戏事件tips
  *
- * @author zcp
+ *
  * @date 2021/9/6 9:04
  */
 public class GameEventActor extends BaseActivityActor {

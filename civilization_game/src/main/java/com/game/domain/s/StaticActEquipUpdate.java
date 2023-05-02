@@ -3,7 +3,7 @@ package com.game.domain.s;
 import java.util.List;
 
 /**
- * @author liyue
+ *
  */
 public class StaticActEquipUpdate {
     public static final long WASH_CONUT = 101;
