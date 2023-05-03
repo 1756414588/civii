@@ -10,7 +10,6 @@ import lombok.Setter;
 public class FishPusher {
 
 	private long playerId;
-	// teamId,日期
 	private Map<Integer, Integer> pushData = new HashMap<>();
 
 

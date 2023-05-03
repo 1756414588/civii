@@ -29,6 +29,11 @@ public class AchievementBoxAwardHandler extends ClientHandler {
     @Autowired
     StaticAchiMgr staticAchiMgr;
 
+    @Override
+    public void action() {
+
+    }
+
 //    @Override
 //    public void event(BasePb.Base msg, Player player) {
 ////        Channel channel = ctx.channel();
