@@ -1,13 +1,9 @@
 package com.game.flame;
 
 import com.game.chat.domain.Chat;
-import com.game.constant.Country;
 import com.game.constant.*;
-import com.game.dataMgr.StaticCountryMgr;
-import com.game.dataMgr.StaticFlameWarMgr;
-import com.game.dataMgr.StaticLimitMgr;
-import com.game.dataMgr.StaticPropMgr;
-import com.game.dataMgr.StaticWorldActPlanMgr;
+import com.game.constant.Country;
+import com.game.dataMgr.*;
 import com.game.domain.Award;
 import com.game.domain.Player;
 import com.game.domain.WorldData;
@@ -42,15 +38,15 @@ import java.util.stream.Collectors;
 public class FlameWarService {
 
     @Autowired
-    private PlayerManager playerManager;
+    PlayerManager playerManager;
     @Autowired
-    private BattleMgr battleMgr;
+    BattleMgr battleMgr;
     @Autowired
-    private WorldManager worldManager;
+    WorldManager worldManager;
     @Autowired
     FlameWarManager flameWarManager;
     @Autowired
-	StaticFlameWarMgr staticFlameWarMgr;
+    StaticFlameWarMgr staticFlameWarMgr;
     @Autowired
     StaticLimitMgr staticLimitMgr;
     @Autowired
@@ -1027,8 +1023,8 @@ public class FlameWarService {
         if (playerCity1 != null) {
             synFlameEntity(null, player.getPos());
             worldManager.synRemoveAllPvpWar(player, flameMap);
-			PlayerCity playerCity = worldManager.changePlayerPos(player, randPos);
-			//worldManager.removePlayerCity(player.getPos(), flameMap);
+            PlayerCity playerCity = worldManager.changePlayerPos(player, randPos);
+            //worldManager.removePlayerCity(player.getPos(), flameMap);
             //playerManager.changePlayerPos(player, randPos);
             //PlayerCity playerCity = worldManager.addPlayerCity(randPos, newMapInfo, player);
             if (playerCity != null) {
