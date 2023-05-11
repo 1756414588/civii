@@ -35,8 +35,8 @@ import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 @Component
 public class ConnectServer extends BaseServer {
 
-    @Value("${http.server.netty.port}")
-    private int port;
+//    @Value("${http.server.netty.port}")
+    private int port =10000;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     public GlobalTrafficShapingHandler trafficShapingHandler;
@@ -55,7 +55,7 @@ public class ConnectServer extends BaseServer {
         executor.shutdown();
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void start() {
         super.run();
         executor = new ThreadPoolExecutor(1, 50, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(4096), new ThreadFactoryBuilder().setNameFormat("thread-pool-%d").build(), new ThreadPoolExecutor.DiscardOldestPolicy());

@@ -51,7 +51,7 @@ public class ServerManager {
 
 	// private Map<String, StaticPackageConfig> pack = new HashMap<>();
 
-	@PostConstruct
+//	@PostConstruct
 	public void init() {
 		// 初始化server
 		List<Server> servers = serverDao.getServerList();

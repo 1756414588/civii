@@ -79,9 +79,9 @@ public class AccountManager {
 
     @PostConstruct
     public void init() {
-        initCloseRole();
-        initCloseAccount();
-        initCloseSpeak();
+//        initCloseRole();
+//        initCloseAccount();
+//        initCloseSpeak();
     }
 
     public void init(int type) {

@@ -45,7 +45,7 @@ public class MergeServerManager {
 	//玩家信息   主键serverId   内部map主键为countryId
 	private Map<Integer, Map<Integer, List<PlayerExist>>> playerExistMapByServer = new HashMap<>();
 
-	@PostConstruct
+//	@PostConstruct
 	public void init() {
 		mergeServers.clear();
 		playerExists.clear();

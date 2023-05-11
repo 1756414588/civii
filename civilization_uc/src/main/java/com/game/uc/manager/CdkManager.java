@@ -45,7 +45,7 @@ public class CdkManager {
   /** 当前cd的礼包 */
   private Map<Integer, CdkeyType> cdKeyTypeMap = new ConcurrentHashMap<>();
 
-  @PostConstruct
+//  @PostConstruct
   public void init() {
     lock.lock();
     // 避免多次发放造成多次奖励

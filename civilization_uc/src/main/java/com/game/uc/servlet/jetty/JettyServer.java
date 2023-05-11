@@ -33,7 +33,7 @@ public class JettyServer {
     private Server server;
     //private ApplicationContext applicationContext
     private String host = "0.0.0.0";
-    private int port = 8080;
+    private int port = 8088;
     private int securePort = 8443;
     private int minThread = 16;
     private int maxThread = 128;

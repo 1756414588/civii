@@ -19,7 +19,7 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
 				
     <!-- 阿里 druid数据库连接池 -->
-	<bean id="gameDataSource" class="com.game.util.GameHikariDataSource">
+	<bean id="gameDataSource" class="com.zaxxer.hikari.HikariDataSource">
         <!-- 基本属性 -->
         <property name="jdbcUrl" value="${jdbc.uc.url}" />
         <property name="username" value="${jdbc.uc.user}" />

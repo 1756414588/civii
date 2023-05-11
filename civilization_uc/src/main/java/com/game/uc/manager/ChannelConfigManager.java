@@ -41,7 +41,7 @@ public class ChannelConfigManager {
 
 	private List<SChannelConfig> selectAllChannelConfig = new ArrayList<>();
 
-	@PostConstruct
+//	@PostConstruct
 	public void init() {
 		// 初始化SDK渠道配置
 		selectAllChannelConfig = channelConfigDao.selectAllChannelConfig();

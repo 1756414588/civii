@@ -44,12 +44,12 @@
     <!--定义jetty -->
     <!-- jetty server start -->
     <bean id="jettyRunner" class="com.game.uc.servlet.jetty.JettyServer" init-method="start">
-        <property name="port" value="${http.server.jetty.port}"/>
-        <property name="host" value="${http.server.jetty.host}"/>
+<!--        <property name="port" value="${http.server.jetty.port}"/>-->
+<!--        <property name="host" value="${http.server.jetty.host}"/>-->
     </bean>
 
     <import resource="spring-game-mybatis.xml"/>
-<!--    <import resource="spring-redis.xml"/>-->
+    <import resource="spring-redis.xml"/>
 
     <task:scheduler id="scheduler" pool-size="5"/>
     <task:executor id="executor" pool-size="5"/>

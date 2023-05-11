@@ -21,7 +21,7 @@ public class PackageConfigManager {
 
 	private Map<String, StaticPackageConfig> allPackageConfig = new ConcurrentHashMap<>();
 
-	@PostConstruct
+//	@PostConstruct
 	public void init() {
 
 		logger.info("加载所有客户端包相关配置>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
