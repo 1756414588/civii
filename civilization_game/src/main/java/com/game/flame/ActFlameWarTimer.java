@@ -14,7 +14,6 @@ public class ActFlameWarTimer extends TimerEvent {
     public ActFlameWarTimer() {
         super(-1, TimeHelper.SECOND_MS);
     }
-
     @Autowired
     FlameWarManager flameWarManager;
 
