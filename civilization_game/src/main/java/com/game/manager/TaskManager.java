@@ -1,15 +1,5 @@
 package com.game.manager;
 
-import com.game.spring.SpringUtil;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.sun.org.apache.regexp.internal.RE;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.game.constant.*;
 import com.game.dataMgr.*;
 import com.game.domain.Player;
@@ -21,11 +11,17 @@ import com.game.pb.BuildingPb;
 import com.game.pb.CommonPb;
 import com.game.pb.TaskPb.SynTaskRq;
 import com.game.server.GameServer;
+import com.game.spring.SpringUtil;
 import com.game.util.GameHelper;
 import com.game.util.LogHelper;
 import com.game.util.PbHelper;
 import com.game.util.SynHelper;
-import com.google.common.collect.HashBasedTable;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 // service->manager->config+db
 // 后面任务有个优化,已经完成的任务不需要加载，但是要存盘
