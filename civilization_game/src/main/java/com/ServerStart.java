@@ -31,7 +31,7 @@ public class ServerStart {
 				}
 			}));
 		} catch (Throwable e) {
-
+			e.printStackTrace();
 
 		}
 	}
