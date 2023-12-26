@@ -1,6 +1,7 @@
 package com.game.timer;
 
 public abstract class TimerEvent implements ITimerEvent {
+
 	// 定时结束时间
 	private long end;
 	// 定时剩余时间
